@@ -54,7 +54,7 @@ export default function DonateFlowPage() {
     const pool = getCandidateProjects();
     const count = Math.min(numMosques, pool.length);
     setRecommendations(pool.slice(0, count));
-    if (count > 0) setStep(3);
+    if (count > 0) setStep(4);
     else alert("Maaf, tiada projek yang sepadan. Sila pilih skop lain.");
   };
 
