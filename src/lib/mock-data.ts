@@ -56,7 +56,7 @@ export const MOCK_PROJECTS: Project[] = [
     bank_name: "Maybank",
     account_name: "Bendahari Masjid Al-Hidayah",
     account_number: "562106712345",
-    image_url: "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?auto=format&fit=crop&q=80&w=800"
+    image_url: "https://images.unsplash.com/photo-1542667593-37ad9224edd0?auto=format&fit=crop&q=80&w=800"
   },
   {
     slug: "surau-at-taqwa-ipoh-renovasi",
@@ -78,7 +78,7 @@ export const MOCK_PROJECTS: Project[] = [
     bank_name: "CIMB Bank",
     account_name: "Jawatankuasa Surau At-Taqwa",
     account_number: "8604561234",
-    image_url: "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?auto=format&fit=crop&q=80&w=800"
+    image_url: "https://images.unsplash.com/photo-1591147139223-8367561333ec?auto=format&fit=crop&q=80&w=800"
   },
   {
     slug: "masjid-jamek-kuala-lumpur-maintenance",

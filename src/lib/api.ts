@@ -210,7 +210,7 @@ export async function approveAndConvertToProject(id: string, notes?: string): Pr
   const slug = `${baseString.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString().slice(-4)}`;
 
   // Dedicated image handling for demo mosques
-  let imageUrl = "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=800";
+  let imageUrl = "https://images.unsplash.com/photo-1584551236674-51f1c289984f?auto=format&fit=crop&q=80&w=800";
   if (lead.extracted_mosque_name?.includes("Lestari Putra")) {
     imageUrl = "/images/masjid-lestari-putra.png";
   } else if (lead.extracted_mosque_name?.includes("Hazelton")) {
