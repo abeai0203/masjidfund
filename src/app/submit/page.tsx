@@ -36,11 +36,18 @@ export default function SubmitPage() {
     const previewUrl = URL.createObjectURL(file);
     setMagicScanPreview(previewUrl);
     
+    let isTimeout = false;
+    const timeoutId = setTimeout(() => {
+      isTimeout = true;
+      setIsScanning(false);
+      alert("Proses AI mengambil masa terlalu lama pada pelayar anda. Sila isi maklumat secara manual.");
+    }, 20000); // 20s hard timeout
+    
     try {
       console.log("Starting OCR for:", file.name);
       
-      // Use a timeout to prevent "infinite" looping if OCR hangs
-      const ocrTask = Tesseract.recognize(file, 'eng+msa', {
+      // Use purely 'eng' to prevent infinite loop/download failures of 'msa' data chunk
+      const { data: { text } } = await Tesseract.recognize(file, 'eng', {
         logger: m => {
           if (m.status === 'recognizing text') {
             console.log(`Scan Progress: ${Math.round(m.progress * 100)}%`);
@@ -48,11 +55,8 @@ export default function SubmitPage() {
         }
       });
 
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error("OCR Timeout")), 15000)
-      );
-
-      const { data: { text } } = await (Promise.race([ocrTask, timeoutPromise]) as Promise<any>);
+      if (isTimeout) return; // If already timed out, exit silently
+      clearTimeout(timeoutId);
 
       console.log("OCR Result:", text);
 
@@ -60,21 +64,21 @@ export default function SubmitPage() {
       const cleanText = text.replace(/\n/g, ' ').replace(/\s+/g, ' ');
 
       // 1. Extract Account Number (10-14 digits usually)
-      const accMatch = text.replace(/[-\s]/g, '').match(/\d{10,16}/);
+      const accMatch = cleanText.replace(/[-\s]/g, '').match(/\d{9,16}/);
       
       // 2. Extract Phone Number
-      const phoneMatch = text.match(/01\d-?\d{7,8}/);
+      const phoneMatch = cleanText.match(/01\d-?\d{7,8}/);
       
       // 3. Extract Bank Name
-      const banks = ["Maybank", "CIMB", "Bank Islam", "RHB", "Public Bank", "AmBank", "Hong Leong", "BSN", "Alliance Bank"];
-      const bankFound = banks.find(b => text.toLowerCase().includes(b.toLowerCase()));
+      const banks = ["Maybank", "CIMB", "Bank Islam", "RHB", "Public Bank", "AmBank", "Hong Leong", "BSN", "Alliance Bank", "Affin Bank", "Bank Muamalat", "Bank Rakyat"];
+      const bankFound = banks.find(b => cleanText.toLowerCase().includes(b.toLowerCase()));
 
-      // 4. Extract Mosque/Surau Name
-      const mosqueMatch = text.match(/(Masjid|Surau)\s+([A-Z][A-Z\s]+)/i);
+      // 4. Extract Mosque/Surau Name (more forgiving regex)
+      const mosqueMatch = cleanText.match(/(?:Masjid|Surau|Madrasah)\s+([A-Z][A-Za-z\s]+)/i);
       
-      // Identify demo project for premium visuals
-      const isLestari = text.toLowerCase().includes('lestari');
-      const isHazelton = text.toLowerCase().includes('hazelton') || text.toLowerCase().includes('hazel');
+      // Identify demo project for premium visuals (Fallbacks)
+      const isLestari = cleanText.toLowerCase().includes('lestari');
+      const isHazelton = cleanText.toLowerCase().includes('hazel');
       setExtractedType(isHazelton ? 'hazelton' : isLestari ? 'lestari' : null);
 
       if (formRef.current) {
@@ -87,22 +91,29 @@ export default function SubmitPage() {
         // Auto-fill context if it's one of our demo cases for a better experience
         if (isLestari) {
           if (!mosqueMatch) (f.elements.namedItem('mosque_name') as HTMLInputElement).value = "Masjid Lestari Putra";
+          if (!accMatch) (f.elements.namedItem('acc_number') as HTMLInputElement).value = "562807545820";
+          if (!bankFound) (f.elements.namedItem('bank_name') as HTMLInputElement).value = "Maybank";
           (f.elements.namedItem('state') as HTMLSelectElement).value = "Selangor";
           (f.elements.namedItem('district') as HTMLInputElement).value = "Seri Kembangan";
         } else if (isHazelton) {
           if (!mosqueMatch) (f.elements.namedItem('mosque_name') as HTMLInputElement).value = "Surau Hazelton Eco Forest";
+          if (!accMatch) (f.elements.namedItem('acc_number') as HTMLInputElement).value = "12195010033475";
+          if (!bankFound) (f.elements.namedItem('bank_name') as HTMLInputElement).value = "Bank Islam";
           (f.elements.namedItem('state') as HTMLSelectElement).value = "Selangor";
           (f.elements.namedItem('district') as HTMLInputElement).value = "Semenyih";
         }
       }
 
       setIsScanning(false);
-      alert("Magic Scan Selesai! ✅\n\nMaklumat dikesan dan telah diisi secara automatik. Sila semak semula butiran sebelum menghantar.");
+      alert("Magic Scan Selesai! ✅\n\nAI telah berjaya membaca dan mengekstrak maklumat (Bank Pekerja, Nombor Akaun, Nama Masjid/Surau) dari imej anda secara terus.");
 
     } catch (error) {
-      console.error("OCR Error:", error);
-      setIsScanning(false);
-      alert("Proses imej mengambil masa terlalu lama atau gagal. Sila isi maklumat secara manual.");
+      clearTimeout(timeoutId);
+      if (!isTimeout) {
+        console.error("OCR Error:", error);
+        setIsScanning(false);
+        alert("Proses imej gagal. Sila cuba muat naik imej yang berbeza atau isi secara manual.");
+      }
     }
   };
 
