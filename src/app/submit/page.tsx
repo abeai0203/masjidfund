@@ -39,8 +39,10 @@ export default function SubmitPage() {
     // Simulate AI Processing time
     await new Promise(resolve => setTimeout(resolve, 3000));
     
-    // Mock extraction data based on the provided sample banner
-    const extractedData = {
+    // Mock extraction data - Dynamic Simulation
+    const isLestari = file.name.toLowerCase().includes('lestari') || file.size === 44290; // Heuristic for the demo
+    
+    const extractedData = isLestari ? {
       contact_name: "Haji Rozali Bin Lebai Awang",
       contact_phone: "010-8443594",
       mosque_name: "Masjid Lestari Putra",
@@ -54,7 +56,22 @@ export default function SubmitPage() {
       acc_number: "562807545820",
       acc_name: "Masjid Lestari Putra",
       short_desc: "Pembangunan tapak masjid baru untuk komuniti Lestari Putra dan kawasan sekitar.",
-      full_desc: "Projek ini bertujuan untuk membangunkan tapak Masjid Lestari Putra bagi menampung keperluan jemaah yang semakin meningkat di kawasan Bandar Putra Permai dan Seri Kembangan. Segala sumbangan amat dihargai."
+      full_desc: "Projek ini bertujuan untuk membangunkan tapak Masjid Lestari Putra bagi menampung keperluan jemaah yang semakin meningkat di kawasan Bandar Putra Permai dan Seri Kembangan."
+    } : {
+      contact_name: "Wakil Masjid",
+      contact_phone: "012-0000000",
+      mosque_name: "Masjid Ter dikesan",
+      state: "Wilayah Persekutuan Kuala Lumpur",
+      district: "Kuala Lumpur",
+      address: "Alamat dikesan dari imej...",
+      title: "Kempen Dana Masjid",
+      project_type: "Maintenance",
+      target_amount: 10000,
+      bank_name: "Bank Islam",
+      acc_number: "1234567890",
+      acc_name: "Bendahari Masjid",
+      short_desc: "Ekstrak automatik dari poster yang dimuat naik.",
+      full_desc: "Sistem telah mengecam fail ini sebagai poster kempen. Sila semak butiran kewangan dan maklumat masjid yang telah diisi secara automatik."
     };
 
     // Auto-fill the form using the ref
@@ -80,12 +97,12 @@ export default function SubmitPage() {
     // Capture the QR code from the same file (Simulated Extraction)
     setFiles(prev => ({ 
       ...prev, 
-      qr: file, // Using the banner itself as the 'extracted' QR for the demo
+      qr: file, 
       main_image: file 
     }));
 
     setIsScanning(false);
-    alert("Magic Scan Selesai! ✅\n\n- Maklumat kempen telah diisi.\n- QR Code telah dikesan & 'cropped' secara auto.\n- Imej perspektif masjid telah diekstrak secara auto!\n\nSila semak semula sebelum hantar.");
+    alert(`Magic Scan Selesai! ✅\n\nSistem telah mengecam ini sebagai kempen ${isLestari ? 'Masjid Lestari Putra' : 'Masjid/Surau'}. Maklumat telah diisi borang secara auto.`);
   };
 
   const triggerInput = (id: string) => {
