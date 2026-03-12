@@ -49,7 +49,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
           <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Back to all projects
+          Kembali ke senarai projek
         </Link>
       </div>
 
@@ -83,14 +83,14 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
               <img src={project.image_url} alt={project.mosque_name} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-primary/5">
-                <span className="text-primary/40 font-medium">No Image Available</span>
+                <span className="text-primary/40 font-medium">Tiada Imej Tersedia</span>
               </div>
             )}
           </div>
 
           {/* Full Description & Story */}
           <section className="bg-surface rounded-2xl p-6 sm:p-8 border border-border shadow-sm">
-            <h2 className="text-xl font-bold text-foreground mb-4">About this Campaign</h2>
+            <h2 className="text-xl font-bold text-foreground mb-4">Mengenai Kempen Ini</h2>
             <div className="prose prose-sm sm:prose-base max-w-none prose-p:text-foreground/80 prose-p:leading-relaxed">
               <p>{project.full_description}</p>
             </div>
@@ -101,14 +101,13 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                 <svg className="w-5 h-5 text-primary mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
-                Trust & Verification
+                Amanah & Pengesahan
               </h3>
               <p className="text-sm text-foreground/70 mb-3">
-                This campaign has been reviewed by the platform. The committee details have been validated 
-                against official local council registers where applicable.
+                Kempen ini telah disemak oleh platform. Butiran jawatankuasa telah disahkan berbanding daftar majlis tempatan rasmi di mana yang berkenaan.
               </p>
               <Link href="/about/trust" className="text-sm text-primary hover:text-primary-hover font-medium">
-                Learn more about our verification process &rarr;
+                Ketahui lebih lanjut tentang proses pengesahan kami &rarr;
               </Link>
             </div>
           </section>
@@ -130,12 +129,15 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
             {/* Status indicators */}
             <div className="space-y-4 mb-8">
               <div className="flex justify-between items-center text-sm border-b border-border-subtle pb-3">
-                <span className="text-foreground/60">Verification Status</span>
-                <span className="font-semibold">{project.verification_status}</span>
+                <span className="text-foreground/60">Status Pengesahan</span>
+                <span className="font-semibold">{
+                  project.verification_status === "Verified" ? "Disahkan" : 
+                  project.verification_status === "Basic Checked" ? "Semakan Asas" : "Menunggu"
+                }</span>
               </div>
               <div className="flex justify-between items-center text-sm border-b border-border-subtle pb-3">
-                <span className="text-foreground/60">Campaign Needs</span>
-                <span className="font-semibold text-primary">{project.needs_donation ? "Active" : "Fully Funded"}</span>
+                <span className="text-foreground/60">Keperluan Kempen</span>
+                <span className="font-semibold text-primary">{project.needs_donation ? "Aktif" : "Dana Mencukupi"}</span>
               </div>
             </div>
 
@@ -144,13 +146,13 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
               {project.needs_donation ? (
                 <>
                   <p className="text-sm text-foreground/70 mb-4 text-center">
-                    Donate directly to the mosque&apos;s official accounts.
+                    Derma terus ke akaun rasmi masjid.
                   </p>
                   <button 
                     onClick={() => setIsModalOpen(true)}
                     className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
                   >
-                    Donate Now
+                    Derma Sekarang
                   </button>
                 </>
               ) : (
@@ -158,7 +160,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                   <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  Goal Reached. Thank you!
+                  Sasaran Dicapai. Terima kasih!
                 </div>
               )}
             </div>

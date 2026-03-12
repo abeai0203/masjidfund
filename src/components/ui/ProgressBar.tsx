@@ -24,10 +24,10 @@ export default function ProgressBar({
       <div className="flex justify-between items-end mb-2 text-sm">
         <div>
           <span className="font-bold text-primary">{formatCurrency(collectedAmount)}</span>
-          <span className="text-foreground/60 ml-1">raised</span>
+          <span className="text-foreground/60 ml-1">dikumpul</span>
         </div>
         <div className="text-foreground/70">
-          of <span className="font-medium">{formatCurrency(targetAmount)}</span>
+          daripada <span className="font-medium">{formatCurrency(targetAmount)}</span>
         </div>
       </div>
       <div className="w-full bg-surface-muted border border-border rounded-full h-2.5 overflow-hidden">

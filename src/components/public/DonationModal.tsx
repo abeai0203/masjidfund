@@ -16,6 +16,11 @@ export default function DonationModal({
     project.donation_method_type === "Bank Transfer" ? "bank" : "qr"
   );
 
+  const methodLabels = {
+    bank: "Pindahan Bank",
+    qr: "DuitNow QR"
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -28,7 +33,7 @@ export default function DonationModal({
       <div className="relative w-full max-w-md bg-surface rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
         <div className="p-6 border-b border-border bg-surface-muted flex justify-between items-start">
           <div>
-            <h2 className="text-xl font-bold text-foreground">Support this Project</h2>
+            <h2 className="text-xl font-bold text-foreground">Sokong Projek Ini</h2>
             <p className="text-sm text-foreground/70 mt-1">{project.mosque_name}</p>
           </div>
           <button 
@@ -48,7 +53,7 @@ export default function DonationModal({
                 }`}
                 onClick={() => setActiveTab("qr")}
               >
-                DuitNow QR
+                {methodLabels.qr}
               </button>
               <button
                 className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
@@ -56,7 +61,7 @@ export default function DonationModal({
                 }`}
                 onClick={() => setActiveTab("bank")}
               >
-                Bank Transfer
+                {methodLabels.bank}
               </button>
             </div>
           )}
@@ -64,32 +69,32 @@ export default function DonationModal({
           <div className="flex flex-col items-center">
             {activeTab === "qr" && project.duitnow_qr_url ? (
               <div className="text-center w-full">
-                <p className="text-sm font-medium text-foreground mb-4">Scan using your preferred banking app</p>
+                <p className="text-sm font-medium text-foreground mb-4">Imbas menggunakan aplikasi perbankan anda</p>
                 <div className="bg-surface-muted border-2 border-dashed border-border p-4 rounded-xl inline-block max-w-[250px] w-full aspect-square flex items-center justify-center mx-auto mb-4">
-                  <span className="text-foreground/40 text-sm font-medium">QR Code Placeholder</span>
+                  <span className="text-foreground/40 text-sm font-medium">Ruang Letak Kod QR</span>
                   {/* Replace with actual image when available */}
                   {/* <img src={project.duitnow_qr_url} alt="DuitNow QR" className="w-full h-auto rounded-lg" /> */}
                 </div>
                 <div className="bg-primary-light/30 text-primary-hover px-4 py-3 rounded-lg text-sm mb-2 text-left border border-primary/20">
-                  <div className="font-semibold mb-1">Important Note:</div>
-                  Please ensure the recipient name appears as <br/>
+                  <div className="font-semibold mb-1">Nota Penting:</div>
+                  Sila pastikan nama penerima tertera sebagai <br/>
                   <span className="font-bold">{project.account_name || project.mosque_name}</span>
                 </div>
               </div>
             ) : (
               <div className="w-full">
-                <p className="text-sm font-medium text-foreground mb-4 text-center">Transfer directly to official account</p>
+                <p className="text-sm font-medium text-foreground mb-4 text-center">Pindahkan terus ke akaun rasmi</p>
                 <div className="bg-surface-muted border border-border rounded-xl p-5 mb-4 space-y-4">
                   <div>
-                    <p className="text-xs text-foreground/60 font-medium uppercase tracking-wider mb-1">Bank Name</p>
+                    <p className="text-xs text-foreground/60 font-medium uppercase tracking-wider mb-1">Nama Bank</p>
                     <p className="font-bold text-foreground">{project.bank_name || "N/A"}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-foreground/60 font-medium uppercase tracking-wider mb-1">Account Name</p>
+                    <p className="text-xs text-foreground/60 font-medium uppercase tracking-wider mb-1">Nama Akaun</p>
                     <p className="font-bold text-foreground">{project.account_name || project.mosque_name}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-foreground/60 font-medium uppercase tracking-wider mb-1">Account Number</p>
+                    <p className="text-xs text-foreground/60 font-medium uppercase tracking-wider mb-1">Nombor Akaun</p>
                     <div className="flex justify-between items-center bg-white border border-border rounded-lg p-3 mt-1">
                       <p className="font-mono text-lg font-bold text-primary tracking-widest">{project.account_number || "Contact Admin"}</p>
                       <button 
@@ -98,7 +103,7 @@ export default function DonationModal({
                           if (project.account_number) navigator.clipboard.writeText(project.account_number);
                         }}
                       >
-                        Copy
+                        Salin
                       </button>
                     </div>
                   </div>
@@ -110,7 +115,7 @@ export default function DonationModal({
 
         <div className="p-4 border-t border-border bg-surface-muted text-center">
           <p className="text-xs text-foreground/60">
-            100% of your donation goes directly to the mosque&apos;s official account. MasjidFund does not take any platform fees.
+            100% daripada derma anda disalurkan terus ke akaun rasmi masjid. MasjidFund tidak mengambil sebarang yuran platform.
           </p>
         </div>
       </div>

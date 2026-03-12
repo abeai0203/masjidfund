@@ -34,8 +34,8 @@ export default function AdminProjectsPage() {
     <div className="w-full">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Project Management</h1>
-          <p className="text-foreground/70 text-sm mt-1">Manage, edit, and publish verified mosque campaigns.</p>
+          <h1 className="text-2xl font-bold text-foreground">Pengurusan Projek</h1>
+          <p className="text-foreground/70 text-sm mt-1">Urus, edit, dan terbitkan kempen masjid yang disahkan.</p>
         </div>
         
         <div className="flex flex-wrap bg-surface-muted p-1 rounded-lg border border-border gap-1">
@@ -49,7 +49,7 @@ export default function AdminProjectsPage() {
                   : "text-foreground/70 hover:text-foreground"
               }`}
             >
-              {status}
+              {status === "All" ? "Semua" : status === "Published" ? "Diterbitkan" : status === "Draft" ? "Draf" : status === "Verified" ? "Disahkan" : "Menunggu"}
             </button>
           ))}
         </div>
@@ -60,19 +60,19 @@ export default function AdminProjectsPage() {
           <table className="w-full text-left text-sm text-foreground/80">
             <thead className="bg-surface-muted border-b border-border text-xs uppercase font-semibold text-foreground/60">
               <tr>
-                <th className="px-6 py-4">Title / Mosque</th>
-                <th className="px-6 py-4">Region</th>
-                <th className="px-6 py-4">Progress</th>
-                <th className="px-6 py-4">Verification</th>
+                <th className="px-6 py-4">Tajuk / Masjid</th>
+                <th className="px-6 py-4">Wilayah</th>
+                <th className="px-6 py-4">Kemajuan</th>
+                <th className="px-6 py-4">Pengesahan</th>
                 <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Action</th>
+                <th className="px-6 py-4 text-right">Tindakan</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-sm text-foreground/50">
-                    Loading projects...
+                   <td colSpan={6} className="px-6 py-4 text-center text-sm text-foreground/50">
+                    Memuatkan projek...
                   </td>
                 </tr>
               ) : filteredProjects.length > 0 ? (
@@ -120,7 +120,7 @@ export default function AdminProjectsPage() {
               ) : (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-foreground/60">
-                    No projects found matching the selected filter.
+                    Tiada projek yang sepadan dengan penapis yang dipilih.
                   </td>
                 </tr>
               )}

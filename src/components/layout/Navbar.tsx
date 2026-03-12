@@ -14,16 +14,16 @@ export default function Navbar() {
             </Link>
             <div className="hidden sm:flex sm:space-x-6">
               <Link href="/projects" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-                Discover Projects
+                Temui Projek
               </Link>
               <Link href="/submit" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-                Submit Campaign
+                Hantar Kempen
               </Link>
             </div>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/projects" className="hidden sm:inline-flex bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-              Donate Now
+              Derma Sekarang
             </Link>
             <button className="sm:hidden text-sm font-medium px-3 py-1.5 border border-border rounded-md hover:bg-surface-muted transition-colors">
               Menu

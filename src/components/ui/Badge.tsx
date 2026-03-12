@@ -8,16 +8,20 @@ interface BadgeProps {
 
 export default function Badge({ status }: BadgeProps) {
   let colorStyles = "";
+  let displayStatus: string = status;
 
   switch (status) {
     case "Verified":
       colorStyles = "bg-primary-light text-primary-hover border-primary/20";
+      displayStatus = "Disahkan";
       break;
     case "Basic Checked":
       colorStyles = "bg-blue-100 text-blue-700 border-blue-200";
+      displayStatus = "Semakan Asas";
       break;
     case "Pending":
       colorStyles = "bg-yellow-100 text-yellow-700 border-yellow-200";
+      displayStatus = "Menunggu";
       break;
     default:
       colorStyles = "bg-gray-100 text-gray-700 border-gray-200";
@@ -32,7 +36,7 @@ export default function Badge({ status }: BadgeProps) {
           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
         </svg>
       )}
-      {status}
+      {displayStatus}
     </span>
   );
 }

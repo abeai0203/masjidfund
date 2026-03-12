@@ -25,8 +25,8 @@ export default function AdminLeadsPage() {
     <div className="w-full">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Lead Inbox</h1>
-          <p className="text-foreground/70 text-sm mt-1">Review and manage incoming mosque donation projects.</p>
+          <h1 className="text-2xl font-bold text-foreground">Peti Masuk Lead</h1>
+          <p className="text-foreground/70 text-sm mt-1">Semak dan urus projek derma masjid yang diterima.</p>
         </div>
         
         <div className="flex bg-surface-muted p-1 rounded-lg border border-border">
@@ -40,7 +40,7 @@ export default function AdminLeadsPage() {
                   : "text-foreground/70 hover:text-foreground"
               }`}
             >
-              {status}
+              {status === "All" ? "Semua" : status === "Pending" ? "Menunggu" : status === "Needs Manual Check" ? "Perlu Semakan Manual" : status === "Approved" ? "Diluluskan" : "Ditolak"}
             </button>
           ))}
         </div>
@@ -51,12 +51,12 @@ export default function AdminLeadsPage() {
           <table className="w-full text-left text-sm text-foreground/80">
             <thead className="bg-surface-muted border-b border-border text-xs uppercase font-semibold text-foreground/60">
               <tr>
-                <th className="px-6 py-4">Title / Mosque</th>
-                <th className="px-6 py-4">Source</th>
-                <th className="px-6 py-4">Date</th>
-                <th className="px-6 py-4">Score</th>
+                <th className="px-6 py-4">Tajuk / Masjid</th>
+                <th className="px-6 py-4">Sumber</th>
+                <th className="px-6 py-4">Tarikh</th>
+                <th className="px-6 py-4">Skor</th>
                 <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Action</th>
+                <th className="px-6 py-4 text-right">Tindakan</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -66,7 +66,7 @@ export default function AdminLeadsPage() {
                     <td className="px-6 py-4">
                       <div className="font-semibold text-foreground line-clamp-1">{lead.raw_title}</div>
                       <div className="text-xs text-foreground/60 mt-1">
-                        {lead.extracted_mosque_name || "Unknown Mosque"} 
+                        {lead.extracted_mosque_name || "Masjid Tidak Diketahui"} 
                         {lead.state ? ` • ${lead.state}` : ""}
                       </div>
                     </td>
@@ -97,7 +97,7 @@ export default function AdminLeadsPage() {
                         href={`/admin/leads/${lead.id}`}
                         className="text-primary hover:text-primary-hover bg-primary/5 hover:bg-primary/10 px-3 py-1.5 rounded-md transition-colors"
                       >
-                        Review
+                        Semak
                       </Link>
                     </td>
                   </tr>
@@ -105,7 +105,7 @@ export default function AdminLeadsPage() {
               ) : (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-foreground/60">
-                    No leads found matching the selected filter.
+                    Tiada lead yang sepadan dengan penapis yang dipilih.
                   </td>
                 </tr>
               )}

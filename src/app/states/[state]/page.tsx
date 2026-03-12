@@ -23,21 +23,21 @@ export default async function StateProjectsPage({ params }: { params: Promise<{ 
           <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Back to all projects
+          Kembali ke senarai projek
         </Link>
       </div>
 
       <div className="mb-8 border-b border-border pb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-4">Mosque Projects in {displayState}</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-4">Projek Masjid di {displayState}</h1>
         <p className="text-foreground/80 max-w-2xl">
-          Support verified mosque construction, renovation, and maintenance needs in the state of {displayState}. 
-          Every contribution helps strengthen the local community.
+          Sokong pembinaan masjid, pengubahsuaian, dan keperluan penyelenggaraan yang disahkan di negeri {displayState}. 
+          Setiap sumbangan membantu mengukuhkan komuniti setempat.
         </p>
       </div>
 
       <div>
         <div className="mb-6 flex justify-between items-center text-sm text-foreground/60 font-medium tracking-wide">
-          <span>SHOWING {projects.length} PROJECT{projects.length !== 1 ? 'S' : ''}</span>
+          <span>MENUNJUKKAN {projects.length} PROJEK</span>
         </div>
 
         {projects.length > 0 ? (
@@ -54,15 +54,15 @@ export default async function StateProjectsPage({ params }: { params: Promise<{ 
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
-            <h3 className="text-lg font-bold text-foreground mb-2">No projects found in {displayState}</h3>
+            <h3 className="text-lg font-bold text-foreground mb-2">Tiada projek ditemui di {displayState}</h3>
             <p className="text-foreground/60 max-w-md">
-              We currently don&apos;t have active verified campaigns running in this state. Please check back later or explore projects in other states.
+              Buat masa ini, kami tidak mempunyai kempen aktif yang disahkan di negeri ini. Sila semak semula nanti atau lihat projek di negeri-negeri lain.
             </p>
             <Link 
               href="/projects"
               className="mt-6 text-primary font-medium hover:text-primary-hover px-6 py-2 bg-primary/5 border border-primary/20 rounded-lg transition-colors"
             >
-              Explore all regions
+              Lihat semua wilayah
             </Link>
           </div>
         )}

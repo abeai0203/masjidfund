@@ -45,8 +45,8 @@ export default function AllProjectsPage() {
   return (
     <div className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 w-full flex-grow flex flex-col">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Discover Projects</h1>
-        <p className="text-foreground/80">Browse all verified mosque donation campaigns across Malaysia.</p>
+        <h1 className="text-3xl font-bold text-foreground mb-2">Temui Projek</h1>
+        <p className="text-foreground/80">Lihat semua kempen derma masjid yang disahkan di seluruh Malaysia.</p>
       </div>
       
       <div className="mb-10">
@@ -55,12 +55,12 @@ export default function AllProjectsPage() {
 
       <div>
         <div className="mb-4 flex justify-between items-center text-sm text-foreground/60 font-medium tracking-wide">
-          <span>SHOWING {filteredProjects.length} PROJECT{filteredProjects.length !== 1 ? 'S' : ''}</span>
+          <span>MENUNJUKKAN {filteredProjects.length} PROJEK</span>
         </div>
 
         {isLoading ? (
           <div className="flex justify-center py-20">
-            <div className="animate-pulse space-y-4">Loading projects...</div>
+            <div className="animate-pulse space-y-4">Memuatkan projek...</div>
           </div>
         ) : filteredProjects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -73,13 +73,13 @@ export default function AllProjectsPage() {
             <svg className="w-12 h-12 text-foreground/20 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <h3 className="text-lg font-bold text-foreground mb-1">No projects found</h3>
-            <p className="text-foreground/60 max-w-sm">We couldn&apos;t find any projects matching your current filters. Try adjusting your search criteria.</p>
+            <h3 className="text-lg font-bold text-foreground mb-1">Tiada projek ditemui</h3>
+            <p className="text-foreground/60 max-w-sm">Kami tidak menemui sebarang projek yang sepadan dengan penapis anda. Cuba laras semula kriteria carian anda.</p>
             <button 
               onClick={() => setFilters({ search: "", state: "", projectType: "", verificationStatus: "" })}
               className="mt-4 text-primary font-medium hover:text-primary-hover px-4 py-2 bg-primary/5 rounded-lg transition-colors"
             >
-              Clear all filters
+              Kosonkan semua penapis
             </button>
           </div>
         )}

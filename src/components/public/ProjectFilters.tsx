@@ -37,13 +37,13 @@ export default function ProjectFilters({ filters, onFilterChange, allProjects }:
       {/* Search Bar */}
       <div>
         <label htmlFor="search" className="block text-sm font-medium text-foreground/80 mb-1">
-          Search
+          Cari
         </label>
         <div className="relative">
           <input
             type="text"
             id="search"
-            placeholder="Search by mosque or project name..."
+            placeholder="Cari mengikut nama masjid atau projek..."
             className="w-full pl-10 pr-4 py-2 bg-surface border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-shadow"
             value={filters.search}
             onChange={(e) => updateFilter("search", e.target.value)}
@@ -60,7 +60,7 @@ export default function ProjectFilters({ filters, onFilterChange, allProjects }:
         {/* State Filter */}
         <div>
           <label htmlFor="state" className="block text-sm font-medium text-foreground/80 mb-1">
-            State
+            Negeri
           </label>
           <select
             id="state"
@@ -68,7 +68,7 @@ export default function ProjectFilters({ filters, onFilterChange, allProjects }:
             value={filters.state}
             onChange={(e) => updateFilter("state", e.target.value)}
           >
-            <option value="">All States</option>
+            <option value="">Semua Negeri</option>
             {states.map(state => (
               <option key={state} value={state}>{state}</option>
             ))}
@@ -78,7 +78,7 @@ export default function ProjectFilters({ filters, onFilterChange, allProjects }:
         {/* Project Type Filter */}
         <div>
           <label htmlFor="projectType" className="block text-sm font-medium text-foreground/80 mb-1">
-            Project Type
+            Jenis Projek
           </label>
           <select
             id="projectType"
@@ -86,7 +86,7 @@ export default function ProjectFilters({ filters, onFilterChange, allProjects }:
             value={filters.projectType}
             onChange={(e) => updateFilter("projectType", e.target.value)}
           >
-            <option value="">All Types</option>
+            <option value="">Semua Jenis</option>
             {projectTypes.map(type => (
               <option key={type} value={type}>{type}</option>
             ))}
@@ -96,7 +96,7 @@ export default function ProjectFilters({ filters, onFilterChange, allProjects }:
         {/* Verification Status Filter */}
         <div>
           <label htmlFor="verificationStatus" className="block text-sm font-medium text-foreground/80 mb-1">
-            Verification
+            Pengesahan
           </label>
           <select
             id="verificationStatus"
@@ -104,7 +104,7 @@ export default function ProjectFilters({ filters, onFilterChange, allProjects }:
             value={filters.verificationStatus}
             onChange={(e) => updateFilter("verificationStatus", e.target.value)}
           >
-            <option value="">All Statuses</option>
+            <option value="">Semua Status</option>
             {verificationStatuses.map(status => (
               <option key={status} value={status}>{status}</option>
             ))}
@@ -119,7 +119,7 @@ export default function ProjectFilters({ filters, onFilterChange, allProjects }:
             onClick={() => onFilterChange({ search: "", state: "", projectType: "", verificationStatus: "" })}
             className="text-sm text-foreground/60 hover:text-primary font-medium transition-colors focus:outline-none"
           >
-            Reset All Filters
+            Set Semula Semua Penapis
           </button>
         </div>
       )}

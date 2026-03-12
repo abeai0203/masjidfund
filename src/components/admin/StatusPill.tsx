@@ -24,9 +24,18 @@ export default function StatusPill({ status }: { status: string }) {
       colorStyles = "bg-gray-100 text-gray-800 border-gray-200";
   }
 
+  const statusLabels: Record<string, string> = {
+    "Published": "Diterbitkan",
+    "Approved": "Diluluskan",
+    "Draft": "Draf",
+    "Needs Manual Check": "Perlu Semakan Manual",
+    "Rejected": "Ditolak",
+    "Pending": "Menunggu",
+  };
+
   return (
     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${colorStyles}`}>
-      {status}
+      {statusLabels[status] || status}
     </span>
   );
 }

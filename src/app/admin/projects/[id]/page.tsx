@@ -23,7 +23,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
     });
   }, [params]);
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <div>Memuatkan...</div>;
   if (!project) return notFound();
 
   const handleSave = (e: React.FormEvent, isPublish: boolean) => {
@@ -33,7 +33,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
     // Simulate API call
     setTimeout(() => {
       setIsSaving(false);
-      alert(`Mock SAVE: Project ${isPublish ? "published" : "saved as draft"}.`);
+      alert(`Simpanan MOCK: Projek ${isPublish ? "diterbitkan" : "disimpan sebagai draf"}.`);
       router.push('/admin/projects');
     }, 600);
   };
@@ -48,13 +48,13 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
           <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Back to Projects
+          Kembali ke Projek
         </Link>
         <StatusPill status={project.publish_status} />
       </div>
 
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground">Edit Project</h1>
+        <h1 className="text-2xl font-bold text-foreground">Edit Projek</h1>
         <p className="text-foreground/70 text-sm mt-1">{project.title}</p>
       </div>
 
@@ -62,10 +62,10 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
         
         {/* Basic Info Section */}
         <div className="bg-surface border border-border rounded-xl p-6 sm:p-8 shadow-sm">
-          <h2 className="text-lg font-bold text-foreground mb-6 pb-2 border-b border-border">Basic Information</h2>
+          <h2 className="text-lg font-bold text-foreground mb-6 pb-2 border-b border-border">Maklumat Asas</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-foreground/80 mb-2">Campaign Title</label>
+              <label className="block text-sm font-semibold text-foreground/80 mb-2">Tajuk Kempen</label>
               <input 
                 type="text" 
                 defaultValue={project.title}
@@ -74,7 +74,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             </div>
             
             <div>
-              <label className="block text-sm font-semibold text-foreground/80 mb-2">Mosque Name</label>
+              <label className="block text-sm font-semibold text-foreground/80 mb-2">Nama Masjid</label>
               <input 
                 type="text" 
                 defaultValue={project.mosque_name}
@@ -83,20 +83,20 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-foreground/80 mb-2">Project Type</label>
+              <label className="block text-sm font-semibold text-foreground/80 mb-2">Jenis Projek</label>
               <select 
                 defaultValue={project.project_type}
                 className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               >
-                <option value="Construction">Construction</option>
-                <option value="Renovation">Renovation</option>
-                <option value="Maintenance">Maintenance</option>
-                <option value="Emergency Fund">Emergency Fund</option>
+                <option value="Construction">Pembinaan</option>
+                <option value="Renovation">Pengubahsuaian</option>
+                <option value="Maintenance">Penyelenggaraan</option>
+                <option value="Emergency Fund">Tabung Kecemasan</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-foreground/80 mb-2">State</label>
+              <label className="block text-sm font-semibold text-foreground/80 mb-2">Negeri</label>
               <input 
                 type="text" 
                 defaultValue={project.state}
@@ -105,7 +105,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-foreground/80 mb-2">District / Area</label>
+              <label className="block text-sm font-semibold text-foreground/80 mb-2">Daerah / Kawasan</label>
               <input 
                 type="text" 
                 defaultValue={project.district}
@@ -117,21 +117,21 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
 
         {/* Content Section */}
         <div className="bg-surface border border-border rounded-xl p-6 sm:p-8 shadow-sm">
-          <h2 className="text-lg font-bold text-foreground mb-6 pb-2 border-b border-border">Campaign Details</h2>
+          <h2 className="text-lg font-bold text-foreground mb-6 pb-2 border-b border-border">Butiran Kempen</h2>
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-foreground/80 mb-2">Short summary (for cards)</label>
+              <label className="block text-sm font-semibold text-foreground/80 mb-2">Ringkasan pendek (untuk kad)</label>
               <textarea 
                 defaultValue={project.short_description}
                 rows={2}
                 maxLength={150}
                 className="w-full bg-surface-muted border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
-              <p className="text-xs text-foreground/50 mt-1">Keep it under 150 characters.</p>
+              <p className="text-xs text-foreground/50 mt-1">Pastikan bawah 150 aksara.</p>
             </div>
             
             <div>
-              <label className="block text-sm font-semibold text-foreground/80 mb-2">Full Story / Description</label>
+              <label className="block text-sm font-semibold text-foreground/80 mb-2">Cerita Penuh / Penerangan</label>
               <textarea 
                 defaultValue={project.full_description}
                 rows={8}
@@ -140,7 +140,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             </div>
 
             <div>
-               <label className="block text-sm font-semibold text-foreground/80 mb-2">Header Image URL</label>
+               <label className="block text-sm font-semibold text-foreground/80 mb-2">URL Imej Pengepala</label>
               <input 
                 type="url" 
                 defaultValue={project.image_url}
@@ -155,29 +155,29 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
           
           {/* Trust Area */}
           <div className="bg-surface border border-border rounded-xl p-6 sm:p-8 shadow-sm">
-            <h2 className="text-lg font-bold text-foreground mb-6 pb-2 border-b border-border">Verification</h2>
+            <h2 className="text-lg font-bold text-foreground mb-6 pb-2 border-b border-border">Pengesahan</h2>
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-semibold text-foreground/80 mb-2">Status Level</label>
+                <label className="block text-sm font-semibold text-foreground/80 mb-2">Tahap Status</label>
                 <select 
                   defaultValue={project.verification_status}
                   className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
-                  <option value="Pending">Pending Validation</option>
-                  <option value="Basic Checked">Basic Checking (Online)</option>
-                  <option value="Verified">Fully Verified (Committee Contacted)</option>
+                  <option value="Pending">Menunggu Pengesahan</option>
+                  <option value="Basic Checked">Semakan Asas (Atas Talian)</option>
+                  <option value="Verified">Disahkan Sepenuhnya (AJK Dihubungi)</option>
                 </select>
-                <p className="text-xs text-foreground/50 mt-2 leading-relaxed">Ensure all relevant documents have been cited in the internal review system before upgrading to Fully Verified.</p>
+                <p className="text-xs text-foreground/50 mt-2 leading-relaxed">Pastikan semua dokumen berkaitan telah dirujuk dalam sistem semakan dalaman sebelum menaik taraf ke Disahkan Sepenuhnya.</p>
               </div>
             </div>
           </div>
 
           {/* Money Area */}
           <div className="bg-surface border border-border rounded-xl p-6 sm:p-8 shadow-sm">
-            <h2 className="text-lg font-bold text-foreground mb-6 pb-2 border-b border-border">Financial Data</h2>
+            <h2 className="text-lg font-bold text-foreground mb-6 pb-2 border-b border-border">Data Kewangan</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-foreground/80 mb-2">Target Amount (RM)</label>
+                <label className="block text-sm font-semibold text-foreground/80 mb-2">Jumlah Sasaran (RM)</label>
                 <input 
                   type="number" 
                   defaultValue={project.target_amount}
@@ -185,7 +185,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-foreground/80 mb-2">Collected (RM)</label>
+                <label className="block text-sm font-semibold text-foreground/80 mb-2">Dikumpul (RM)</label>
                 <input 
                   type="number" 
                   defaultValue={project.collected_amount}
@@ -200,7 +200,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
                     defaultChecked={project.needs_donation}
                     className="w-5 h-5 rounded border-border text-primary focus:ring-primary/50 bg-surface-muted" 
                   />
-                  <span className="text-sm font-semibold text-foreground/80">Actively seeking donations</span>
+                   <span className="text-sm font-semibold text-foreground/80">Sedang aktif mencari derma</span>
                 </label>
               </div>
             </div>
@@ -209,22 +209,22 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
 
         {/* Payment Methods */}
         <div className="bg-surface border border-border rounded-xl p-6 sm:p-8 shadow-sm mb-8">
-           <h2 className="text-lg font-bold text-foreground mb-6 pb-2 border-b border-border">Official Payment Methods</h2>
+           <h2 className="text-lg font-bold text-foreground mb-6 pb-2 border-b border-border">Kaedah Pembayaran Rasmi</h2>
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-foreground/80 mb-2">Active Modalities</label>
+                <label className="block text-sm font-semibold text-foreground/80 mb-2">Modaliti Aktif</label>
                 <select 
                   defaultValue={project.donation_method_type}
                   className="w-full md:w-1/2 bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
-                  <option value="DuitNow QR">Only DuitNow QR</option>
-                  <option value="Bank Transfer">Only Direct Bank Transfer</option>
-                  <option value="Both">Both Enabled</option>
+                  <option value="DuitNow QR">Hanya DuitNow QR</option>
+                  <option value="Bank Transfer">Hanya Pindahan Bank Terus</option>
+                  <option value="Both">Kedua-duanya Aktif</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-foreground/80 mb-2">Bank Name</label>
+                <label className="block text-sm font-semibold text-foreground/80 mb-2">Nama Bank</label>
                 <input 
                   type="text" 
                   defaultValue={project.bank_name}
@@ -233,7 +233,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-foreground/80 mb-2">Account Number</label>
+                <label className="block text-sm font-semibold text-foreground/80 mb-2">Nombor Akaun</label>
                 <input 
                   type="text" 
                   defaultValue={project.account_number}
@@ -242,7 +242,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-foreground/80 mb-2">Registered Account Name</label>
+                <label className="block text-sm font-semibold text-foreground/80 mb-2">Nama Akaun Berdaftar</label>
                 <input 
                   type="text" 
                   defaultValue={project.account_name}
@@ -251,7 +251,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-foreground/80 mb-2">DuitNow QR Image URL</label>
+                <label className="block text-sm font-semibold text-foreground/80 mb-2">URL Imej DuitNow QR</label>
                 <input 
                   type="url" 
                   defaultValue={project.duitnow_qr_url}
@@ -269,7 +269,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
              disabled={isSaving}
              className="px-6 py-2.5 rounded-lg border border-border bg-surface hover:bg-surface-muted text-sm font-medium transition-colors"
            >
-             {isSaving ? "Saving..." : "Save Draft"}
+             {isSaving ? "Menyimpan..." : "Simpan Draf"}
            </button>
            <button 
              type="button"
@@ -277,7 +277,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
              disabled={isSaving}
              className="px-6 py-2.5 rounded-lg border border-primary/20 bg-primary hover:bg-primary-hover text-white text-sm font-medium shadow-sm transition-colors"
            >
-             {isSaving ? "Publishing..." : "Save & Publish"}
+             {isSaving ? "Menerbitkan..." : "Simpan & Terbit"}
            </button>
         </div>
 
