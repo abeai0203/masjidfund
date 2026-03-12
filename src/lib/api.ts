@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 import { Project, Lead } from './types';
-import { MOCK_PROJECTS } from './mock-data';
+import { MOCK_PROJECTS, MOCK_LEADS } from './mock-data';
 
 export async function getPublicProjects(): Promise<Project[]> {
   const { data, error } = await supabase
@@ -66,9 +66,9 @@ export async function getAdminProjects(): Promise<Project[]> {
     .select('*')
     .order('created_at', { ascending: false });
     
-  if (error) {
-    console.error("Error fetching admin projects:", error.message);
-    return [];
+  if (error || !data || data.length === 0) {
+    if (error) console.error("Error fetching admin projects:", error.message);
+    return MOCK_PROJECTS;
   }
   return data as Project[];
 }
@@ -80,9 +80,9 @@ export async function getLeadById(id: string): Promise<Lead | null> {
     .eq('id', id)
     .single();
     
-  if (error) {
-    console.error("Error fetching lead:", error.message);
-    return null;
+  if (error || !data) {
+    if (error && error.code !== 'PGRST116') console.error("Error fetching lead:", error.message);
+    return MOCK_LEADS.find(l => l.id === id) || null;
   }
   return data as Lead;
 }
@@ -132,9 +132,9 @@ export async function getAllLeads(): Promise<Lead[]> {
     .select('*')
     .order('created_at', { ascending: false });
     
-  if (error) {
-    console.error("Error fetching leads:", error.message);
-    return [];
+  if (error || !data || data.length === 0) {
+    if (error) console.error("Error fetching leads:", error.message);
+    return MOCK_LEADS;
   }
   return data as Lead[];
 }

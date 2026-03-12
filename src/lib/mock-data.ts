@@ -1,4 +1,35 @@
-import { Project } from "./types";
+import { Project, Lead, ProjectType } from "./types";
+
+export const MOCK_LEADS: Lead[] = [
+  {
+    id: "lead-1",
+    raw_title: "Permohonan Dana Bumbung Bocor",
+    raw_summary: "Masjid kami mengalami kebocoran serius di ruang solat wanita. Perlu baiki segera sebelum musim hujan.",
+    extracted_mosque_name: "Masjid Al-Falah",
+    state: "Selangor",
+    source_type: "Manual Submission",
+    lead_score: 85,
+    status: "Pending",
+    detected_project_type: "Renovation",
+    detected_account_info: "Maybank - 1234567890 (Masjid Al-Falah)",
+    created_at: new Date(Date.now() - 86400000).toISOString(),
+    updated_at: new Date(Date.now() - 86400000).toISOString()
+  },
+  {
+    id: "lead-2",
+    raw_title: "Projek Pembinaan Pagar Masjid",
+    raw_summary: "Kami ingin membina pagar baru untuk keselamatan kawasan masjid dan tanah perkuburan bersebelahan.",
+    extracted_mosque_name: "Masjid Nurul Huda",
+    state: "Johor",
+    source_type: "Manual Submission",
+    lead_score: 45,
+    status: "Needs Manual Check",
+    detected_project_type: "Construction",
+    detected_account_info: "CIMB - 0987654321 (Tabung Pembangunan Masjid)",
+    created_at: new Date(Date.now() - 172800000).toISOString(),
+    updated_at: new Date(Date.now() - 172800000).toISOString()
+  }
+];
 
 export const MOCK_PROJECTS: Project[] = [
   {

@@ -43,6 +43,7 @@ export interface Lead {
   lead_score: number; // e.g. 0-100 confidence score
   status: LeadStatus;
   created_at: string;
+  updated_at?: string;
   notes?: string;
   detected_qr?: string;
   detected_account_info?: string;
