@@ -4,7 +4,7 @@ export const runtime = 'edge';
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
-import { getLeadById, updateLeadStatus } from "@/lib/api";
+import { getLeadById, updateLeadStatus, approveAndConvertToProject } from "@/lib/api";
 import { Lead } from "@/lib/types";
 import StatusPill from "@/components/admin/StatusPill";
 
@@ -32,13 +32,21 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
     setIsActing(true);
     const resolvedParams = await params;
     
-    // Actions: Draft Project Generated (Approved), Needs Manual Check, Rejected
-    let status = action === "Rejected" ? "Rejected" : action === "Needs Manual Check" ? "Needs Manual Check" : "Approved";
+    if (action === "Approved") {
+      await approveAndConvertToProject(resolvedParams.id, notes);
+      setIsActing(false);
+      alert("Berjaya: Lead diluluskan dan projek baru telah diterbitkan secara automatik!");
+      router.push('/admin/projects');
+      return;
+    }
+    
+    // Others: Needs Manual Check, Rejected
+    let status = action === "Rejected" ? "Rejected" : "Needs Manual Check";
     
     await updateLeadStatus(resolvedParams.id, status, notes);
     
     setIsActing(false);
-    const actionMsg = status === "Approved" ? "Diluluskan & Draf Projek Dicipta" : status === "Needs Manual Check" ? "Semakan Manual Diperlukan" : "Ditolak";
+    const actionMsg = status === "Needs Manual Check" ? "Semakan Manual Diperlukan" : "Ditolak";
     alert(`Berjaya: Lead ditandakan sebagai ${actionMsg}.`);
     router.push('/admin/leads');
   };
@@ -137,11 +145,11 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
             <h2 className="text-sm font-bold text-foreground/50 uppercase tracking-wider mb-4 border-b border-border pb-2">Tindakan</h2>
             <div className="space-y-3">
               <button 
-                onClick={() => handleAction("Draft Project Generated")}
+                onClick={() => handleAction("Approved")}
                 disabled={isActing}
                 className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-2 px-4 rounded-lg transition-colors shadow-sm disabled:opacity-50"
               >
-                {isActing ? "Memproses..." : "Luluskan & Cipta Draf"}
+                {isActing ? "Memproses..." : "Luluskan & Terbitkan"}
               </button>
               <button 
                 onClick={() => handleAction("Needs Manual Check")}

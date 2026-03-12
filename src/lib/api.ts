@@ -191,6 +191,52 @@ export async function updateLeadStatus(id: string, status: string, notes?: strin
   }
 }
 
+export async function approveAndConvertToProject(id: string, notes?: string): Promise<boolean> {
+  const simLeads = getStoredData<Lead>('leads', MOCK_LEADS);
+  const leadIndex = simLeads.findIndex(l => l.id === id);
+  if (leadIndex === -1) return false;
+
+  const lead = simLeads[leadIndex];
+  
+  // 1. Update Lead Status
+  simLeads[leadIndex] = { ...lead, status: 'Approved', notes };
+  setStoredData('leads', simLeads);
+
+  // 2. Create New Project from Lead Data
+  const simProjects = getStoredData<Project>('projects', MOCK_PROJECTS);
+  
+  // Create a slug from mosque name or title
+  const baseString = lead.extracted_mosque_name || lead.raw_title;
+  const slug = `${baseString.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString().slice(-4)}`;
+
+  const newProject: Project = {
+    slug,
+    mosque_name: lead.extracted_mosque_name || "Masjid Baru",
+    state: lead.state || "Selangor",
+    district: "Akan Dikemaskini",
+    title: lead.raw_title,
+    short_description: lead.raw_summary.slice(0, 120) + "...",
+    full_description: lead.raw_summary,
+    project_type: lead.detected_project_type || "Maintenance",
+    verification_status: "Verified",
+    publish_status: "Published", // User asked to be "aktif"
+    target_amount: 50000, // Placeholder
+    collected_amount: 0,
+    completion_percent: 0,
+    needs_donation: true,
+    donation_method_type: "Both",
+    bank_name: "Maybank",
+    account_name: lead.extracted_mosque_name || "Bendahari Masjid",
+    account_number: "1234567890",
+    image_url: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=800"
+  };
+
+  simProjects.unshift(newProject);
+  setStoredData('projects', simProjects);
+
+  return true;
+}
+
 export async function getAllLeads(): Promise<Lead[]> {
   const { data, error } = await supabase
     .from('leads')
