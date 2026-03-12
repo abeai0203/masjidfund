@@ -53,6 +53,44 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Magic CTA Banner - Moved Up & Enhanced */}
+      <section className="bg-primary py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+             <path d="M0 100 C 20 0, 50 0, 100 100 Z" fill="white" />
+          </svg>
+        </div>
+        <div className="max-w-7xl mx-auto text-center relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
+          <div className="text-center md:text-left flex-1">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-white/10 rounded-2xl mb-6 backdrop-blur-sm border border-white/20">
+              <span className="text-3xl animate-bounce">🕌</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-white mb-4 tracking-tight">
+              Satu Derma, <span className="underline decoration-white/30 underline-offset-8">Pelbagai Masjid.</span>
+            </h2>
+            <p className="text-white/90 text-lg mb-0 leading-relaxed max-w-xl font-medium">
+              Alat agihan automatik kami membolehkan anda menyokong berbilang masjid yang disahkan dalam sekali transaksi. Lebih mudah, lebih banyak pahala.
+            </p>
+          </div>
+          
+          <div className="flex flex-col items-center gap-4 bg-white/5 p-8 rounded-3xl backdrop-blur-md border border-white/10 shadow-2xl">
+            <Link
+              href="/donate"
+              className="group inline-flex items-center gap-4 bg-white text-primary hover:bg-surface-muted font-black text-xl px-12 py-5 rounded-2xl shadow-xl transition-all hover:-translate-y-1.5 hover:shadow-2xl active:scale-95"
+            >
+              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+              </div>
+              Mula Agih Derma
+            </Link>
+            <div className="flex items-center gap-4 text-white/70 text-[10px] font-bold uppercase tracking-widest mt-2">
+              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span> 100% Terus</span>
+              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span> Patuh Syariah</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Featured Projects Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-surface">
         <div className="max-w-7xl mx-auto">
@@ -129,27 +167,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Donate CTA Banner */}
-      <section className="bg-primary py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="text-5xl mb-6">🕌</div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
-            Satu Derma, Pelbagai Masjid.
-          </h2>
-          <p className="text-white/80 text-lg mb-10 leading-relaxed">
-            Agihkan sumbangan anda secara automatik ke beberapa projek yang disahkan dalam sekali bayar.
-          </p>
-          <Link
-            href="/donate"
-            className="inline-flex items-center gap-3 bg-white text-primary hover:bg-surface-muted font-black text-xl px-12 py-5 rounded-2xl shadow-2xl transition-all hover:-translate-y-1 hover:shadow-3xl"
-          >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-            Mula Agih Derma
-          </Link>
-        </div>
-      </section>
     </div>
   );
 }
-
