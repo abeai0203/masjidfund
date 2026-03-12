@@ -98,6 +98,8 @@ export default function SubmitPage() {
     if (isScanning) return;
     
     setIsScanning(true);
+    setExtractedQrUrl(null);
+    setExtractedType(null);
     setFiles(prev => ({ ...prev, magic_scan: file }));
     const previewUrl = URL.createObjectURL(file);
     setMagicScanPreview(previewUrl);
@@ -217,9 +219,13 @@ export default function SubmitPage() {
          if (longCapsMatch) detectedAccName = longCapsMatch[0].trim();
       }
 
-      const isLestari = cleanText.toLowerCase().includes('lestari');
-      const isHazelton = cleanText.toLowerCase().includes('hazel');
-      setExtractedType(isHazelton ? 'hazelton' : isLestari ? 'lestari' : null);
+      const lowerText = cleanText.toLowerCase();
+      // Stricter matching: must contain specific project identifiers
+      const isLestari = lowerText.includes('lestari') && lowerText.includes('putra');
+      const isHazelton = lowerText.includes('hazel') && (lowerText.includes('eco') || lowerText.includes('forest'));
+      
+      const projectType = isHazelton ? 'hazelton' : isLestari ? 'lestari' : null;
+      setExtractedType(projectType);
 
       const mosqueName = isLestari ? "Masjid Lestari Putra" : (isHazelton ? "Surau Hazelton Eco Forest" : (detectedName || "Institusi Baru"));
       const location = isLestari ? "Seri Kembangan, Selangor" : (isHazelton ? "Semenyih, Selangor" : "Malaysia");
@@ -335,7 +341,7 @@ export default function SubmitPage() {
         lead_score: 98,
         status: 'Pending',
         detected_project_type: formData.get('project_type') as ProjectType,
-        detected_qr: extractedQrUrl || (files.magic_scan ? (extractedType === 'hazelton' ? "/images/qr-hazelton.png" : "/images/qr-cropped.png") : undefined),
+        detected_qr: extractedQrUrl || (files.magic_scan ? (extractedType === 'hazelton' ? "/images/qr-hazelton.png" : extractedType === 'lestari' ? "/images/qr-cropped.png" : undefined) : undefined),
         detected_bank_name: formData.get('bank_name') as string,
         detected_acc_number: formData.get('acc_number') as string,
         detected_acc_name: formData.get('acc_name') as string,
@@ -577,16 +583,22 @@ export default function SubmitPage() {
                         className="max-h-full w-auto object-contain" 
                         alt="Extracted QR" 
                       />
+                    ) : (extractedType && (extractedType === 'hazelton' || extractedType === 'lestari')) ? (
+                      <img 
+                        src={extractedType === 'hazelton' ? "/images/qr-hazelton.png" : "/images/qr-cropped.png"} 
+                        className="max-h-full w-auto object-contain" 
+                        alt="Demo QR" 
+                      />
                     ) : files.qr ? (
                       <img 
-                        src={files.magic_scan ? (extractedType === 'hazelton' ? "/images/qr-hazelton.png" : "/images/qr-cropped.png") : URL.createObjectURL(files.qr)} 
+                        src={URL.createObjectURL(files.qr)} 
                         className="max-h-full w-auto object-contain" 
-                        alt="QR" 
+                        alt="Original QR" 
                       />
                     ) : (
                        <svg className="w-12 h-12 text-foreground/10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
                     )}
-                    {files.magic_scan && <span className="absolute top-3 right-3 bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg animate-pulse">EXTRACTED</span>}
+                    {(extractedQrUrl || extractedType) && <span className="absolute top-3 right-3 bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg animate-pulse">EXTRACTED</span>}
                   </div>
                 </div>
 
@@ -594,12 +606,12 @@ export default function SubmitPage() {
                 <div className="space-y-3">
                   <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest">Visual Projek Dikesan</p>
                   <div className="relative aspect-square bg-white border-2 border-dashed border-border rounded-2xl flex items-center justify-center overflow-hidden group">
-                    {files.main_image ? (
-                      <img 
-                        src={files.magic_scan ? (extractedType === 'hazelton' ? "/images/hazelton-render.png" : "/images/masjid-lestari-putra.png") : URL.createObjectURL(files.main_image)} 
-                        className="w-full h-full object-cover" 
-                        alt="Preview" 
-                      />
+                    {extractedType === 'hazelton' ? (
+                      <img src="/images/hazelton-render.png" className="w-full h-full object-cover" alt="Hazelton Render" />
+                    ) : extractedType === 'lestari' ? (
+                      <img src="/images/masjid-lestari-putra.png" className="w-full h-full object-cover" alt="Lestari Render" />
+                    ) : files.main_image ? (
+                      <img src={URL.createObjectURL(files.main_image)} className="w-full h-full object-cover" alt="Uploaded Image" />
                     ) : (
                        <svg className="w-12 h-12 text-foreground/10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     )}
