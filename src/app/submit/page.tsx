@@ -76,8 +76,15 @@ export default function SubmitPage() {
       (f.elements.namedItem('full_desc') as HTMLTextAreaElement).value = extractedData.full_desc;
     }
 
+    // Capture the QR code from the same file (Simulated Extraction)
+    setFiles(prev => ({ 
+      ...prev, 
+      qr: file, // Using the banner itself as the 'extracted' QR for the demo
+      main_image: file 
+    }));
+
     setIsScanning(false);
-    alert("Magic Scan Selesai! Maklumat telah diisi secara automatik. Sila semak dan lengkapkan butiran lain.");
+    alert("Magic Scan Selesai! Maklumat teks & Gambar QR telah diisi secara automatik. Sila semak semula.");
   };
 
   const triggerInput = (id: string) => {
