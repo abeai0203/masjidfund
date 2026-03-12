@@ -96,7 +96,7 @@ export const MOCK_PROJECTS: Project[] = [
     bank_name: "Bank Islam",
     account_name: "Lembaga Pentadbir Masjid Jamek",
     account_number: "14014010123456",
-    image_url: "https://images.unsplash.com/photo-1609946860441-a51ffed3d12d?auto=format&fit=crop&q=80&w=800"
+    image_url: "https://images.unsplash.com/photo-1542667593-37ad9224edd0?auto=format&fit=crop&q=80&w=800"
   },
   {
     slug: "masjid-an-nur-johor-bahru-emergency",

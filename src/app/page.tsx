@@ -1,11 +1,28 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import ProjectCard from "@/components/public/ProjectCard";
 import { getPublicProjects, getAllStates } from "@/lib/api";
+import { Project } from "@/lib/types";
 
-export default async function Home() {
-  const publicProjects = await getPublicProjects();
+export default function Home() {
+  const [publicProjects, setPublicProjects] = useState<Project[]>([]);
+  const [states, setStates] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      const projects = await getPublicProjects();
+      const st = await getAllStates();
+      setPublicProjects(projects);
+      setStates(st);
+      setIsLoading(false);
+    }
+    loadData();
+  }, []);
+
   const featuredProjects = publicProjects.slice(0, 3);
-  const states = await getAllStates();
 
   return (
     <div className="flex flex-col min-h-full">
@@ -49,11 +66,19 @@ export default async function Home() {
             </Link>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredProjects.map((project) => (
-              <ProjectCard key={project.slug} project={project} />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="h-80 bg-surface-muted animate-pulse rounded-2xl border border-border"></div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredProjects.map((project) => (
+                <ProjectCard key={project.slug} project={project} />
+              ))}
+            </div>
+          )}
           
           <div className="mt-10 sm:hidden flex justify-center">
             <Link href="/projects" className="inline-flex items-center text-primary font-medium hover:text-primary-hover">
@@ -127,3 +152,4 @@ export default async function Home() {
     </div>
   );
 }
+
