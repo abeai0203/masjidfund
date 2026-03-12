@@ -1,46 +1,49 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import dynamic from "next/dynamic";
 import { getPublicProjects } from "@/lib/api";
-import { Project } from "@/lib/types";
+
+const LeafletMap = dynamic(() => import("./LeafletMap"), { 
+  ssr: false,
+  loading: () => (
+    <div className="h-[500px] w-full bg-surface-muted animate-pulse rounded-2xl flex items-center justify-center text-foreground/40 font-medium">
+      Memuatkan Peta Malaysia...
+    </div>
+  )
+});
 
 interface MapPoint {
-  id: string;
   name: string;
-  x: number; // percentage from left
-  y: number; // percentage from top
   amount: number;
+  lat: number;
+  lng: number;
 }
 
-const STATE_COORDINATES: Record<string, { x: number, y: number }> = {
-  "Selangor": { x: 22, y: 55 },
-  "Kuala Lumpur": { x: 25, y: 60 },
-  "Johor": { x: 35, y: 80 },
-  "Pulau Pinang": { x: 18, y: 30 },
-  "Perak": { x: 20, y: 40 },
-  "Perlis": { x: 15, y: 15 },
-  "Kedah": { x: 17, y: 22 },
-  "Pahang": { x: 30, y: 50 },
-  "Terengganu": { x: 38, y: 35 },
-  "Kelantan": { x: 32, y: 25 },
-  "Melaka": { x: 30, y: 72 },
-  "Negeri Sembilan": { x: 28, y: 66 },
-  "Sarawak": { x: 70, y: 70 },
-  "Sabah": { x: 88, y: 35 },
+const STATE_COORDINATES: Record<string, { lat: number, lng: number }> = {
+  "Selangor": { lat: 3.0738, lng: 101.5183 },
+  "Kuala Lumpur": { lat: 3.1390, lng: 101.6869 },
+  "Johor": { lat: 1.4854, lng: 103.7618 },
+  "Pulau Pinang": { lat: 5.4141, lng: 100.3288 },
+  "Perak": { lat: 4.5921, lng: 101.0901 },
+  "Perlis": { lat: 6.4449, lng: 100.2048 },
+  "Kedah": { lat: 6.1184, lng: 100.3686 },
+  "Pahang": { lat: 3.8126, lng: 103.3256 },
+  "Terengganu": { lat: 5.3117, lng: 103.1324 },
+  "Kelantan": { lat: 6.1254, lng: 102.2386 },
+  "Melaka": { lat: 2.1896, lng: 102.2501 },
+  "Negeri Sembilan": { lat: 2.7258, lng: 101.9424 },
+  "Sarawak": { lat: 1.5533, lng: 110.3592 },
+  "Sabah": { lat: 5.9788, lng: 116.0753 },
 };
 
 export default function InteractiveMap() {
   const [points, setPoints] = useState<MapPoint[]>([]);
-  const [activePoint, setActivePoint] = useState<string | null>(null);
-  const [isDetecting, setIsDetecting] = useState(false);
-  const [detectedLocation, setDetectedLocation] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadRealData() {
       const projects = await getPublicProjects();
       
-      // Group by state and sum target_amount
       const stateData: Record<string, number> = {};
       projects.forEach(p => {
         if (!stateData[p.state]) stateData[p.state] = 0;
@@ -48,13 +51,12 @@ export default function InteractiveMap() {
       });
 
       const mappedPoints: MapPoint[] = Object.entries(stateData).map(([state, total]) => {
-        const coords = STATE_COORDINATES[state] || { x: 50, y: 50 };
+        const coords = STATE_COORDINATES[state] || { lat: 4, lng: 102 };
         return {
-          id: state.toLowerCase().replace(/\s+/g, '-'),
           name: state,
           amount: total,
-          x: coords.x,
-          y: coords.y
+          lat: coords.lat,
+          lng: coords.lng
         };
       });
 
@@ -63,95 +65,23 @@ export default function InteractiveMap() {
     loadRealData();
   }, []);
 
-  const handleDetect = () => {
-    setIsDetecting(true);
-    setTimeout(() => {
-      setIsDetecting(false);
-      setDetectedLocation("Selangor");
-      setActivePoint("selangor");
-    }, 1500);
-  };
-
-  const formatAmount = (num: number) => {
-    if (num >= 1000000) return `RM${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `RM${(num / 1000).toFixed(0)}k`;
-    return `RM${num}`;
-  };
-
   return (
     <div className="w-full bg-white rounded-3xl border border-border shadow-xl overflow-hidden">
       <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface-muted/50">
         <div>
-          <h3 className="text-xl font-bold text-foreground">Terokai Infaq Malaysia (Data Sebenar)</h3>
-          <p className="text-sm text-foreground/60">Data dikemaskini terus daripada pangkalan data projek aktif.</p>
+          <h3 className="text-xl font-bold text-foreground">Peta Infaq Malaysia (Live)</h3>
+          <p className="text-sm text-foreground/60">Data sasaran dana sebenar yang diperlukan bagi setiap negeri.</p>
         </div>
-        <button 
-          onClick={handleDetect}
-          disabled={isDetecting}
-          className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-md disabled:opacity-50"
-        >
-          {isDetecting ? (
-            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-          ) : (
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-          )}
-          {detectedLocation ? `Lokasi: ${detectedLocation}` : "Temui Projek Berdekatan Saya"}
-        </button>
       </div>
 
-      <div className="relative aspect-[21/9] w-full bg-[#f8fafc] p-4 sm:p-8">
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] select-none">
-           <span className="text-[15rem] font-black italic">MASJID FUND</span>
-        </div>
-
-        <div className="relative w-full h-full max-w-5xl mx-auto">
-          {/* Peninsular Malaysia Style */}
-          <div className="absolute top-[10%] left-[10%] w-[35%] h-[80%] bg-primary/10 rounded-[20%_40%_20%_60%] border-2 border-green-500/20 shadow-inner overflow-hidden">
-             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
-          </div>
-          
-          {/* East Malaysia Style */}
-          <div className="absolute top-[30%] left-[55%] w-[40%] h-[55%] bg-primary/10 rounded-[40%_20%_60%_20%] border-2 border-green-500/20 shadow-inner">
-             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
-          </div>
-
-          {/* Map Dots/Labels - Using Database Items */}
-          {points.map((point) => (
-            <div 
-              key={point.id}
-              className="absolute z-20 group"
-              style={{ left: `${point.x}%`, top: `${point.y}%` }}
-              onMouseEnter={() => setActivePoint(point.id)}
-              onMouseLeave={() => setActivePoint(null)}
-            >
-              <Link href={`/states/${point.name.toLowerCase()}`} className="relative block transform transition-transform hover:scale-110 active:scale-95">
-                <div className={`
-                  bg-white px-3 py-1.5 rounded-full shadow-lg border border-border flex items-center gap-2 whitespace-nowrap transition-all
-                  ${activePoint === point.id ? 'ring-4 ring-primary/20 border-primary' : ''}
-                `}>
-                  <div className={`w-2 h-2 rounded-full ${activePoint === point.id ? 'bg-primary animate-ping' : 'bg-primary'}`}></div>
-                  <span className="text-xs font-black text-foreground">{formatAmount(point.amount)}</span>
-                  {activePoint === point.id && (
-                    <span className="text-[10px] font-bold text-primary bg-primary/5 px-1.5 py-0.5 rounded ml-1">
-                      {point.name}
-                    </span>
-                  )}
-                </div>
-                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-3 bg-gradient-to-b from-white to-transparent opacity-50"></div>
-              </Link>
-            </div>
-          ))}
-
-          <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur px-3 py-1.5 rounded-md text-[10px] text-foreground/40 font-bold tracking-widest uppercase border border-border">
-            Semenanjung & Borneo
-          </div>
-        </div>
+      <div className="w-full">
+        <LeafletMap points={points} />
       </div>
       
       <div className="px-6 py-4 bg-surface border-t border-border flex flex-wrap gap-4 items-center justify-center text-xs text-foreground/50">
          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-primary rounded-full"></span> Projek Aktif Sebenar</span>
-         <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-primary/40 rounded-full"></span> Dana Diperlukan</span>
-         <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse"></span> Data Live</span>
+         <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-primary/40 rounded-full border border-primary/20"></span> Geo-Sempadan Malaysia</span>
+         <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span> Data Berasaskan Pangkalan Data</span>
       </div>
     </div>
   );
