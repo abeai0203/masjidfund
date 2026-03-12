@@ -20,16 +20,17 @@ export default async function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/projects"
-              className="bg-primary hover:bg-primary-hover text-white px-8 py-3 rounded-lg text-lg font-medium transition-all shadow-sm hover:shadow-md"
+              href="/donate"
+              className="bg-primary hover:bg-primary-hover text-white px-10 py-4 rounded-xl text-lg font-bold transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:-translate-y-1 flex items-center justify-center gap-2"
             >
-              Temui Projek
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+              Agihkan Derma Anda
             </Link>
             <Link
-              href="/submit"
-              className="bg-surface border border-border text-foreground hover:bg-surface-muted px-8 py-3 rounded-lg text-lg font-medium transition-all shadow-sm"
+              href="/projects"
+              className="bg-surface border-2 border-border text-foreground hover:bg-surface-muted px-8 py-4 rounded-xl text-lg font-medium transition-all shadow-sm"
             >
-              Hantar Kempen
+              Semak Projek
             </Link>
           </div>
         </div>
@@ -101,6 +102,26 @@ export default async function Home() {
               <p className="text-sm text-foreground/70 leading-relaxed">Penunjuk lencana yang jelas menunjukkan tahap pengesahan yang telah dilengkapkan untuk setiap projek.</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Donate CTA Banner */}
+      <section className="bg-primary py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="text-5xl mb-6">🕌</div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
+            Satu Derma, Pelbagai Masjid.
+          </h2>
+          <p className="text-white/80 text-lg mb-10 leading-relaxed">
+            Agihkan sumbangan anda secara automatik ke beberapa projek yang disahkan dalam sekali bayar.
+          </p>
+          <Link
+            href="/donate"
+            className="inline-flex items-center gap-3 bg-white text-primary hover:bg-surface-muted font-black text-xl px-12 py-5 rounded-2xl shadow-2xl transition-all hover:-translate-y-1 hover:shadow-3xl"
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+            Mula Agih Derma
+          </Link>
         </div>
       </section>
     </div>
