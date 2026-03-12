@@ -195,6 +195,28 @@ export default function SubmitPage() {
         return { title, shortDesc, fullDesc };
       };
 
+      // 9. Extract Account Name (Very aggressive - look for "Atas Nama", "Payable to" or proximity to Acc Number)
+      const accNameKeywords = ["Atas Nama", "Akaun Atas Nama", "Payable To", "Nama Akaun", "Nama"];
+      let detectedAccName = "";
+      
+      for (const keyword of accNameKeywords) {
+        // Look for the keyword followed by a long name
+        const regex = new RegExp(`${keyword}\\s*(?::|-)?\\s*([A-Z0-9][-A-Z0-9\\s]{5,80})`, "i");
+        const match = cleanText.match(regex);
+        if (match) {
+          detectedAccName = match[1].toUpperCase().trim();
+          break;
+        }
+      }
+      
+      // Proximity logic: If no name found, look at the text around the account number
+      if (!detectedAccName && accMatch) {
+         const accIdx = cleanText.replace(/[-\s]/g, '').indexOf(accMatch[0]);
+         const aroundText = cleanText.substring(Math.max(0, accIdx - 50), Math.min(cleanText.length, accIdx + 100));
+         const longCapsMatch = aroundText.match(/[A-Z]{4,}(?:\s[A-Z0-9]{2,}){2,}/g);
+         if (longCapsMatch) detectedAccName = longCapsMatch[0].trim();
+      }
+
       const isLestari = cleanText.toLowerCase().includes('lestari');
       const isHazelton = cleanText.toLowerCase().includes('hazel');
       setExtractedType(isHazelton ? 'hazelton' : isLestari ? 'lestari' : null);
@@ -227,7 +249,7 @@ export default function SubmitPage() {
           (f.elements.namedItem('bank_name') as HTMLInputElement).value = "Bank Islam";
           (f.elements.namedItem('contact_name') as HTMLInputElement).value = "Tuan Haji Azman Zainal";
           (f.elements.namedItem('contact_phone') as HTMLInputElement).value = "019-2761616";
-          (f.elements.namedItem('acc_name') as HTMLInputElement).value = "PENDUDUK SURAU HAZELTON";
+          (f.elements.namedItem('acc_name') as HTMLInputElement).value = "JAWATANKUASA PENAJA PEMBINAAN SURAU HAZELTON ECO FOREST";
           (f.elements.namedItem('state') as HTMLSelectElement).value = "Selangor";
           (f.elements.namedItem('district') as HTMLInputElement).value = "Semenyih";
           (f.elements.namedItem('address') as HTMLTextAreaElement).value = "Hazelton, Eco Forest, Semenyih, Selangor.";
@@ -241,7 +263,7 @@ export default function SubmitPage() {
           (f.elements.namedItem('contact_name') as HTMLInputElement).value = detectedContactName || "Wakil Institusi";
           (f.elements.namedItem('acc_number') as HTMLInputElement).value = accMatch ? accMatch[0] : "";
           (f.elements.namedItem('bank_name') as HTMLInputElement).value = bankFound || "";
-          (f.elements.namedItem('acc_name') as HTMLInputElement).value = detectedName || "";
+          (f.elements.namedItem('acc_name') as HTMLInputElement).value = detectedAccName || detectedName || "";
           if (addressMatch) (f.elements.namedItem('address') as HTMLTextAreaElement).value = addressMatch[0];
           (f.elements.namedItem('target_amount') as HTMLInputElement).value = targetAmount;
           if (phoneMatch) (f.elements.namedItem('contact_phone') as HTMLInputElement).value = phoneMatch[0];
