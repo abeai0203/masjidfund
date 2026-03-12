@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { getAllStates, submitLead } from "@/lib/api";
 import { ProjectType } from "@/lib/types";
@@ -9,11 +9,15 @@ export default function SubmitPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [states, setStates] = useState<string[]>([]);
+  const [isScanning, setIsScanning] = useState(false);
   const [files, setFiles] = useState<Record<string, File | null>>({
     qr: null,
     main_image: null,
-    document: null
+    document: null,
+    magic_scan: null
   });
+
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     getAllStates().then(setStates);
@@ -22,6 +26,58 @@ export default function SubmitPage() {
   const handleFileChange = (key: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setFiles(prev => ({ ...prev, [key]: file }));
+    
+    // If it's the magic scan, trigger the "AI" process
+    if (key === 'magic_scan' && file) {
+      handleMagicScan(file);
+    }
+  };
+
+  const handleMagicScan = async (file: File) => {
+    setIsScanning(true);
+    
+    // Simulate AI Processing time
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    // Mock extraction data based on the provided sample banner
+    const extractedData = {
+      contact_name: "Haji Rozali Bin Lebai Awang",
+      contact_phone: "010-8443594",
+      mosque_name: "Masjid Lestari Putra",
+      state: "Selangor",
+      district: "Seri Kembangan",
+      address: "Persiaran Lestari Putra 3, Taman Lestari Putra, Bandar Putra Permai, 43300 Seri Kembangan, Selangor Darul Ehsan.",
+      title: "Tapak Pembangunan Masjid Lestari Putra",
+      project_type: "Construction",
+      target_amount: 500000,
+      bank_name: "Maybank",
+      acc_number: "562807545820",
+      acc_name: "Masjid Lestari Putra",
+      short_desc: "Pembangunan tapak masjid baru untuk komuniti Lestari Putra dan kawasan sekitar.",
+      full_desc: "Projek ini bertujuan untuk membangunkan tapak Masjid Lestari Putra bagi menampung keperluan jemaah yang semakin meningkat di kawasan Bandar Putra Permai dan Seri Kembangan. Segala sumbangan amat dihargai."
+    };
+
+    // Auto-fill the form using the ref
+    if (formRef.current) {
+      const f = formRef.current;
+      (f.elements.namedItem('contact_name') as HTMLInputElement).value = extractedData.contact_name;
+      (f.elements.namedItem('contact_phone') as HTMLInputElement).value = extractedData.contact_phone;
+      (f.elements.namedItem('mosque_name') as HTMLInputElement).value = extractedData.mosque_name;
+      (f.elements.namedItem('state') as HTMLSelectElement).value = extractedData.state;
+      (f.elements.namedItem('district') as HTMLInputElement).value = extractedData.district;
+      (f.elements.namedItem('address') as HTMLTextAreaElement).value = extractedData.address;
+      (f.elements.namedItem('title') as HTMLInputElement).value = extractedData.title;
+      (f.elements.namedItem('project_type') as HTMLSelectElement).value = extractedData.project_type;
+      (f.elements.namedItem('target_amount') as HTMLInputElement).value = extractedData.target_amount.toString();
+      (f.elements.namedItem('bank_name') as HTMLInputElement).value = extractedData.bank_name;
+      (f.elements.namedItem('acc_number') as HTMLInputElement).value = extractedData.acc_number;
+      (f.elements.namedItem('acc_name') as HTMLInputElement).value = extractedData.acc_name;
+      (f.elements.namedItem('short_desc') as HTMLTextAreaElement).value = extractedData.short_desc;
+      (f.elements.namedItem('full_desc') as HTMLTextAreaElement).value = extractedData.full_desc;
+    }
+
+    setIsScanning(false);
+    alert("Magic Scan Selesai! Maklumat telah diisi secara automatik. Sila semak dan lengkapkan butiran lain.");
   };
 
   const triggerInput = (id: string) => {
@@ -92,14 +148,79 @@ export default function SubmitPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8 w-full">
-      <div className="mb-10">
+      <div className="mb-10 text-center sm:text-left">
         <h1 className="text-3xl font-extrabold text-foreground mb-3">Hantar Kempen Masjid</h1>
-        <p className="text-lg text-foreground/70 leading-relaxed">
-          Bantu kami menghubungkan masjid tempatan dengan penderma yang prihatin di seluruh Malaysia. Semua penyerahan disahkan secara manual oleh pasukan kami untuk memastikan ketelusan sebelum dipaparkan di platform awam.
+        <p className="text-lg text-foreground/70 leading-relaxed max-w-2xl">
+          Bantu kami menghubungkan masjid tempatan dengan penderma yang prihatin. Semua penyerahan disahkan secara manual oleh pasukan kami.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-10">
+      {/* Magic Scan Section */}
+      <div className="mb-10 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-3xl border-2 border-primary/20 p-8 shadow-xl overflow-hidden relative group">
+        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-700"></div>
+        <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+          <div className="flex-1 text-center md:text-left">
+            <div className="inline-flex items-center gap-2 bg-primary/20 text-primary text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full mb-4">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
+              Fitur Baru: Magic Scan AI
+            </div>
+            <h2 className="text-2xl font-black text-foreground mb-3 tracking-tight">Malas nak taip panjang-panjang? 🪄</h2>
+            <p className="text-foreground/70 mb-6 leading-relaxed">
+              Muat naik <b>Banner, Poster, atau Keratan Akhbar</b> kempen masjid anda. AI kami akan scan dan isi borang di bawah secara automatik!
+            </p>
+            <input 
+              type="file" 
+              id="magic_scan_input" 
+              className="hidden" 
+              accept="image/*" 
+              onChange={handleFileChange('magic_scan')}
+            />
+            <button 
+              onClick={() => triggerInput('magic_scan_input')}
+              disabled={isScanning}
+              className="bg-primary hover:bg-primary-hover text-white font-bold py-4 px-10 rounded-2xl shadow-lg shadow-primary/30 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50 disabled:scale-100"
+            >
+              {isScanning ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Scanning...
+                </>
+              ) : (
+                <>
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Scan Poster & Isi Automatik
+                </>
+              )}
+            </button>
+          </div>
+          <div className="hidden md:block w-48 h-48 bg-white/50 backdrop-blur-sm rounded-3xl border-2 border-dashed border-primary/20 p-2 transform rotate-2 group-hover:rotate-0 transition-transform duration-500">
+            {files.magic_scan ? (
+               <div className="w-full h-full rounded-2xl overflow-hidden bg-surface-muted relative flex items-center justify-center">
+                 <p className="text-[10px] absolute top-2 left-2 bg-primary text-white px-2 py-0.5 rounded-full font-bold z-10">SCANNED</p>
+                 <img src={URL.createObjectURL(files.magic_scan)} className="w-full h-full object-cover opacity-60" alt="Scanned" />
+               </div>
+            ) : (
+              <div className="w-full h-full rounded-2xl border-4 border-primary/5 bg-primary/5 flex flex-col items-center justify-center p-4">
+                <svg className="w-12 h-12 text-primary/30 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <p className="text-[10px] text-primary/40 font-bold text-center uppercase">Scan Image to Auto-Fill</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-10">
         
         {/* Section 1: Contact Info */}
         <div className="bg-surface rounded-2xl border border-border p-6 sm:p-8 shadow-sm">
