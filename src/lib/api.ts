@@ -23,8 +23,9 @@ export async function getAllStates(): Promise<string[]> {
     .select('state')
     .eq('publish_status', 'Published');
     
-  if (error || !data) {
-    return [];
+  if (error || !data || data.length === 0) {
+    // Fallback: derive states from mock data
+    return Array.from(new Set(MOCK_PROJECTS.map(p => p.state))).sort();
   }
   const states = new Set(data.map(p => p.state));
   return Array.from(states).sort();
@@ -37,9 +38,9 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
     .eq('slug', slug)
     .single();
     
-  if (error) {
-    console.error("Error fetching project by slug:", error.message);
-    return null;
+  if (error || !data) {
+    // Fallback: find in mock data
+    return MOCK_PROJECTS.find(p => p.slug === slug) || null;
   }
   return data as Project;
 }
@@ -52,8 +53,9 @@ export async function getProjectsByState(state: string): Promise<Project[]> {
     .ilike('state', state)
     .order('created_at', { ascending: false });
     
-  if (error) {
-    return [];
+  if (error || !data || data.length === 0) {
+    // Fallback: filter mock data by state
+    return MOCK_PROJECTS.filter(p => p.state.toLowerCase() === state.toLowerCase());
   }
   return data as Project[];
 }

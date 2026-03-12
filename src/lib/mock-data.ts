@@ -21,7 +21,7 @@ export const MOCK_PROJECTS: Project[] = [
     bank_name: "Maybank",
     account_name: "Bendahari Masjid Al-Hidayah",
     account_number: "562106712345",
-    image_url: "https://images.unsplash.com/photo-1542332213-9b5a5a3fad35?auto=format&fit=crop&q=80&w=800"
+    image_url: "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?auto=format&fit=crop&q=80&w=800"
   },
   {
     slug: "surau-at-taqwa-ipoh-renovasi",
