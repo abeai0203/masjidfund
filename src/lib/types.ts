@@ -50,4 +50,5 @@ export interface Lead {
   detected_acc_number?: string;
   detected_acc_name?: string;
   detected_project_type?: ProjectType;
+  image_url?: string;
 }

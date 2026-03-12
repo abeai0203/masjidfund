@@ -346,6 +346,7 @@ export default function SubmitPage() {
         detected_bank_name: formData.get('bank_name') as string,
         detected_acc_number: formData.get('acc_number') as string,
         detected_acc_name: formData.get('acc_name') as string,
+        image_url: files.main_image ? URL.createObjectURL(files.main_image) : undefined,
         notes: `Lokasi: ${formData.get('district')}, ${formData.get('state')}\nAlamat: ${formData.get('address')}\n\nCerita Penuh: ${formData.get('full_desc')}\n\nSasaran: RM${formData.get('target_amount')}\nHubungi: ${formData.get('contact_name')} (${formData.get('contact_phone')})\n\n[Extracted via Magic Scan]`
       });
       setIsSubmitting(false);
