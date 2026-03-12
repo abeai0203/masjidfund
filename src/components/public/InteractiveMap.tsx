@@ -112,7 +112,7 @@ export default function InteractiveMap() {
         </div>
 
         {/* The Map Component */}
-        <div className="relative w-full aspect-[21/9] bg-slate-50/50 rounded-[40px] border border-slate-100 overflow-hidden shadow-inner">
+        <div className="relative w-full aspect-[21/9] min-h-[500px] md:min-h-0 bg-slate-50/50 rounded-[40px] border border-slate-100 overflow-hidden shadow-inner">
            
            {/* SVG Map Container for Zooming */}
            <div 
