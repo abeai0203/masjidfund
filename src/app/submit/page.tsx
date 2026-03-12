@@ -5,6 +5,8 @@ import Link from "next/link";
 import { getAllStates, submitLead } from "@/lib/api";
 import { ProjectType } from "@/lib/types";
 
+import Tesseract from 'tesseract.js';
+
 export default function SubmitPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -31,86 +33,62 @@ export default function SubmitPage() {
     setFiles(prev => ({ ...prev, magic_scan: file }));
     setMagicScanPreview(URL.createObjectURL(file));
     
-    // Simulate AI Processing time
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // Robust detection logic
-    const fileName = file.name.toLowerCase();
-    const size = file.size;
-    
-    // Heuristics based on the uploaded files
-    // Hazelton: ~243kb, Lestari: ~150kb
-    let type: 'lestari' | 'hazelton' = 'lestari'; // Default to lestari
-    
-    if (fileName.includes('hazel') || fileName.includes('surau') || size > 200000) {
-      type = 'hazelton';
-    } else {
-      type = 'lestari';
+    try {
+      // 1. Perform Real OCR using Tesseract.js
+      const { data: { text } } = await Tesseract.recognize(file, 'eng+msy', {
+        logger: m => console.log(m)
+      });
+
+      console.log("OCR Extracted Text:", text);
+
+      // 2. Extract Data using Regex
+      const accNumberMatch = text.replace(/[-\s]/g, '').match(/\d{10,16}/);
+      const phoneMatch = text.match(/01\d-?\d{7,8}/);
+      
+      const banks = ["Maybank", "CIMB", "Bank Islam", "RHB", "Public Bank", "AmBank", "Hong Leong", "BSN", "Alliance Bank"];
+      const bankFound = banks.find(b => text.toLowerCase().includes(b.toLowerCase()));
+
+      const mosqueMatch = text.match(/(Masjid|Surau)\s+([A-Za-z]+\s?[A-Za-z]+)/i);
+      
+      // Recognition for demo purposes (to keep the premium renders)
+      const isLestari = text.toLowerCase().includes('lestari');
+      const isHazelton = text.toLowerCase().includes('hazelton') || text.toLowerCase().includes('hazel');
+      const type = isHazelton ? 'hazelton' : isLestari ? 'lestari' : null;
+      setExtractedType(type);
+
+      // 3. Populate Form (Priority: OCR -> Fallback/Demo)
+      if (formRef.current) {
+        const f = formRef.current;
+        const mosqueName = mosqueMatch ? mosqueMatch[0] : (isLestari ? "Masjid Lestari Putra" : isHazelton ? "Surau Hazelton Eco Forest" : "");
+        
+        (f.elements.namedItem('mosque_name') as HTMLInputElement).value = mosqueName;
+        (f.elements.namedItem('acc_number') as HTMLInputElement).value = accNumberMatch ? accNumberMatch[0] : (isLestari ? "562807545820" : isHazelton ? "12195010033475" : "");
+        (f.elements.namedItem('bank_name') as HTMLInputElement).value = bankFound || (isLestari ? "Maybank" : isHazelton ? "Bank Islam" : "");
+        (f.elements.namedItem('contact_phone') as HTMLInputElement).value = phoneMatch ? phoneMatch[0] : (isLestari ? "010-8443594" : isHazelton ? "019-2761616" : "");
+        
+        // Fill other fields with defaults if recognized
+        if (isLestari || isHazelton) {
+          (f.elements.namedItem('state') as HTMLSelectElement).value = "Selangor";
+          (f.elements.namedItem('district') as HTMLInputElement).value = isLestari ? "Seri Kembangan" : "Semenyih";
+          (f.elements.namedItem('project_type') as HTMLSelectElement).value = "Construction";
+          (f.elements.namedItem('target_amount') as HTMLInputElement).value = isLestari ? "500000" : "1000000";
+        }
+      }
+
+      setFiles(prev => ({ 
+        ...prev, 
+        qr: file, 
+        main_image: file 
+      }));
+
+      setIsScanning(false);
+      alert(`Magic Scan Selesai! ✅\n\nAI telah membaca teks dari imej anda.\n\n- Dikesan: ${mosqueMatch ? mosqueMatch[0] : 'Nama Institusi'}\n- Akaun: ${accNumberMatch ? accNumberMatch[0] : 'No Akaun'}\n- Bank: ${bankFound || 'Nama Bank'}`);
+
+    } catch (error) {
+      console.error("OCR Error:", error);
+      setIsScanning(false);
+      alert("Maaf, ralat semasa memproses imej. Sila isi secara manual.");
     }
-    
-    setExtractedType(type);
-
-    const extractedData = type === 'lestari' ? {
-      contact_name: "Haji Rozali Bin Lebai Awang",
-      contact_phone: "010-8443594",
-      mosque_name: "Masjid Lestari Putra",
-      state: "Selangor",
-      district: "Seri Kembangan",
-      address: "Persiaran Lestari Putra 3, Taman Lestari Putra, Bandar Putra Permai, 43300 Seri Kembangan, Selangor Darul Ehsan.",
-      title: "Tapak Pembangunan Masjid Lestari Putra",
-      project_type: "Construction",
-      target_amount: 500000,
-      bank_name: "Maybank",
-      acc_number: "562807545820",
-      acc_name: "MASJID LESTARI PUTRA",
-      short_desc: "Pembangunan tapak masjid baru untuk komuniti Lestari Putra dan kawasan sekitar.",
-      full_desc: "Projek ini bertujuan untuk membangunkan tapak Masjid Lestari Putra bagi menampung keperluan jemaah yang semakin meningkat di kawasan Bandar Putra Permai dan Seri Kembangan. Segala sumbangan amat dihargai."
-    } : {
-      contact_name: "Tuan Haji Azman Zainal",
-      contact_phone: "019-2761616",
-      mosque_name: "Surau Hazelton Eco Forest",
-      state: "Selangor",
-      district: "Semenyih",
-      address: "Semenyih, Selangor",
-      title: "Sumbangan Pembinaan Surau Hazelton Eco Forest",
-      project_type: "Construction",
-      target_amount: 1000000,
-      bank_name: "Bank Islam",
-      acc_number: "12195010033475",
-      acc_name: "JAWATANKUASA PENAJA PEMBINAAN SURAU HAZELTON ECO FOREST",
-      short_desc: "Pembinaan surau baru yang moden dan lestari untuk komuniti Hazelton Eco Forest.",
-      full_desc: "Mari berwakaf RM1 untuk pembinaan Surau Hazelton Eco Forest. Dana ini akan digunakan sepenuhnya untuk menyiapkan struktur bangunan surau bagi kemudahan penduduk setempat di Semenyih."
-    };
-
-    // Auto-fill the form using the ref
-    if (formRef.current) {
-      const f = formRef.current;
-      (f.elements.namedItem('contact_name') as HTMLInputElement).value = extractedData.contact_name;
-      (f.elements.namedItem('contact_phone') as HTMLInputElement).value = extractedData.contact_phone;
-      (f.elements.namedItem('mosque_name') as HTMLInputElement).value = extractedData.mosque_name;
-      (f.elements.namedItem('state') as HTMLSelectElement).value = extractedData.state;
-      (f.elements.namedItem('district') as HTMLInputElement).value = extractedData.district;
-      (f.elements.namedItem('address') as HTMLTextAreaElement).value = extractedData.address;
-      (f.elements.namedItem('title') as HTMLInputElement).value = extractedData.title;
-      (f.elements.namedItem('project_type') as HTMLSelectElement).value = extractedData.project_type;
-      (f.elements.namedItem('target_amount') as HTMLInputElement).value = extractedData.target_amount.toString();
-      (f.elements.namedItem('bank_name') as HTMLInputElement).value = extractedData.bank_name;
-      (f.elements.namedItem('acc_number') as HTMLInputElement).value = extractedData.acc_number;
-      (f.elements.namedItem('acc_name') as HTMLInputElement).value = extractedData.acc_name;
-      (f.elements.namedItem('method_type') as HTMLSelectElement).value = "Both";
-      (f.elements.namedItem('short_desc') as HTMLTextAreaElement).value = extractedData.short_desc;
-      (f.elements.namedItem('full_desc') as HTMLTextAreaElement).value = extractedData.full_desc;
-    }
-
-    // Assign extracted images
-    setFiles(prev => ({ 
-      ...prev, 
-      qr: file, 
-      main_image: file 
-    }));
-
-    setIsScanning(false);
-    alert(`Magic Scan Selesai! ✅\n\n- Institusi: ${extractedData.mosque_name}\n- Bank: ${extractedData.bank_name}\n- Akaun: ${extractedData.acc_number}\n\nMaklumat dikesan dan telah diisi secara automatik.`);
   };
 
   const triggerInput = (id: string) => {
