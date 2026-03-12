@@ -2,6 +2,8 @@ import Link from "next/link";
 import { getProjectsByState } from "@/lib/api";
 import ProjectCard from "@/components/public/ProjectCard";
 
+export const runtime = 'edge';
+
 export default async function StateProjectsPage({ params }: { params: Promise<{ state: string }> }) {
   const resolvedParams = await params;
   const stateParam = decodeURIComponent(resolvedParams.state);
