@@ -4,7 +4,7 @@ export const runtime = 'edge';
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
-import { getLeadById } from "@/lib/api";
+import { getLeadById, updateLeadStatus } from "@/lib/api";
 import { Lead } from "@/lib/types";
 import StatusPill from "@/components/admin/StatusPill";
 
@@ -12,11 +12,14 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   const router = useRouter();
   const [lead, setLead] = useState<Lead | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [notes, setNotes] = useState("");
+  const [isActing, setIsActing] = useState(false);
 
   useEffect(() => {
     params.then(resolved => {
       getLeadById(resolved.id).then(data => {
         setLead(data);
+        setNotes(data?.notes || "");
         setIsLoading(false);
       });
     });
@@ -25,12 +28,18 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   if (isLoading) return <div>Memuatkan...</div>;
   if (!lead) return notFound();
 
-
-
-  const handleAction = (action: string) => {
-    // In a real app we'd call an API here. Let's just mock router push for this UI workflow.
-    const actionMsg = action === "Draft Project Generated" ? "Draf Projek Dicipta" : action === "Needs Manual Check" ? "Semakan Manual Diperlukan" : "Ditolak";
-    alert(`Tindakan MOCK: Lead ditandakan sebagai ${actionMsg}.`);
+  const handleAction = async (action: string) => {
+    setIsActing(true);
+    const resolvedParams = await params;
+    
+    // Actions: Draft Project Generated (Approved), Needs Manual Check, Rejected
+    let status = action === "Rejected" ? "Rejected" : action === "Needs Manual Check" ? "Needs Manual Check" : "Approved";
+    
+    await updateLeadStatus(resolvedParams.id, status, notes);
+    
+    setIsActing(false);
+    const actionMsg = status === "Approved" ? "Diluluskan & Draf Projek Dicipta" : status === "Needs Manual Check" ? "Semakan Manual Diperlukan" : "Ditolak";
+    alert(`Berjaya: Lead ditandakan sebagai ${actionMsg}.`);
     router.push('/admin/leads');
   };
 
@@ -118,7 +127,8 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                 className="w-full bg-surface-muted border border-border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-foreground/40"
                 rows={4}
                 placeholder="Tambah nota dalaman untuk penyemak lain..."
-                defaultValue={lead.notes || ""}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
               ></textarea>
             </div>
           </div>
@@ -128,21 +138,24 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
             <div className="space-y-3">
               <button 
                 onClick={() => handleAction("Draft Project Generated")}
-                className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-2 px-4 rounded-lg transition-colors shadow-sm"
+                disabled={isActing}
+                className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-2 px-4 rounded-lg transition-colors shadow-sm disabled:opacity-50"
               >
-                Luluskan & Cipta Draf
+                {isActing ? "Memproses..." : "Luluskan & Cipta Draf"}
               </button>
               <button 
                 onClick={() => handleAction("Needs Manual Check")}
-                className="w-full bg-orange-100 hover:bg-orange-200 border border-orange-200 text-orange-800 font-medium py-2 px-4 rounded-lg transition-colors"
+                disabled={isActing}
+                className="w-full bg-orange-100 hover:bg-orange-200 border border-orange-200 text-orange-800 font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
               >
-                Tandakan untuk Semakan Manual
+                {isActing ? "Memproses..." : "Tandakan untuk Semakan Manual"}
               </button>
               <button 
                 onClick={() => handleAction("Rejected")}
-                className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 font-medium py-2 px-4 rounded-lg transition-colors"
+                disabled={isActing}
+                className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
               >
-                Tolak Lead
+                {isActing ? "Memproses..." : "Tolak Lead"}
               </button>
             </div>
           </div>

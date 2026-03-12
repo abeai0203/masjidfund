@@ -4,9 +4,9 @@ export const runtime = 'edge';
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
+import { getProjectBySlug, updateProject } from "@/lib/api";
+import { Project, ProjectType } from "@/lib/types";
 import StatusPill from "@/components/admin/StatusPill";
-import { getProjectBySlug } from "@/lib/api";
-import { Project } from "@/lib/types";
 
 export default function ProjectEditPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -26,16 +26,43 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
   if (isLoading) return <div>Memuatkan...</div>;
   if (!project) return notFound();
 
-  const handleSave = (e: React.FormEvent, isPublish: boolean) => {
+  const handleSave = async (e: React.FormEvent, isPublish: boolean) => {
     e.preventDefault();
+    if (!project) return;
     setIsSaving(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const updates: Partial<Project> = {
+      title: formData.get('title') as string,
+      mosque_name: formData.get('mosque_name') as string,
+      project_type: formData.get('project_type') as ProjectType,
+      state: formData.get('state') as string,
+      district: formData.get('district') as string,
+      short_description: formData.get('short_description') as string,
+      full_description: formData.get('full_description') as string,
+      image_url: formData.get('image_url') as string,
+      verification_status: formData.get('verification_status') as any,
+      target_amount: Number(formData.get('target_amount')),
+      collected_amount: Number(formData.get('collected_amount')),
+      needs_donation: formData.get('needs_donation') === 'on',
+      donation_method_type: formData.get('donation_method_type') as any,
+      bank_name: formData.get('bank_name') as string,
+      account_number: formData.get('account_number') as string,
+      account_name: formData.get('account_name') as string,
+      duitnow_qr_url: formData.get('duitnow_qr_url') as string,
+      publish_status: isPublish ? 'Published' : 'Draft'
+    };
+
+    try {
+      await updateProject(project.slug, updates);
       setIsSaving(false);
-      alert(`Simpanan MOCK: Projek ${isPublish ? "diterbitkan" : "disimpan sebagai draf"}.`);
+      alert(`Berjaya: Projek telah ${isPublish ? "diterbitkan" : "disimpan sebagai draf"}.`);
       router.push('/admin/projects');
-    }, 600);
+    } catch (error) {
+      console.error("Failed to update project", error);
+      setIsSaving(false);
+      alert("Gagal mengemaskini projek. Sila cuba lagi.");
+    }
   };
 
   return (
@@ -67,6 +94,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-foreground/80 mb-2">Tajuk Kempen</label>
               <input 
+                name="title"
                 type="text" 
                 defaultValue={project.title}
                 className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -76,6 +104,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             <div>
               <label className="block text-sm font-semibold text-foreground/80 mb-2">Nama Masjid</label>
               <input 
+                name="mosque_name"
                 type="text" 
                 defaultValue={project.mosque_name}
                 className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -85,6 +114,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             <div>
               <label className="block text-sm font-semibold text-foreground/80 mb-2">Jenis Projek</label>
               <select 
+                name="project_type"
                 defaultValue={project.project_type}
                 className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               >
@@ -98,6 +128,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             <div>
               <label className="block text-sm font-semibold text-foreground/80 mb-2">Negeri</label>
               <input 
+                name="state"
                 type="text" 
                 defaultValue={project.state}
                 className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -107,6 +138,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             <div>
               <label className="block text-sm font-semibold text-foreground/80 mb-2">Daerah / Kawasan</label>
               <input 
+                name="district"
                 type="text" 
                 defaultValue={project.district}
                 className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -122,6 +154,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             <div>
               <label className="block text-sm font-semibold text-foreground/80 mb-2">Ringkasan pendek (untuk kad)</label>
               <textarea 
+                name="short_description"
                 defaultValue={project.short_description}
                 rows={2}
                 maxLength={150}
@@ -133,6 +166,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             <div>
               <label className="block text-sm font-semibold text-foreground/80 mb-2">Cerita Penuh / Penerangan</label>
               <textarea 
+                name="full_description"
                 defaultValue={project.full_description}
                 rows={8}
                 className="w-full bg-surface-muted border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -142,6 +176,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             <div>
                <label className="block text-sm font-semibold text-foreground/80 mb-2">URL Imej Pengepala</label>
               <input 
+                name="image_url"
                 type="url" 
                 defaultValue={project.image_url}
                 className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -160,6 +195,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
               <div>
                 <label className="block text-sm font-semibold text-foreground/80 mb-2">Tahap Status</label>
                 <select 
+                  name="verification_status"
                   defaultValue={project.verification_status}
                   className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
@@ -179,6 +215,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
               <div>
                 <label className="block text-sm font-semibold text-foreground/80 mb-2">Jumlah Sasaran (RM)</label>
                 <input 
+                  name="target_amount"
                   type="number" 
                   defaultValue={project.target_amount}
                   className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -187,6 +224,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
               <div>
                 <label className="block text-sm font-semibold text-foreground/80 mb-2">Dikumpul (RM)</label>
                 <input 
+                  name="collected_amount"
                   type="number" 
                   defaultValue={project.collected_amount}
                   className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -196,6 +234,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
               <div className="col-span-2 pt-2 border-t border-border mt-2">
                  <label className="flex items-center space-x-3 cursor-pointer">
                   <input 
+                    name="needs_donation"
                     type="checkbox" 
                     defaultChecked={project.needs_donation}
                     className="w-5 h-5 rounded border-border text-primary focus:ring-primary/50 bg-surface-muted" 
@@ -214,6 +253,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
               <div className="md:col-span-2">
                 <label className="block text-sm font-semibold text-foreground/80 mb-2">Modaliti Aktif</label>
                 <select 
+                  name="donation_method_type"
                   defaultValue={project.donation_method_type}
                   className="w-full md:w-1/2 bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
@@ -226,6 +266,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
               <div>
                 <label className="block text-sm font-semibold text-foreground/80 mb-2">Nama Bank</label>
                 <input 
+                  name="bank_name"
                   type="text" 
                   defaultValue={project.bank_name}
                   className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -235,6 +276,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
               <div>
                 <label className="block text-sm font-semibold text-foreground/80 mb-2">Nombor Akaun</label>
                 <input 
+                  name="account_number"
                   type="text" 
                   defaultValue={project.account_number}
                   className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -244,6 +286,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
               <div className="md:col-span-2">
                 <label className="block text-sm font-semibold text-foreground/80 mb-2">Nama Akaun Berdaftar</label>
                 <input 
+                  name="account_name"
                   type="text" 
                   defaultValue={project.account_name}
                   className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -253,6 +296,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
               <div className="md:col-span-2">
                 <label className="block text-sm font-semibold text-foreground/80 mb-2">URL Imej DuitNow QR</label>
                 <input 
+                  name="duitnow_qr_url"
                   type="url" 
                   defaultValue={project.duitnow_qr_url}
                   className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
