@@ -29,65 +29,80 @@ export default function SubmitPage() {
   }, []);
 
   const handleMagicScan = async (file: File) => {
+    if (isScanning) return;
+    
     setIsScanning(true);
     setFiles(prev => ({ ...prev, magic_scan: file }));
-    setMagicScanPreview(URL.createObjectURL(file));
+    const previewUrl = URL.createObjectURL(file);
+    setMagicScanPreview(previewUrl);
     
     try {
-      // 1. Perform Real OCR using Tesseract.js
-      const { data: { text } } = await Tesseract.recognize(file, 'eng+msy', {
-        logger: m => console.log(m)
+      console.log("Starting OCR for:", file.name);
+      
+      // Use a timeout to prevent "infinite" looping if OCR hangs
+      const ocrTask = Tesseract.recognize(file, 'eng+msa', {
+        logger: m => {
+          if (m.status === 'recognizing text') {
+            console.log(`Scan Progress: ${Math.round(m.progress * 100)}%`);
+          }
+        }
       });
 
-      console.log("OCR Extracted Text:", text);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("OCR Timeout")), 15000)
+      );
 
-      // 2. Extract Data using Regex
-      const accNumberMatch = text.replace(/[-\s]/g, '').match(/\d{10,16}/);
+      const { data: { text } } = await (Promise.race([ocrTask, timeoutPromise]) as Promise<any>);
+
+      console.log("OCR Result:", text);
+
+      // Clean text for better matching
+      const cleanText = text.replace(/\n/g, ' ').replace(/\s+/g, ' ');
+
+      // 1. Extract Account Number (10-14 digits usually)
+      const accMatch = text.replace(/[-\s]/g, '').match(/\d{10,16}/);
+      
+      // 2. Extract Phone Number
       const phoneMatch = text.match(/01\d-?\d{7,8}/);
       
+      // 3. Extract Bank Name
       const banks = ["Maybank", "CIMB", "Bank Islam", "RHB", "Public Bank", "AmBank", "Hong Leong", "BSN", "Alliance Bank"];
       const bankFound = banks.find(b => text.toLowerCase().includes(b.toLowerCase()));
 
-      const mosqueMatch = text.match(/(Masjid|Surau)\s+([A-Za-z]+\s?[A-Za-z]+)/i);
+      // 4. Extract Mosque/Surau Name
+      const mosqueMatch = text.match(/(Masjid|Surau)\s+([A-Z][A-Z\s]+)/i);
       
-      // Recognition for demo purposes (to keep the premium renders)
+      // Identify demo project for premium visuals
       const isLestari = text.toLowerCase().includes('lestari');
       const isHazelton = text.toLowerCase().includes('hazelton') || text.toLowerCase().includes('hazel');
-      const type = isHazelton ? 'hazelton' : isLestari ? 'lestari' : null;
-      setExtractedType(type);
+      setExtractedType(isHazelton ? 'hazelton' : isLestari ? 'lestari' : null);
 
-      // 3. Populate Form (Priority: OCR -> Fallback/Demo)
       if (formRef.current) {
         const f = formRef.current;
-        const mosqueName = mosqueMatch ? mosqueMatch[0] : (isLestari ? "Masjid Lestari Putra" : isHazelton ? "Surau Hazelton Eco Forest" : "");
+        if (mosqueMatch) (f.elements.namedItem('mosque_name') as HTMLInputElement).value = mosqueMatch[0].trim();
+        if (accMatch) (f.elements.namedItem('acc_number') as HTMLInputElement).value = accMatch[0];
+        if (bankFound) (f.elements.namedItem('bank_name') as HTMLInputElement).value = bankFound;
+        if (phoneMatch) (f.elements.namedItem('contact_phone') as HTMLInputElement).value = phoneMatch[0];
         
-        (f.elements.namedItem('mosque_name') as HTMLInputElement).value = mosqueName;
-        (f.elements.namedItem('acc_number') as HTMLInputElement).value = accNumberMatch ? accNumberMatch[0] : (isLestari ? "562807545820" : isHazelton ? "12195010033475" : "");
-        (f.elements.namedItem('bank_name') as HTMLInputElement).value = bankFound || (isLestari ? "Maybank" : isHazelton ? "Bank Islam" : "");
-        (f.elements.namedItem('contact_phone') as HTMLInputElement).value = phoneMatch ? phoneMatch[0] : (isLestari ? "010-8443594" : isHazelton ? "019-2761616" : "");
-        
-        // Fill other fields with defaults if recognized
-        if (isLestari || isHazelton) {
+        // Auto-fill context if it's one of our demo cases for a better experience
+        if (isLestari) {
+          if (!mosqueMatch) (f.elements.namedItem('mosque_name') as HTMLInputElement).value = "Masjid Lestari Putra";
           (f.elements.namedItem('state') as HTMLSelectElement).value = "Selangor";
-          (f.elements.namedItem('district') as HTMLInputElement).value = isLestari ? "Seri Kembangan" : "Semenyih";
-          (f.elements.namedItem('project_type') as HTMLSelectElement).value = "Construction";
-          (f.elements.namedItem('target_amount') as HTMLInputElement).value = isLestari ? "500000" : "1000000";
+          (f.elements.namedItem('district') as HTMLInputElement).value = "Seri Kembangan";
+        } else if (isHazelton) {
+          if (!mosqueMatch) (f.elements.namedItem('mosque_name') as HTMLInputElement).value = "Surau Hazelton Eco Forest";
+          (f.elements.namedItem('state') as HTMLSelectElement).value = "Selangor";
+          (f.elements.namedItem('district') as HTMLInputElement).value = "Semenyih";
         }
       }
 
-      setFiles(prev => ({ 
-        ...prev, 
-        qr: file, 
-        main_image: file 
-      }));
-
       setIsScanning(false);
-      alert(`Magic Scan Selesai! ✅\n\nAI telah membaca teks dari imej anda.\n\n- Dikesan: ${mosqueMatch ? mosqueMatch[0] : 'Nama Institusi'}\n- Akaun: ${accNumberMatch ? accNumberMatch[0] : 'No Akaun'}\n- Bank: ${bankFound || 'Nama Bank'}`);
+      alert("Magic Scan Selesai! ✅\n\nMaklumat dikesan dan telah diisi secara automatik. Sila semak semula butiran sebelum menghantar.");
 
     } catch (error) {
       console.error("OCR Error:", error);
       setIsScanning(false);
-      alert("Maaf, ralat semasa memproses imej. Sila isi secara manual.");
+      alert("Proses imej mengambil masa terlalu lama atau gagal. Sila isi maklumat secara manual.");
     }
   };
 
