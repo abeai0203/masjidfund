@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import ProjectCard from "@/components/public/ProjectCard";
+import InteractiveMap from "@/components/public/InteractiveMap";
 import { getPublicProjects, getAllStates } from "@/lib/api";
 import { Project } from "@/lib/types";
 
@@ -99,16 +100,22 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Browse by State */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-surface-muted border-t border-border">
-        <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-2xl font-bold text-foreground mb-8">Lihat Projek Mengikut Negeri</h2>
-          <div className="flex flex-wrap justify-center gap-3">
+      {/* Interactive Map Explorer */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-surface-muted border-t border-border overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-black text-foreground mb-4">Eksplorasi Dana Mengikut Negeri</h2>
+            <p className="text-foreground/60 max-w-xl mx-auto">Visualisasi dana yang diperlukan untuk pembangunan institusi Islam di seluruh Malaysia.</p>
+          </div>
+          
+          <InteractiveMap />
+          
+          <div className="mt-12 flex flex-wrap justify-center gap-3">
             {states.map(state => (
               <Link 
                 key={state} 
                 href={`/states/${state.toLowerCase()}`}
-                className="bg-surface border border-border hover:border-primary hover:text-primary px-6 py-2.5 rounded-full text-sm font-medium transition-all shadow-sm"
+                className="bg-white border border-border hover:border-primary hover:text-primary px-5 py-2 rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow-md"
               >
                 {state}
               </Link>
