@@ -45,7 +45,10 @@ export default function Footer() {
           <p className="text-xs text-foreground/60">
             &copy; {new Date().getFullYear()} MasjidFund. Hak cipta terpelihara.
           </p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
+          <div className="flex space-x-6 mt-4 md:mt-0 items-center">
+            <Link href="/admin" className="text-[10px] text-foreground/20 hover:text-primary transition-colors">
+              Pintu Masuk Admin
+            </Link>
             <Link href="/terms" className="text-xs text-foreground/60 hover:text-primary transition-colors">
               Syarat Perkhidmatan
             </Link>
