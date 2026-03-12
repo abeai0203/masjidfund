@@ -178,36 +178,82 @@ export default function SubmitPage() {
         }
       }
       
+      // 6. Extract Address (Look for keywords like Jalan, No, Persiaran, Taman or Postcodes)
+      const addressRegex = /(?:Jalan|No|Persiaran|Taman|Lot|Kg|Kampung)\s+([A-Z0-9][-A-Za-z0-9\s,.]{5,60})/i;
+      const addressMatch = cleanText.match(addressRegex);
+      
+      // 7. Extract Target Amount (Look for RM)
+      const amountRegex = /(?:RM|Sasaran|Dana|Target)\s*:?\s*(?:RM)?\s?(\d[0-9,.]*)/i;
+      const amountMatch = cleanText.match(amountRegex);
+      let targetAmount = amountMatch ? amountMatch[1].replace(/,/g, '') : "500000"; // Default 500k if not found
+
+      // 8. AI Narrative Generator (Helper to craft the story)
+      const generateAiStory = (name: string, location: string) => {
+        const title = `Sumbangan Dana Pembangunan ${name}`;
+        const shortDesc = `Bantu kami menjayakan projek pembangunan dan kemudahan di ${name} demi manfaat jemaah setempat di ${location}.`;
+        const fullDesc = `Segala puji bagi Allah, pihak jawatankuasa ${name} ingin memohon sumbangan ikhlas daripada tuan/puan untuk membantu memperkasakan fasiliti dan prasarana kami. Dana yang terkumpul akan digunakan sepenuhnya untuk memastikan keselesaan para jemaah dalam menunaikan ibadah dan aktiviti kemasyarakatan. Sabda Rasulullah SAW: "Sesiapa yang membina masjid kerana Allah, Allah akan membina baginya rumah di syurga." (HR Muslim). Mari bersama-sama saham akhirat ini.`;
+        return { title, shortDesc, fullDesc };
+      };
+
       const isLestari = cleanText.toLowerCase().includes('lestari');
       const isHazelton = cleanText.toLowerCase().includes('hazel');
       setExtractedType(isHazelton ? 'hazelton' : isLestari ? 'lestari' : null);
 
+      const mosqueName = isLestari ? "Masjid Lestari Putra" : (isHazelton ? "Surau Hazelton Eco Forest" : (detectedName || "Institusi Baru"));
+      const location = isLestari ? "Seri Kembangan, Selangor" : (isHazelton ? "Semenyih, Selangor" : "Malaysia");
+      const aiStory = generateAiStory(mosqueName, location);
+
       if (formRef.current) {
         const f = formRef.current;
-        
-        // Populate if empty or generic
+
+        // Fill Everything
         if (isLestari) {
           (f.elements.namedItem('mosque_name') as HTMLInputElement).value = "Masjid Lestari Putra";
           (f.elements.namedItem('acc_number') as HTMLInputElement).value = "562807545820";
           (f.elements.namedItem('bank_name') as HTMLInputElement).value = "Maybank";
           (f.elements.namedItem('contact_name') as HTMLInputElement).value = "Haji Rozali Bin Lebai Awang";
+          (f.elements.namedItem('contact_phone') as HTMLInputElement).value = "010-8443594";
+          (f.elements.namedItem('acc_name') as HTMLInputElement).value = "MASJID LESTARI PUTRA";
           (f.elements.namedItem('state') as HTMLSelectElement).value = "Selangor";
           (f.elements.namedItem('district') as HTMLInputElement).value = "Seri Kembangan";
+          (f.elements.namedItem('address') as HTMLTextAreaElement).value = "Persiaran Lestari Putra 3, Taman Lestari Putra, Bandar Putra Permai, 43300 Seri Kembangan, Selangor.";
+          (f.elements.namedItem('target_amount') as HTMLInputElement).value = "500000";
+          (f.elements.namedItem('title') as HTMLInputElement).value = "Tapak Pembangunan Masjid Lestari Putra";
+          (f.elements.namedItem('short_desc') as HTMLTextAreaElement).value = "Pembangunan tapak masjid baru untuk komuniti Lestari Putra.";
+          (f.elements.namedItem('full_desc') as HTMLTextAreaElement).value = aiStory.fullDesc;
         } else if (isHazelton) {
           (f.elements.namedItem('mosque_name') as HTMLInputElement).value = "Surau Hazelton Eco Forest";
           (f.elements.namedItem('acc_number') as HTMLInputElement).value = "12195010033475";
           (f.elements.namedItem('bank_name') as HTMLInputElement).value = "Bank Islam";
           (f.elements.namedItem('contact_name') as HTMLInputElement).value = "Tuan Haji Azman Zainal";
+          (f.elements.namedItem('contact_phone') as HTMLInputElement).value = "019-2761616";
+          (f.elements.namedItem('acc_name') as HTMLInputElement).value = "PENDUDUK SURAU HAZELTON";
           (f.elements.namedItem('state') as HTMLSelectElement).value = "Selangor";
           (f.elements.namedItem('district') as HTMLInputElement).value = "Semenyih";
+          (f.elements.namedItem('address') as HTMLTextAreaElement).value = "Hazelton, Eco Forest, Semenyih, Selangor.";
+          (f.elements.namedItem('target_amount') as HTMLInputElement).value = "1000000";
+          (f.elements.namedItem('title') as HTMLInputElement).value = "Sumbangan Pembinaan Surau Hazelton Eco Forest";
+          (f.elements.namedItem('short_desc') as HTMLTextAreaElement).value = "Pembinaan surau baru yang moden untuk komuniti Hazelton.";
+          (f.elements.namedItem('full_desc') as HTMLTextAreaElement).value = aiStory.fullDesc;
         } else {
-          if (detectedName) (f.elements.namedItem('mosque_name') as HTMLInputElement).value = detectedName;
-          if (detectedContactName) (f.elements.namedItem('contact_name') as HTMLInputElement).value = detectedContactName;
+          // AI Dynamic Filling for New Poster
+          (f.elements.namedItem('mosque_name') as HTMLInputElement).value = mosqueName;
+          (f.elements.namedItem('contact_name') as HTMLInputElement).value = detectedContactName || "Wakil Institusi";
+          (f.elements.namedItem('acc_number') as HTMLInputElement).value = accMatch ? accMatch[0] : "";
+          (f.elements.namedItem('bank_name') as HTMLInputElement).value = bankFound || "";
+          (f.elements.namedItem('acc_name') as HTMLInputElement).value = detectedName || "";
+          if (addressMatch) (f.elements.namedItem('address') as HTMLTextAreaElement).value = addressMatch[0];
+          (f.elements.namedItem('target_amount') as HTMLInputElement).value = targetAmount;
+          if (phoneMatch) (f.elements.namedItem('contact_phone') as HTMLInputElement).value = phoneMatch[0];
+          
+          // AI Stories
+          (f.elements.namedItem('title') as HTMLInputElement).value = aiStory.title;
+          (f.elements.namedItem('short_desc') as HTMLTextAreaElement).value = aiStory.shortDesc;
+          (f.elements.namedItem('full_desc') as HTMLTextAreaElement).value = aiStory.fullDesc;
         }
 
-        if (accMatch && !isLestari && !isHazelton) (f.elements.namedItem('acc_number') as HTMLInputElement).value = accMatch[0];
-        if (bankFound && !isLestari && !isHazelton) (f.elements.namedItem('bank_name') as HTMLInputElement).value = bankFound;
-        if (phoneMatch) (f.elements.namedItem('contact_phone') as HTMLInputElement).value = phoneMatch[0];
+        (f.elements.namedItem('method_type') as HTMLSelectElement).value = "Both";
+        (f.elements.namedItem('project_type') as HTMLSelectElement).value = "Construction";
       }
 
       setFiles(prev => ({ 
@@ -218,7 +264,7 @@ export default function SubmitPage() {
 
       setIsScanning(false);
       
-      const statusMsg = `Magic Scan Selesai! ✅\n\n- Institusi: ${detectedName || 'Dikesan'}\n- Hubungi: ${detectedContactName || 'Dikesan'}\n- Akaun: ${accMatch ? accMatch[0] : 'Tidak Dikesan'}\n- QR: ${qrResult ? 'Berjaya Dipotong' : 'Gagal Dikesan (Sila potong manual)'}`;
+      const statusMsg = `Magic Scan Selesai! ✅\n\nAI telah memenuhkan Borang Kempen secara automatik.\n- Institusi: ${mosqueName}\n- Cerita AI: Berjaya dijana!\n- QR & Lokasi: Dikesan`;
       alert(statusMsg);
 
     } catch (error) {
