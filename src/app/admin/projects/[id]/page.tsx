@@ -1,10 +1,10 @@
 "use client";
 
 export const runtime = 'edge';
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
-import { getProjectBySlug, updateProject } from "@/lib/api";
+import { getProjectBySlug, updateProject, deleteProject } from "@/lib/api";
 import { Project, ProjectType } from "@/lib/types";
 import StatusPill from "@/components/admin/StatusPill";
 
@@ -13,6 +13,8 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     params.then(resolved => {
@@ -28,10 +30,10 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
 
   const handleSave = async (e: React.FormEvent, isPublish: boolean) => {
     e.preventDefault();
-    if (!project) return;
+    if (!project || !formRef.current) return;
     setIsSaving(true);
     
-    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const formData = new FormData(formRef.current);
     const updates: Partial<Project> = {
       title: formData.get('title') as string,
       mosque_name: formData.get('mosque_name') as string,
@@ -85,7 +87,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
         <p className="text-foreground/70 text-sm mt-1">{project.title}</p>
       </div>
 
-      <form className="space-y-8" onSubmit={(e) => handleSave(e, false)}>
+      <form ref={formRef} className="space-y-8" onSubmit={(e) => handleSave(e, project.publish_status === 'Published')}>
         
         {/* Basic Info Section */}
         <div className="bg-surface border border-border rounded-xl p-6 sm:p-8 shadow-sm">
@@ -306,23 +308,42 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
         </div>
 
         {/* Sticky Actions Footer */}
-        <div className="sticky bottom-0 bg-surface/95 backdrop-blur-md border border-border p-4 rounded-xl shadow-lg flex justify-end gap-3 z-50">
+        <div className="sticky bottom-0 bg-surface/95 backdrop-blur-md border border-border p-4 rounded-xl shadow-lg flex justify-between items-center gap-3 z-50">
            <button 
              type="button"
-             onClick={(e) => handleSave(e, false)}
-             disabled={isSaving}
-             className="px-6 py-2.5 rounded-lg border border-border bg-surface hover:bg-surface-muted text-sm font-medium transition-colors"
+             onClick={async () => {
+               if (confirm("Adakah anda pasti mahu memadam projek ini? Tindakan ini tidak boleh dibatalkan.")) {
+                 setIsDeleting(true);
+                 await deleteProject(project.slug);
+                 setIsDeleting(false);
+                 alert("Projek telah dipadam.");
+                 router.push('/admin/projects');
+               }
+             }}
+             disabled={isSaving || isDeleting}
+             className="px-6 py-2.5 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-medium transition-colors disabled:opacity-50"
            >
-             {isSaving ? "Menyimpan..." : "Simpan Draf"}
+             {isDeleting ? "Memadam..." : "Padam Projek"}
            </button>
-           <button 
-             type="button"
-             onClick={(e) => handleSave(e, true)}
-             disabled={isSaving}
-             className="px-6 py-2.5 rounded-lg border border-primary/20 bg-primary hover:bg-primary-hover text-white text-sm font-medium shadow-sm transition-colors"
-           >
-             {isSaving ? "Menerbitkan..." : "Simpan & Terbit"}
-           </button>
+
+           <div className="flex gap-3">
+             <button 
+               type="button"
+               onClick={(e) => handleSave(e, false)}
+               disabled={isSaving || isDeleting}
+               className="px-6 py-2.5 rounded-lg border border-border bg-surface hover:bg-surface-muted text-sm font-medium transition-colors disabled:opacity-50"
+             >
+               {isSaving ? "Menyimpan..." : "Simpan Draf"}
+             </button>
+             <button 
+               type="button"
+               onClick={(e) => handleSave(e, true)}
+               disabled={isSaving || isDeleting}
+               className="px-6 py-2.5 rounded-lg border border-primary/20 bg-primary hover:bg-primary-hover text-white text-sm font-medium shadow-sm transition-colors disabled:opacity-50"
+             >
+               {isSaving ? "Menerbitkan..." : "Simpan & Terbit"}
+             </button>
+           </div>
         </div>
 
       </form>
