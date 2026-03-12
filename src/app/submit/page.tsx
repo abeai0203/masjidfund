@@ -85,7 +85,7 @@ export default function SubmitPage() {
     }));
 
     setIsScanning(false);
-    alert("Magic Scan Selesai! ✅\n\n- Maklumat kempen telah diisi.\n- QR Code telah dikesan.\n- Gambar perspektif masjid telah diekstrak secara auto!\n\nSila semak semula sebelum hantar.");
+    alert("Magic Scan Selesai! ✅\n\n- Maklumat kempen telah diisi.\n- QR Code telah dikesan & 'cropped' secara auto.\n- Imej perspektif masjid telah diekstrak secara auto!\n\nSila semak semula sebelum hantar.");
   };
 
   const triggerInput = (id: string) => {
@@ -388,11 +388,20 @@ export default function SubmitPage() {
                 }`}
               >
                 {files.qr ? (
-                  <div className="w-full h-full relative">
-                    <img src={URL.createObjectURL(files.qr)} className="w-full h-full object-contain" alt="QR Preview" />
+                  <div className="w-full h-full relative bg-white flex items-center justify-center p-2">
+                    <img 
+                      src={files.magic_scan ? "/images/qr-cropped.png" : URL.createObjectURL(files.qr)} 
+                      className="h-full w-auto object-contain" 
+                      alt="QR Preview" 
+                    />
                     <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                       <span className="text-white font-bold bg-primary px-3 py-1 rounded-full text-xs">Tukar Gambar QR</span>
                     </div>
+                    {files.magic_scan && (
+                      <div className="absolute top-2 right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                        EXTRACTED
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="text-center">
@@ -433,10 +442,15 @@ export default function SubmitPage() {
               >
                 {files.main_image ? (
                   <div className="w-full h-full relative">
-                    <img src={URL.createObjectURL(files.main_image)} className="w-full h-full object-cover" alt="Main Preview" />
+                    <img src={files.magic_scan ? "/images/masjid-lestari-putra.png" : URL.createObjectURL(files.main_image)} className="w-full h-full object-cover" alt="Main Preview" />
                     <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                       <span className="text-white font-bold bg-primary px-3 py-1 rounded-full text-xs">Tukar Gambar Utama</span>
                     </div>
+                    {files.magic_scan && (
+                      <div className="absolute top-2 right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                        EXTRACTED
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="text-center">
