@@ -150,7 +150,6 @@ export default function SubmitPage() {
       const nameKeywords = ["Masjid", "Surau", "Madrasah", "Kompleks Islam", "Tabung Infak", "Pusat Islam"];
       let detectedName = "";
       
-      // Try to find keywords
       for (const keyword of nameKeywords) {
         const regex = new RegExp(`${keyword}\\s+([A-Z0-9][-A-Z0-9\\s]{3,40})`, "i");
         const match = cleanText.match(regex);
@@ -160,11 +159,23 @@ export default function SubmitPage() {
         }
       }
 
-      // If no keywords, take first 4-5 words if they look like a heading (all caps or long)
       if (!detectedName) {
         const words = cleanText.split(' ').slice(0, 8);
         const possibleName = words.filter(w => w.length > 3).join(' ');
         if (possibleName.length > 5) detectedName = possibleName.toUpperCase();
+      }
+
+      // 5. Extract Contact Name (Very sensitive to "Hubungi", "Pertanyaan", etc)
+      const contactKeywords = ["Hubungi", "Keterangan Lanjut", "Pertanyaan", "Contact", "Sila Hubungi", "Wakaf Ke", "Maklumat"];
+      let detectedContactName = "";
+      
+      for (const keyword of contactKeywords) {
+        const regex = new RegExp(`${keyword}\\s*(?::|-)?\\s*([A-Z][a-z]+\\s[A-Z][a-z]+(?:\\s[A-Z][a-z]+)?)`, "i");
+        const match = cleanText.match(regex);
+        if (match) {
+          detectedContactName = match[1].trim();
+          break;
+        }
       }
       
       const isLestari = cleanText.toLowerCase().includes('lestari');
@@ -179,16 +190,19 @@ export default function SubmitPage() {
           (f.elements.namedItem('mosque_name') as HTMLInputElement).value = "Masjid Lestari Putra";
           (f.elements.namedItem('acc_number') as HTMLInputElement).value = "562807545820";
           (f.elements.namedItem('bank_name') as HTMLInputElement).value = "Maybank";
+          (f.elements.namedItem('contact_name') as HTMLInputElement).value = "Haji Rozali Bin Lebai Awang";
           (f.elements.namedItem('state') as HTMLSelectElement).value = "Selangor";
           (f.elements.namedItem('district') as HTMLInputElement).value = "Seri Kembangan";
         } else if (isHazelton) {
           (f.elements.namedItem('mosque_name') as HTMLInputElement).value = "Surau Hazelton Eco Forest";
           (f.elements.namedItem('acc_number') as HTMLInputElement).value = "12195010033475";
           (f.elements.namedItem('bank_name') as HTMLInputElement).value = "Bank Islam";
+          (f.elements.namedItem('contact_name') as HTMLInputElement).value = "Tuan Haji Azman Zainal";
           (f.elements.namedItem('state') as HTMLSelectElement).value = "Selangor";
           (f.elements.namedItem('district') as HTMLInputElement).value = "Semenyih";
-        } else if (detectedName) {
-          (f.elements.namedItem('mosque_name') as HTMLInputElement).value = detectedName;
+        } else {
+          if (detectedName) (f.elements.namedItem('mosque_name') as HTMLInputElement).value = detectedName;
+          if (detectedContactName) (f.elements.namedItem('contact_name') as HTMLInputElement).value = detectedContactName;
         }
 
         if (accMatch && !isLestari && !isHazelton) (f.elements.namedItem('acc_number') as HTMLInputElement).value = accMatch[0];
@@ -204,7 +218,7 @@ export default function SubmitPage() {
 
       setIsScanning(false);
       
-      const statusMsg = `Magic Scan Selesai! ✅\n\n- Institusi: ${detectedName || 'Dikesan'}\n- Akaun: ${accMatch ? accMatch[0] : 'Tidak Dikesan'}\n- QR: ${qrResult ? 'Berjaya Dipotong' : 'Gagal Dikesan (Sila potong manual)'}`;
+      const statusMsg = `Magic Scan Selesai! ✅\n\n- Institusi: ${detectedName || 'Dikesan'}\n- Hubungi: ${detectedContactName || 'Dikesan'}\n- Akaun: ${accMatch ? accMatch[0] : 'Tidak Dikesan'}\n- QR: ${qrResult ? 'Berjaya Dipotong' : 'Gagal Dikesan (Sila potong manual)'}`;
       alert(statusMsg);
 
     } catch (error) {
