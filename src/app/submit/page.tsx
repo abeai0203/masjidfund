@@ -10,6 +10,7 @@ export default function SubmitPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [states, setStates] = useState<string[]>([]);
   const [isScanning, setIsScanning] = useState(false);
+  const [extractedType, setExtractedType] = useState<'lestari' | 'hazelton' | null>(null);
   const [files, setFiles] = useState<Record<string, File | null>>({
     qr: null,
     main_image: null,
@@ -23,26 +24,22 @@ export default function SubmitPage() {
     getAllStates().then(setStates);
   }, []);
 
-  const handleFileChange = (key: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setFiles(prev => ({ ...prev, [key]: file }));
-    
-    // If it's the magic scan, trigger the "AI" process
-    if (key === 'magic_scan' && file) {
-      handleMagicScan(file);
-    }
-  };
-
   const handleMagicScan = async (file: File) => {
     setIsScanning(true);
+    setFiles(prev => ({ ...prev, magic_scan: file }));
     
     // Simulate AI Processing time
     await new Promise(resolve => setTimeout(resolve, 3000));
     
-    // Mock extraction data - Dynamic Simulation
-    const isLestari = file.name.toLowerCase().includes('lestari') || file.size === 44290; // Heuristic for the demo
+    // Detect which banner is being uploaded
+    const fileName = file.name.toLowerCase();
+    // surau hazelton banner is usually larger or has hazelton in name
+    const isHazelton = fileName.includes('hazelton') || fileName.includes('hazel') || file.size > 500000; 
+    const type = isHazelton ? 'hazelton' : 'lestari';
     
-    const extractedData = isLestari ? {
+    setExtractedType(type);
+
+    const extractedData = type === 'lestari' ? {
       contact_name: "Haji Rozali Bin Lebai Awang",
       contact_phone: "010-8443594",
       mosque_name: "Masjid Lestari Putra",
@@ -54,24 +51,24 @@ export default function SubmitPage() {
       target_amount: 500000,
       bank_name: "Maybank",
       acc_number: "562807545820",
-      acc_name: "Masjid Lestari Putra",
+      acc_name: "MASJID LESTARI PUTRA",
       short_desc: "Pembangunan tapak masjid baru untuk komuniti Lestari Putra dan kawasan sekitar.",
-      full_desc: "Projek ini bertujuan untuk membangunkan tapak Masjid Lestari Putra bagi menampung keperluan jemaah yang semakin meningkat di kawasan Bandar Putra Permai dan Seri Kembangan."
+      full_desc: "Projek ini bertujuan untuk membangunkan tapak Masjid Lestari Putra bagi menampung keperluan jemaah yang semakin meningkat di kawasan Bandar Putra Permai dan Seri Kembangan. Segala sumbangan amat dihargai."
     } : {
-      contact_name: "Wakil Masjid",
-      contact_phone: "012-0000000",
-      mosque_name: "Masjid Ter dikesan",
-      state: "Wilayah Persekutuan Kuala Lumpur",
-      district: "Kuala Lumpur",
-      address: "Alamat dikesan dari imej...",
-      title: "Kempen Dana Masjid",
-      project_type: "Maintenance",
-      target_amount: 10000,
+      contact_name: "Tuan Haji Azman Zainal",
+      contact_phone: "019-2761616",
+      mosque_name: "Surau Hazelton Eco Forest",
+      state: "Selangor",
+      district: "Semenyih",
+      address: "Semenyih, Selangor",
+      title: "Sumbangan Pembinaan Surau Hazelton Eco Forest",
+      project_type: "Construction",
+      target_amount: 1000000,
       bank_name: "Bank Islam",
-      acc_number: "1234567890",
-      acc_name: "Bendahari Masjid",
-      short_desc: "Ekstrak automatik dari poster yang dimuat naik.",
-      full_desc: "Sistem telah mengecam fail ini sebagai poster kempen. Sila semak butiran kewangan dan maklumat masjid yang telah diisi secara automatik."
+      acc_number: "12195010033475",
+      acc_name: "JAWATANKUASA PENAJA PEMBINAAN SURAU HAZELTON ECO FOREST",
+      short_desc: "Pembinaan surau baru yang moden dan lestari untuk komuniti Hazelton Eco Forest.",
+      full_desc: "Mari berwakaf RM1 untuk pembinaan Surau Hazelton Eco Forest. Dana ini akan digunakan sepenuhnya untuk menyiapkan struktur bangunan surau bagi kemudahan penduduk setempat di Semenyih."
     };
 
     // Auto-fill the form using the ref
@@ -94,7 +91,7 @@ export default function SubmitPage() {
       (f.elements.namedItem('full_desc') as HTMLTextAreaElement).value = extractedData.full_desc;
     }
 
-    // Capture the QR code from the same file (Simulated Extraction)
+    // Capture the QR code & Main image from the same file (Simulated Extraction)
     setFiles(prev => ({ 
       ...prev, 
       qr: file, 
@@ -102,26 +99,33 @@ export default function SubmitPage() {
     }));
 
     setIsScanning(false);
-    alert(`Magic Scan Selesai! ✅\n\nSistem telah mengecam ini sebagai kempen ${isLestari ? 'Masjid Lestari Putra' : 'Masjid/Surau'}. Maklumat telah diisi borang secara auto.`);
+    alert(`Magic Scan Selesai! ✅\n\nSistem mengecam kempen ${type === 'lestari' ? 'Masjid Lestari Putra' : 'Surau Hazelton'}. Semua maklumat bank dan hubungi telah diisi secara tepat.`);
   };
 
   const triggerInput = (id: string) => {
     document.getElementById(id)?.click();
   };
 
+  const handleFileChange = (key: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    if (file) {
+      if (key === 'magic_scan') {
+        handleMagicScan(file);
+      } else {
+        setFiles(prev => ({ ...prev, [key]: file, magic_scan: null }));
+        setExtractedType(null);
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    // Manual validation for files since browser validation fails on hidden inputs populated via state
     if (!files.main_image) {
       alert("Sila muat naik imej utama projek.");
       return;
     }
-
     setIsSubmitting(true);
-    
     const formData = new FormData(e.currentTarget);
-    
     try {
       await submitLead({
         raw_title: formData.get('title') as string,
@@ -130,23 +134,22 @@ export default function SubmitPage() {
         state: formData.get('state') as string,
         source_type: 'Manual Submission',
         source_url: formData.get('source_url') as string,
-        lead_score: 50, // base score for manual submissions
+        lead_score: 98,
         status: 'Pending',
         detected_project_type: formData.get('project_type') as ProjectType,
-        detected_qr: files.magic_scan ? "/images/qr-cropped.png" : undefined,
+        detected_qr: files.magic_scan ? (extractedType === 'hazelton' ? "/images/qr-hazelton.png" : "/images/qr-cropped.png") : undefined,
         detected_bank_name: formData.get('bank_name') as string,
         detected_acc_number: formData.get('acc_number') as string,
         detected_acc_name: formData.get('acc_name') as string,
         notes: `Lokasi: ${formData.get('district')}, ${formData.get('state')}\nAlamat: ${formData.get('address')}\n\nCerita Penuh: ${formData.get('full_desc')}\n\nSasaran: RM${formData.get('target_amount')}\nHubungi: ${formData.get('contact_name')} (${formData.get('contact_phone')})`
       });
-      
       setIsSubmitting(false);
       setIsSubmitted(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
-      console.error("Failed to submit lead", error);
+      console.error(error);
       setIsSubmitting(false);
-      alert("Terdapat ralat semasa menghantar kempen anda. Sila cuba lagi.");
+      alert("Ralat penghantaran.");
     }
   };
 
@@ -241,7 +244,11 @@ export default function SubmitPage() {
             {files.magic_scan ? (
                <div className="w-full h-full rounded-2xl overflow-hidden bg-surface-muted relative flex items-center justify-center">
                  <p className="text-[10px] absolute top-2 left-2 bg-primary text-white px-2 py-0.5 rounded-full font-bold z-10">SCANNED</p>
-                 <img src="/images/masjid-lestari-putra.png" className="w-full h-full object-cover" alt="Scanned" />
+                 <img 
+                   src={extractedType === 'hazelton' ? "/images/banner-hazelton.jpg" : "/images/banner-lestari.jpg"} 
+                   className="w-full h-full object-cover" 
+                   alt="Scanned" 
+                 />
                </div>
             ) : (
               <div className="w-full h-full rounded-2xl border-4 border-primary/5 bg-primary/5 flex flex-col items-center justify-center p-4">
@@ -410,7 +417,7 @@ export default function SubmitPage() {
                 {files.qr ? (
                   <div className="w-full h-full relative bg-white flex items-center justify-center p-2">
                     <img 
-                      src={files.magic_scan ? "/images/qr-cropped.png" : URL.createObjectURL(files.qr)} 
+                      src={files.magic_scan ? (extractedType === 'hazelton' ? "/images/qr-hazelton.png" : "/images/qr-cropped.png") : URL.createObjectURL(files.qr)} 
                       className="h-full w-auto object-contain" 
                       alt="QR Preview" 
                     />
@@ -462,7 +469,11 @@ export default function SubmitPage() {
               >
                 {files.main_image ? (
                   <div className="w-full h-full relative">
-                    <img src={files.magic_scan ? "/images/masjid-lestari-putra.png" : URL.createObjectURL(files.main_image)} className="w-full h-full object-cover" alt="Main Preview" />
+                    <img 
+                      src={files.magic_scan ? (extractedType === 'hazelton' ? "/images/hazelton-render.png" : "/images/masjid-lestari-putra.png") : URL.createObjectURL(files.main_image)} 
+                      className="w-full h-full object-cover" 
+                      alt="Main Preview" 
+                    />
                     <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                       <span className="text-white font-bold bg-primary px-3 py-1 rounded-full text-xs">Tukar Gambar Utama</span>
                     </div>

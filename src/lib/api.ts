@@ -209,29 +209,38 @@ export async function approveAndConvertToProject(id: string, notes?: string): Pr
   const baseString = lead.extracted_mosque_name || lead.raw_title;
   const slug = `${baseString.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString().slice(-4)}`;
 
-  // Dedicated image for Masjid Lestari Putra if it matches
+  // Dedicated image handling for demo mosques
   let imageUrl = "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=800";
   if (lead.extracted_mosque_name?.includes("Lestari Putra")) {
     imageUrl = "/images/masjid-lestari-putra.png";
+  } else if (lead.extracted_mosque_name?.includes("Hazelton")) {
+    imageUrl = "/images/hazelton-render.png";
+  }
+
+  // Extract target amount from notes if possible (heuristic)
+  let targetAmount = 50000;
+  if (lead.notes?.includes("Sasaran: RM")) {
+    const match = lead.notes.match(/Sasaran: RM(\d+)/);
+    if (match) targetAmount = parseInt(match[1]);
   }
 
   const newProject: Project = {
     slug,
     mosque_name: lead.extracted_mosque_name || "Masjid Baru",
     state: lead.state || "Selangor",
-    district: "Akan Dikemaskini",
+    district: lead.notes?.includes("Lokasi:") ? lead.notes.split("Lokasi:")[1].split(",")[0].trim() : "Akan Dikemaskini",
     title: lead.raw_title,
-    short_description: lead.raw_summary.slice(0, 120) + "...",
-    full_description: lead.raw_summary,
+    short_description: lead.raw_summary.slice(0, 150),
+    full_description: lead.notes?.split("Cerita Penuh:")[1]?.split("Sasaran:")[0]?.trim() || lead.raw_summary,
     project_type: lead.detected_project_type || "Maintenance",
     verification_status: "Verified",
-    publish_status: "Published", // User asked to be "aktif"
-    target_amount: 50000, // Placeholder
+    publish_status: "Published",
+    target_amount: targetAmount,
     collected_amount: 0,
     completion_percent: 0,
     needs_donation: true,
     donation_method_type: "Both",
-    duitnow_qr_url: lead.detected_qr,
+    duitnow_qr_url: lead.detected_qr || "/images/qr-cropped.png",
     bank_name: lead.detected_bank_name || "Maybank",
     account_name: lead.detected_acc_name || lead.extracted_mosque_name || "Bendahari Masjid",
     account_number: lead.detected_acc_number || "1234567890",
