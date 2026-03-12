@@ -44,8 +44,18 @@ export default function SubmitPage() {
           canvas.height = img.height;
           ctx.drawImage(img, 0, 0);
           
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const code = jsQR(imageData.data, imageData.width, imageData.height);
+          let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          let code = jsQR(imageData.data, imageData.width, imageData.height);
+          
+          // Fallback: If fail, try to shrink large images (jsQR sometimes fails on too high res)
+          if (!code && (img.width > 2000 || img.height > 2000)) {
+            const scale = 0.5;
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            code = jsQR(imageData.data, imageData.width, imageData.height);
+          }
           
           if (code) {
             // Found a QR code! Let's crop it with some padding
@@ -136,17 +146,25 @@ export default function SubmitPage() {
       const banks = ["Maybank", "CIMB", "Bank Islam", "RHB", "Public Bank", "AmBank", "Hong Leong", "BSN", "Alliance Bank", "Affin Bank", "Bank Muamalat", "Bank Rakyat"];
       const bankFound = banks.find(b => cleanText.toLowerCase().includes(b.toLowerCase()));
 
-      // 4. Extract Mosque/Surau Name (Improved regex and logic)
-      const nameKeywords = ["Masjid", "Surau", "Madrasah", "Kompleks Islam", "Tabung Infak"];
+      // 4. Extract Mosque/Surau Name (Very Aggressive)
+      const nameKeywords = ["Masjid", "Surau", "Madrasah", "Kompleks Islam", "Tabung Infak", "Pusat Islam"];
       let detectedName = "";
       
+      // Try to find keywords
       for (const keyword of nameKeywords) {
-        const regex = new RegExp(`${keyword}\\s+([A-Za-z0-9\\s]{3,40})`, "i");
+        const regex = new RegExp(`${keyword}\\s+([A-Z0-9][-A-Z0-9\\s]{3,40})`, "i");
         const match = cleanText.match(regex);
         if (match) {
-          detectedName = match[0].trim();
+          detectedName = match[0].toUpperCase().trim();
           break;
         }
+      }
+
+      // If no keywords, take first 4-5 words if they look like a heading (all caps or long)
+      if (!detectedName) {
+        const words = cleanText.split(' ').slice(0, 8);
+        const possibleName = words.filter(w => w.length > 3).join(' ');
+        if (possibleName.length > 5) detectedName = possibleName.toUpperCase();
       }
       
       const isLestari = cleanText.toLowerCase().includes('lestari');
@@ -156,7 +174,7 @@ export default function SubmitPage() {
       if (formRef.current) {
         const f = formRef.current;
         
-        // Priority: Real Match -> Fallback Specifics -> Keyword Match
+        // Populate if empty or generic
         if (isLestari) {
           (f.elements.namedItem('mosque_name') as HTMLInputElement).value = "Masjid Lestari Putra";
           (f.elements.namedItem('acc_number') as HTMLInputElement).value = "562807545820";
@@ -185,7 +203,9 @@ export default function SubmitPage() {
       }));
 
       setIsScanning(false);
-      alert(`Magic Scan Selesai! ✅\n\nAI telah membaca maklumat dan mengekstrak ${qrResult ? 'DuitNow QR' : 'teks'} dari poster anda.`);
+      
+      const statusMsg = `Magic Scan Selesai! ✅\n\n- Institusi: ${detectedName || 'Dikesan'}\n- Akaun: ${accMatch ? accMatch[0] : 'Tidak Dikesan'}\n- QR: ${qrResult ? 'Berjaya Dipotong' : 'Gagal Dikesan (Sila potong manual)'}`;
+      alert(statusMsg);
 
     } catch (error) {
       clearTimeout(timeoutId);
