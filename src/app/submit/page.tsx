@@ -45,8 +45,8 @@ export default function SubmitPage() {
         lead_score: 50, // base score for manual submissions
         status: 'Pending',
         detected_project_type: formData.get('project_type') as ProjectType,
-        detected_account_info: `${formData.get('bank_name')} - ${formData.get('acc_number')} (${formData.get('acc_name')})`,
-        notes: `Full Description: ${formData.get('full_desc')}\nTarget: RM${formData.get('target_amount')}\nContact: ${formData.get('contact_name')} (${formData.get('contact_phone')})`
+        detected_account_info: `${formData.get('method_type')} | ${formData.get('bank_name')} - ${formData.get('acc_number')} (${formData.get('acc_name')})`,
+        notes: `Lokasi: ${formData.get('district')}, ${formData.get('state')}\nAlamat: ${formData.get('address')}\n\nCerita Penuh: ${formData.get('full_desc')}\n\nSasaran: RM${formData.get('target_amount')}\nHubungi: ${formData.get('contact_name')} (${formData.get('contact_phone')})`
       });
       
       setIsSubmitting(false);
@@ -145,11 +145,11 @@ export default function SubmitPage() {
             </div>
             <div>
               <label htmlFor="district" className="block text-sm font-semibold text-foreground/80 mb-2">Daerah/Bandar *</label>
-              <input required type="text" id="district" className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+              <input name="district" required type="text" id="district" className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
             </div>
             <div className="md:col-span-2">
               <label htmlFor="address" className="block text-sm font-semibold text-foreground/80 mb-2">Alamat Penuh</label>
-              <textarea id="address" rows={2} className="w-full bg-surface-muted border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"></textarea>
+              <textarea name="address" id="address" rows={2} className="w-full bg-surface-muted border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"></textarea>
             </div>
           </div>
         </div>
@@ -218,7 +218,7 @@ export default function SubmitPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-surface-muted/50 p-5 rounded-xl border border-border">
             <div className="md:col-span-2">
                <label className="block text-sm font-semibold text-foreground/80 mb-2">Adakah anda menyediakan Pindahan Bank, DuitNow QR, atau kedua-duanya?</label>
-                <select required className="w-full md:w-1/2 bg-surface border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
+                <select name="method_type" required className="w-full md:w-1/2 bg-surface border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
                   <option value="Both">Kedua-dua Kaedah Tersedia</option>
                   <option value="Bank Transfer">Pindahan Bank Sahaja</option>
                   <option value="DuitNow QR">DuitNow QR Sahaja</option>
