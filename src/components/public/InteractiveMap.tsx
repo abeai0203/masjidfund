@@ -8,7 +8,7 @@ const COORDINATES: Record<string, { x: number, y: number }> = {
   "Selangor": { x: 22, y: 55 },
   "Hazelton Eco Forest": { x: 25, y: 53 },
   "Lestari Putra": { x: 19, y: 58 },
-  "Al-Hidayah": { lat: 3.1505, x: 23, y: 56 },
+  "Al-Hidayah": { x: 23, y: 56 },
   "Kuala Lumpur": { x: 24, y: 58 },
   "Johor": { x: 38, y: 80 },
   "Pulau Pinang": { x: 15, y: 28 },
