@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getPublicProjects, getAllStates } from "@/lib/api";
+import { getPublicProjects } from "@/lib/api";
+import { MOCK_PROJECTS } from "@/lib/mock-data";
 import { Project } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
 import ProgressBar from "@/components/ui/ProgressBar";
@@ -21,11 +22,17 @@ export default function DonateFlowPage() {
   const [currentPaymentIdx, setCurrentPaymentIdx] = useState(0);
   
   const [allStates, setAllStates] = useState<string[]>([]);
-  const [allProjects, setAllProjects] = useState<Project[]>([]);
+  const [allProjects, setAllProjects] = useState<Project[]>(MOCK_PROJECTS);
   
   useEffect(() => {
-    getAllStates().then(setAllStates);
-    getPublicProjects().then(setAllProjects);
+    // Always start with mock data, replace with live data if available
+    getPublicProjects().then(data => {
+      const projects = data && data.length > 0 ? data : MOCK_PROJECTS;
+      setAllProjects(projects);
+      // Derive states from whatever data we have
+      const states = Array.from(new Set(projects.map(p => p.state))).sort();
+      setAllStates(states);
+    });
   }, []);
   
   // Helpers for recommendations
