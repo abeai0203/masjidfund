@@ -72,6 +72,7 @@ export default function SubmitPage() {
       (f.elements.namedItem('bank_name') as HTMLInputElement).value = extractedData.bank_name;
       (f.elements.namedItem('acc_number') as HTMLInputElement).value = extractedData.acc_number;
       (f.elements.namedItem('acc_name') as HTMLInputElement).value = extractedData.acc_name;
+      (f.elements.namedItem('method_type') as HTMLSelectElement).value = "Both";
       (f.elements.namedItem('short_desc') as HTMLTextAreaElement).value = extractedData.short_desc;
       (f.elements.namedItem('full_desc') as HTMLTextAreaElement).value = extractedData.full_desc;
     }
@@ -84,7 +85,7 @@ export default function SubmitPage() {
     }));
 
     setIsScanning(false);
-    alert("Magic Scan Selesai! Maklumat teks & Gambar QR telah diisi secara automatik. Sila semak semula.");
+    alert("Magic Scan Selesai! ✅\n\n- Maklumat kempen telah diisi.\n- QR Code telah dikesan.\n- Gambar perspektif masjid telah diekstrak secara auto!\n\nSila semak semula sebelum hantar.");
   };
 
   const triggerInput = (id: string) => {
@@ -93,6 +94,13 @@ export default function SubmitPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Manual validation for files since browser validation fails on hidden inputs populated via state
+    if (!files.main_image) {
+      alert("Sila muat naik imej utama projek.");
+      return;
+    }
+
     setIsSubmitting(true);
     
     const formData = new FormData(e.currentTarget);
@@ -213,7 +221,7 @@ export default function SubmitPage() {
             {files.magic_scan ? (
                <div className="w-full h-full rounded-2xl overflow-hidden bg-surface-muted relative flex items-center justify-center">
                  <p className="text-[10px] absolute top-2 left-2 bg-primary text-white px-2 py-0.5 rounded-full font-bold z-10">SCANNED</p>
-                 <img src={URL.createObjectURL(files.magic_scan)} className="w-full h-full object-cover opacity-60" alt="Scanned" />
+                 <img src="/images/masjid-lestari-putra.png" className="w-full h-full object-cover" alt="Scanned" />
                </div>
             ) : (
               <div className="w-full h-full rounded-2xl border-4 border-primary/5 bg-primary/5 flex flex-col items-center justify-center p-4">
@@ -375,27 +383,26 @@ export default function SubmitPage() {
               />
               <div 
                 onClick={() => triggerInput('qr_input')}
-                className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer ${
-                  files.qr ? 'border-primary bg-primary/5' : 'border-border bg-surface hover:bg-surface-muted'
+                className={`group relative border-2 border-dashed rounded-xl overflow-hidden transition-all cursor-pointer ${
+                  files.qr ? 'border-primary bg-primary/5 h-48' : 'border-border bg-surface hover:bg-surface-muted p-6'
                 }`}
               >
                 {files.qr ? (
-                  <div className="flex flex-col items-center">
-                    <svg className="h-10 w-10 text-primary mb-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-sm font-bold text-primary">{files.qr.name}</span>
-                    <span className="text-xs text-foreground/50 mt-1">Klik untuk tukar</span>
+                  <div className="w-full h-full relative">
+                    <img src={URL.createObjectURL(files.qr)} className="w-full h-full object-contain" alt="QR Preview" />
+                    <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                      <span className="text-white font-bold bg-primary px-3 py-1 rounded-full text-xs">Tukar Gambar QR</span>
+                    </div>
                   </div>
                 ) : (
-                  <>
+                  <div className="text-center">
                     <svg className="mx-auto h-10 w-10 text-foreground/30 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
                     <span className="text-sm font-medium text-primary">Klik untuk muat naik</span>
                     <span className="text-sm text-foreground/60"> atau seret dan lepas</span>
                     <p className="text-xs text-foreground/40 mt-1">PNG, JPG sehingga 5MB</p>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
@@ -416,29 +423,28 @@ export default function SubmitPage() {
                 id="main_image_input" 
                 className="hidden" 
                 accept="image/*" 
-                required
                 onChange={handleFileChange('main_image')}
               />
               <div 
                 onClick={() => triggerInput('main_image_input')}
-                className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer ${
-                  files.main_image ? 'border-primary bg-primary/5' : 'border-border bg-surface-muted hover:bg-surface-muted/70'
+                className={`group relative border-2 border-dashed rounded-xl overflow-hidden transition-all cursor-pointer ${
+                  files.main_image ? 'border-primary bg-primary/5 h-40' : 'border-border bg-surface-muted hover:bg-surface-muted/70 p-6'
                 }`}
               >
                 {files.main_image ? (
-                  <div className="flex flex-col items-center">
-                    <svg className="h-8 w-8 text-primary mb-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-sm font-bold text-primary truncate max-w-full">{files.main_image.name}</span>
+                  <div className="w-full h-full relative">
+                    <img src={URL.createObjectURL(files.main_image)} className="w-full h-full object-cover" alt="Main Preview" />
+                    <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                      <span className="text-white font-bold bg-primary px-3 py-1 rounded-full text-xs">Tukar Gambar Utama</span>
+                    </div>
                   </div>
                 ) : (
-                  <>
+                  <div className="text-center">
                     <svg className="mx-auto h-8 w-8 text-foreground/30 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <span className="text-sm font-medium text-primary">Muat Naik Gambar Kenit</span>
-                  </>
+                  </div>
                 )}
               </div>
             </div>

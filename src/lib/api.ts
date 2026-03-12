@@ -209,6 +209,12 @@ export async function approveAndConvertToProject(id: string, notes?: string): Pr
   const baseString = lead.extracted_mosque_name || lead.raw_title;
   const slug = `${baseString.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString().slice(-4)}`;
 
+  // Dedicated image for Masjid Lestari Putra if it matches
+  let imageUrl = "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=800";
+  if (lead.extracted_mosque_name?.includes("Lestari Putra")) {
+    imageUrl = "/images/masjid-lestari-putra.png";
+  }
+
   const newProject: Project = {
     slug,
     mosque_name: lead.extracted_mosque_name || "Masjid Baru",
@@ -228,7 +234,7 @@ export async function approveAndConvertToProject(id: string, notes?: string): Pr
     bank_name: "Maybank",
     account_name: lead.extracted_mosque_name || "Bendahari Masjid",
     account_number: "1234567890",
-    image_url: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=800"
+    image_url: imageUrl
   };
 
   simProjects.unshift(newProject);
