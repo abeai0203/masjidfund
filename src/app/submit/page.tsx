@@ -6,6 +6,7 @@ import { getAllStates, submitLead } from "@/lib/api";
 import { ProjectType } from "@/lib/types";
 
 import Tesseract from 'tesseract.js';
+import jsQR from 'jsqr';
 
 export default function SubmitPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -14,6 +15,7 @@ export default function SubmitPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [extractedType, setExtractedType] = useState<'lestari' | 'hazelton' | null>(null);
   const [magicScanPreview, setMagicScanPreview] = useState<string | null>(null);
+  const [extractedQrUrl, setExtractedQrUrl] = useState<string | null>(null);
   
   const [files, setFiles] = useState<Record<string, File | null>>({
     qr: null,
@@ -28,6 +30,60 @@ export default function SubmitPage() {
     getAllStates().then(setStates);
   }, []);
 
+  const extractQrFromImage = (file: File): Promise<string | null> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return resolve(null);
+          
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height);
+          
+          if (code) {
+            // Found a QR code! Let's crop it with some padding
+            const { topCP, bottomCP, leftCP, rightCP } = {
+              topCP: Math.min(code.location.topLeftCorner.y, code.location.topRightCorner.y),
+              bottomCP: Math.max(code.location.bottomLeftCorner.y, code.location.bottomRightCorner.y),
+              leftCP: Math.min(code.location.topLeftCorner.x, code.location.bottomLeftCorner.x),
+              rightCP: Math.max(code.location.topRightCorner.x, code.location.bottomRightCorner.x)
+            };
+            
+            const width = rightCP - leftCP;
+            const height = bottomCP - topCP;
+            const padding = Math.max(width, height) * 0.2;
+            
+            const cropCanvas = document.createElement('canvas');
+            const cropCtx = cropCanvas.getContext('2d');
+            if (!cropCtx) return resolve(null);
+            
+            cropCanvas.width = width + padding * 2;
+            cropCanvas.height = height + padding * 2;
+            
+            cropCtx.drawImage(
+              img, 
+              leftCP - padding, topCP - padding, width + padding * 2, height + padding * 2,
+              0, 0, cropCanvas.width, cropCanvas.height
+            );
+            
+            resolve(cropCanvas.toDataURL());
+          } else {
+            resolve(null);
+          }
+        };
+        img.src = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleMagicScan = async (file: File) => {
     if (isScanning) return;
     
@@ -41,29 +97,36 @@ export default function SubmitPage() {
       isTimeout = true;
       setIsScanning(false);
       alert("Proses AI mengambil masa terlalu lama pada pelayar anda. Sila isi maklumat secara manual.");
-    }, 20000); // 20s hard timeout
+    }, 25000); 
     
     try {
-      console.log("Starting OCR for:", file.name);
+      console.log("Starting OCR and QR detection for:", file.name);
       
-      // Use purely 'eng' to prevent infinite loop/download failures of 'msa' data chunk
-      const { data: { text } } = await Tesseract.recognize(file, 'eng', {
-        logger: m => {
-          if (m.status === 'recognizing text') {
-            console.log(`Scan Progress: ${Math.round(m.progress * 100)}%`);
+      // Parallel processing for performance
+      const [ocrResult, qrResult] = await Promise.all([
+        Tesseract.recognize(file, 'eng', {
+          logger: m => {
+            if (m.status === 'recognizing text') {
+              console.log(`Scan Progress: ${Math.round(m.progress * 100)}%`);
+            }
           }
-        }
-      });
+        }),
+        extractQrFromImage(file)
+      ]);
 
-      if (isTimeout) return; // If already timed out, exit silently
+      if (isTimeout) return; 
       clearTimeout(timeoutId);
 
+      const text = ocrResult.data.text;
       console.log("OCR Result:", text);
+      console.log("QR Extraction Successful:", !!qrResult);
+
+      setExtractedQrUrl(qrResult);
 
       // Clean text for better matching
       const cleanText = text.replace(/\n/g, ' ').replace(/\s+/g, ' ');
 
-      // 1. Extract Account Number (10-14 digits usually)
+      // 1. Extract Account Number
       const accMatch = cleanText.replace(/[-\s]/g, '').match(/\d{9,16}/);
       
       // 2. Extract Phone Number
@@ -73,10 +136,9 @@ export default function SubmitPage() {
       const banks = ["Maybank", "CIMB", "Bank Islam", "RHB", "Public Bank", "AmBank", "Hong Leong", "BSN", "Alliance Bank", "Affin Bank", "Bank Muamalat", "Bank Rakyat"];
       const bankFound = banks.find(b => cleanText.toLowerCase().includes(b.toLowerCase()));
 
-      // 4. Extract Mosque/Surau Name (more forgiving regex)
+      // 4. Extract Mosque/Surau Name
       const mosqueMatch = cleanText.match(/(?:Masjid|Surau|Madrasah)\s+([A-Z][A-Za-z\s]+)/i);
       
-      // Identify demo project for premium visuals (Fallbacks)
       const isLestari = cleanText.toLowerCase().includes('lestari');
       const isHazelton = cleanText.toLowerCase().includes('hazel');
       setExtractedType(isHazelton ? 'hazelton' : isLestari ? 'lestari' : null);
@@ -88,7 +150,7 @@ export default function SubmitPage() {
         if (bankFound) (f.elements.namedItem('bank_name') as HTMLInputElement).value = bankFound;
         if (phoneMatch) (f.elements.namedItem('contact_phone') as HTMLInputElement).value = phoneMatch[0];
         
-        // Auto-fill context if it's one of our demo cases for a better experience
+        // Contextual enhancements
         if (isLestari) {
           if (!mosqueMatch) (f.elements.namedItem('mosque_name') as HTMLInputElement).value = "Masjid Lestari Putra";
           if (!accMatch) (f.elements.namedItem('acc_number') as HTMLInputElement).value = "562807545820";
@@ -104,15 +166,21 @@ export default function SubmitPage() {
         }
       }
 
+      setFiles(prev => ({ 
+        ...prev, 
+        qr: file, 
+        main_image: file 
+      }));
+
       setIsScanning(false);
-      alert("Magic Scan Selesai! ✅\n\nAI telah berjaya membaca dan mengekstrak maklumat (Bank Pekerja, Nombor Akaun, Nama Masjid/Surau) dari imej anda secara terus.");
+      alert(`Magic Scan Selesai! ✅\n\nAI telah membaca maklumat dan mengekstrak ${qrResult ? 'DuitNow QR' : 'teks'} dari poster anda.`);
 
     } catch (error) {
       clearTimeout(timeoutId);
       if (!isTimeout) {
-        console.error("OCR Error:", error);
+        console.error("Scan Error:", error);
         setIsScanning(false);
-        alert("Proses imej gagal. Sila cuba muat naik imej yang berbeza atau isi secara manual.");
+        alert("Proses gagal. Sila cuba lagi.");
       }
     }
   };
@@ -153,7 +221,7 @@ export default function SubmitPage() {
         lead_score: 98,
         status: 'Pending',
         detected_project_type: formData.get('project_type') as ProjectType,
-        detected_qr: files.magic_scan ? (extractedType === 'hazelton' ? "/images/qr-hazelton.png" : "/images/qr-cropped.png") : undefined,
+        detected_qr: extractedQrUrl || (files.magic_scan ? (extractedType === 'hazelton' ? "/images/qr-hazelton.png" : "/images/qr-cropped.png") : undefined),
         detected_bank_name: formData.get('bank_name') as string,
         detected_acc_number: formData.get('acc_number') as string,
         detected_acc_name: formData.get('acc_name') as string,
@@ -389,7 +457,13 @@ export default function SubmitPage() {
                 <div className="space-y-3">
                   <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest">DuitNow QR Dikesan</p>
                   <div className="relative aspect-square bg-white border-2 border-dashed border-border rounded-2xl flex items-center justify-center p-4 overflow-hidden group">
-                    {files.qr ? (
+                    {extractedQrUrl ? (
+                      <img 
+                        src={extractedQrUrl} 
+                        className="max-h-full w-auto object-contain" 
+                        alt="Extracted QR" 
+                      />
+                    ) : files.qr ? (
                       <img 
                         src={files.magic_scan ? (extractedType === 'hazelton' ? "/images/qr-hazelton.png" : "/images/qr-cropped.png") : URL.createObjectURL(files.qr)} 
                         className="max-h-full w-auto object-contain" 
