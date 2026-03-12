@@ -104,9 +104,23 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                 <p className="text-sm font-medium">{lead.detected_project_type || "T/D"}</p>
               </div>
               <div>
-                 <p className="text-xs font-semibold text-foreground/60 mb-1">Maklumat Akaun</p>
-                <p className="text-sm font-medium">{lead.detected_account_info || "T/D"}</p>
+                 <p className="text-xs font-semibold text-foreground/60 mb-1">Nama Bank</p>
+                <p className="text-sm font-medium">{lead.detected_bank_name || "T/D"}</p>
               </div>
+              <div>
+                 <p className="text-xs font-semibold text-foreground/60 mb-1">No. Akaun</p>
+                <p className="text-sm font-medium font-mono">{lead.detected_acc_number || "T/D"}</p>
+              </div>
+              <div>
+                 <p className="text-xs font-semibold text-foreground/60 mb-1">Nama Akaun</p>
+                <p className="text-sm font-medium">{lead.detected_acc_name || "T/D"}</p>
+              </div>
+              {lead.detected_qr && (
+                <div className="sm:col-span-2 mt-4 p-4 border border-border rounded-lg bg-surface-muted/50">
+                   <p className="text-xs font-semibold text-foreground/60 mb-3 uppercase tracking-wider">QR Dikesan</p>
+                   <img src={lead.detected_qr} alt="Detected QR" className="w-32 h-32 rounded-lg shadow-sm border border-border bg-white" />
+                </div>
+              )}
             </div>
           </div>
         </div>

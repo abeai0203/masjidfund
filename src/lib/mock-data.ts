@@ -11,7 +11,9 @@ export const MOCK_LEADS: Lead[] = [
     lead_score: 85,
     status: "Pending",
     detected_project_type: "Renovation",
-    detected_account_info: "Maybank - 1234567890 (Masjid Al-Falah)",
+    detected_bank_name: "Maybank",
+    detected_acc_number: "1234567890",
+    detected_acc_name: "Masjid Al-Falah",
     created_at: new Date(Date.now() - 86400000).toISOString(),
     updated_at: new Date(Date.now() - 86400000).toISOString()
   },
@@ -25,7 +27,9 @@ export const MOCK_LEADS: Lead[] = [
     lead_score: 45,
     status: "Needs Manual Check",
     detected_project_type: "Construction",
-    detected_account_info: "CIMB - 0987654321 (Tabung Pembangunan Masjid)",
+    detected_bank_name: "CIMB",
+    detected_acc_number: "0987654321",
+    detected_acc_name: "Tabung Pembangunan Masjid",
     created_at: new Date(Date.now() - 172800000).toISOString(),
     updated_at: new Date(Date.now() - 172800000).toISOString()
   }
