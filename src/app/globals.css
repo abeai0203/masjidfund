@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fdfbf7;
+  --foreground: #111827;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-inter); /* Can be overridden if needed */
+
+  /* Custom Theme Palette */
+  --color-primary: #059669; /* Emerald 600 */
+  --color-primary-hover: #047857; /* Emerald 700 */
+  --color-primary-light: #d1fae5; /* Emerald 100 */
+  --color-secondary: #0ea5e9; /* Sky 500 */
+  --color-accent: #d97706; /* Amber 600 - for urgencies */
+  
+  --color-surface: #ffffff;
+  --color-surface-muted: #f9fafb; /* Gray 50 */
+  --color-border: #e5e7eb; /* Gray 200 */
+  --color-border-subtle: #f3f4f6; /* Gray 100 */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f172a; /* Slate 900 for a calm dark mode */
+    --foreground: #f8fafc; /* Slate 50 */
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
