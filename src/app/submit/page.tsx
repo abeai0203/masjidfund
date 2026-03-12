@@ -136,8 +136,18 @@ export default function SubmitPage() {
       const banks = ["Maybank", "CIMB", "Bank Islam", "RHB", "Public Bank", "AmBank", "Hong Leong", "BSN", "Alliance Bank", "Affin Bank", "Bank Muamalat", "Bank Rakyat"];
       const bankFound = banks.find(b => cleanText.toLowerCase().includes(b.toLowerCase()));
 
-      // 4. Extract Mosque/Surau Name
-      const mosqueMatch = cleanText.match(/(?:Masjid|Surau|Madrasah)\s+([A-Z][A-Za-z\s]+)/i);
+      // 4. Extract Mosque/Surau Name (Improved regex and logic)
+      const nameKeywords = ["Masjid", "Surau", "Madrasah", "Kompleks Islam", "Tabung Infak"];
+      let detectedName = "";
+      
+      for (const keyword of nameKeywords) {
+        const regex = new RegExp(`${keyword}\\s+([A-Za-z0-9\\s]{3,40})`, "i");
+        const match = cleanText.match(regex);
+        if (match) {
+          detectedName = match[0].trim();
+          break;
+        }
+      }
       
       const isLestari = cleanText.toLowerCase().includes('lestari');
       const isHazelton = cleanText.toLowerCase().includes('hazel');
@@ -145,25 +155,27 @@ export default function SubmitPage() {
 
       if (formRef.current) {
         const f = formRef.current;
-        if (mosqueMatch) (f.elements.namedItem('mosque_name') as HTMLInputElement).value = mosqueMatch[0].trim();
-        if (accMatch) (f.elements.namedItem('acc_number') as HTMLInputElement).value = accMatch[0];
-        if (bankFound) (f.elements.namedItem('bank_name') as HTMLInputElement).value = bankFound;
-        if (phoneMatch) (f.elements.namedItem('contact_phone') as HTMLInputElement).value = phoneMatch[0];
         
-        // Contextual enhancements
+        // Priority: Real Match -> Fallback Specifics -> Keyword Match
         if (isLestari) {
-          if (!mosqueMatch) (f.elements.namedItem('mosque_name') as HTMLInputElement).value = "Masjid Lestari Putra";
-          if (!accMatch) (f.elements.namedItem('acc_number') as HTMLInputElement).value = "562807545820";
-          if (!bankFound) (f.elements.namedItem('bank_name') as HTMLInputElement).value = "Maybank";
+          (f.elements.namedItem('mosque_name') as HTMLInputElement).value = "Masjid Lestari Putra";
+          (f.elements.namedItem('acc_number') as HTMLInputElement).value = "562807545820";
+          (f.elements.namedItem('bank_name') as HTMLInputElement).value = "Maybank";
           (f.elements.namedItem('state') as HTMLSelectElement).value = "Selangor";
           (f.elements.namedItem('district') as HTMLInputElement).value = "Seri Kembangan";
         } else if (isHazelton) {
-          if (!mosqueMatch) (f.elements.namedItem('mosque_name') as HTMLInputElement).value = "Surau Hazelton Eco Forest";
-          if (!accMatch) (f.elements.namedItem('acc_number') as HTMLInputElement).value = "12195010033475";
-          if (!bankFound) (f.elements.namedItem('bank_name') as HTMLInputElement).value = "Bank Islam";
+          (f.elements.namedItem('mosque_name') as HTMLInputElement).value = "Surau Hazelton Eco Forest";
+          (f.elements.namedItem('acc_number') as HTMLInputElement).value = "12195010033475";
+          (f.elements.namedItem('bank_name') as HTMLInputElement).value = "Bank Islam";
           (f.elements.namedItem('state') as HTMLSelectElement).value = "Selangor";
           (f.elements.namedItem('district') as HTMLInputElement).value = "Semenyih";
+        } else if (detectedName) {
+          (f.elements.namedItem('mosque_name') as HTMLInputElement).value = detectedName;
         }
+
+        if (accMatch && !isLestari && !isHazelton) (f.elements.namedItem('acc_number') as HTMLInputElement).value = accMatch[0];
+        if (bankFound && !isLestari && !isHazelton) (f.elements.namedItem('bank_name') as HTMLInputElement).value = bankFound;
+        if (phoneMatch) (f.elements.namedItem('contact_phone') as HTMLInputElement).value = phoneMatch[0];
       }
 
       setFiles(prev => ({ 
