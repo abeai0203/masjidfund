@@ -4,8 +4,6 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import "./globals.css";
 
-export const runtime = 'edge';
-
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
