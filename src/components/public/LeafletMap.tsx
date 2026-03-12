@@ -1,57 +1,30 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, GeoJSON, Marker, Tooltip, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Tooltip, useMap } from "react-leaflet";
 import L from "leaflet";
-import Link from "next/link";
-import malaysiaGeoJSON from "@/lib/malaysia.json";
+import { useRouter } from "next/navigation";
 
-// Fix Leaflet icon issue in Next.js
-const icon = L.icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
+// Stylized Custom Marker Icon
+const customIcon = L.divIcon({
+  className: 'custom-div-icon',
+  html: `<div class="marker-pin"><div class="marker-dot"></div></div>`,
+  iconSize: [30, 30],
+  iconAnchor: [15, 30]
 });
 
 interface MapProps {
-  points: {
-    name: string;
-    amount: number;
+  projects: {
+    slug: string;
+    mosque_name: string;
+    target_amount: number;
     lat: number;
     lng: number;
   }[];
 }
 
-const STATE_COORDINATES: Record<string, [number, number]> = {
-  "Selangor": [3.0738, 101.5183],
-  "Kuala Lumpur": [3.1390, 101.6869],
-  "Johor": [1.4854, 103.7618],
-  "Pulau Pinang": [5.4141, 100.3288],
-  "Perak": [4.5921, 101.0901],
-  "Perlis": [6.4449, 100.2048],
-  "Kedah": [6.1184, 100.3686],
-  "Pahang": [3.8126, 103.3256],
-  "Terengganu": [5.3117, 103.1324],
-  "Kelantan": [6.1254, 102.2386],
-  "Melaka": [2.1896, 102.2501],
-  "Negeri Sembilan": [2.7258, 101.9424],
-  "Sarawak": [1.5533, 110.3592],
-  "Sabah": [5.9788, 116.0753],
-};
-
-function SetViewOnLocate({ location }: { location: string | null }) {
-  const map = useMap();
-  useEffect(() => {
-    if (location && STATE_COORDINATES[location]) {
-      map.setView(STATE_COORDINATES[location], 9, { animate: true });
-    }
-  }, [location, map]);
-  return null;
-}
-
-export default function LeafletMap({ points }: MapProps) {
-  const [detectedLocation, setDetectedLocation] = useState<string | null>(null);
+export default function LeafletMap({ projects }: MapProps) {
+  const router = useRouter();
 
   const formatAmount = (num: number) => {
     if (num >= 1000000) return `RM${(num / 1000000).toFixed(1)}M`;
@@ -60,70 +33,91 @@ export default function LeafletMap({ points }: MapProps) {
   };
 
   return (
-    <div className="relative h-[500px] w-full rounded-2xl overflow-hidden border border-border shadow-inner bg-slate-50">
+    <div className="relative h-[600px] w-full rounded-3xl overflow-hidden border-4 border-white shadow-2xl bg-slate-900">
       <MapContainer 
         center={[4.2105, 108.6753]} 
         zoom={6} 
         scrollWheelZoom={false}
-        className="h-full w-full leaflet-custom-filter"
+        className="h-full w-full dark-map-theme"
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         />
         
-        <GeoJSON 
-          data={malaysiaGeoJSON as any} 
-          style={{
-            fillColor: "#059669",
-            fillOpacity: 0.1,
-            color: "#059669",
-            weight: 1,
-          }}
-        />
-
-        {points.map((point) => (
+        {projects.map((project) => (
           <Marker 
-            key={point.name} 
-            position={[point.lat, point.lng]} 
-            icon={icon}
+            key={project.slug} 
+            position={[project.lat, project.lng]} 
+            icon={customIcon}
+            eventHandlers={{
+              click: () => {
+                router.push(`/projects/${project.slug}`);
+              },
+            }}
           >
-            <Tooltip permanent direction="top" className="custom-tooltip">
-              <div className="flex flex-col items-center">
-                <span className="text-[10px] font-bold text-primary leading-none mb-1">{point.name}</span>
-                <span className="text-xs font-black text-foreground">{formatAmount(point.amount)}</span>
+            <Tooltip permanent direction="top" className="premium-tooltip" offset={[0, -20]}>
+              <div className="flex flex-col items-center group cursor-pointer">
+                <span className="text-[10px] font-black text-primary uppercase tracking-tighter mb-0.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                  {project.mosque_name}
+                </span>
+                <span className="text-sm font-black text-white bg-primary px-3 py-1 rounded-lg shadow-lg transform group-hover:scale-110 transition-transform">
+                  {formatAmount(project.target_amount)}
+                </span>
               </div>
             </Tooltip>
           </Marker>
         ))}
 
-        <SetViewOnLocate location={detectedLocation} />
       </MapContainer>
 
-      {/* Manual Locality Trigger overlay */}
-      <div className="absolute top-4 right-4 z-[1000]">
-        <button 
-          onClick={() => setDetectedLocation("Selangor")}
-          className="bg-white border border-border shadow-lg text-primary px-4 py-2 rounded-xl text-xs font-bold hover:bg-surface-muted transition-all flex items-center gap-2"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
-          Gunakan Lokaliti Saya
-        </button>
+      {/* Floating Instructions */}
+      <div className="absolute bottom-6 left-6 z-[1000] bg-black/40 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10 text-white/70 text-[10px] font-bold uppercase tracking-widest pointer-events-none">
+         Klik Pada Harga Untuk Infaq Terus
       </div>
 
       <style jsx global>{`
-        .leaflet-custom-filter .leaflet-tile-container {
-          filter: grayscale(100%) brightness(1.1) contrast(1);
+        .dark-map-theme .leaflet-tile-container {
+          filter: saturate(0) contrast(1.2) brightness(0.8);
         }
-        .custom-tooltip {
-          background: white !important;
-          border: 1px solid #e5e7eb !important;
-          border-radius: 9999px !important;
-          padding: 6px 12px !important;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+        .premium-tooltip {
+          background: transparent !important;
+          border: none !important;
+          box-shadow: none !important;
+          padding: 0 !important;
         }
-        .custom-tooltip:before {
+        .premium-tooltip:before {
           display: none !important;
+        }
+        
+        .marker-pin {
+          width: 20px;
+          height: 20px;
+          border-radius: 50% 50% 50% 0;
+          background: #059669;
+          position: absolute;
+          transform: rotate(-45deg);
+          left: 50%;
+          top: 50%;
+          margin: -15px 0 0 -10px;
+          box-shadow: 0 0 15px rgba(5, 150, 105, 0.5);
+          animation: pulseMarker 2s infinite;
+        }
+        
+        .marker-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: white;
+          position: absolute;
+          top: 6px;
+          left: 6px;
+        }
+
+        @keyframes pulseMarker {
+          0% { transform: rotate(-45deg) scale(1); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7); }
+          70% { transform: rotate(-45deg) scale(1.1); box-shadow: 0 0 0 10px rgba(5, 150, 105, 0); }
+          100% { transform: rotate(-45deg) scale(1); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
         }
       `}</style>
     </div>

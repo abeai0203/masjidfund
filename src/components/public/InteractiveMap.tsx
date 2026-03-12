@@ -7,21 +7,17 @@ import { getPublicProjects } from "@/lib/api";
 const LeafletMap = dynamic(() => import("./LeafletMap"), { 
   ssr: false,
   loading: () => (
-    <div className="h-[500px] w-full bg-surface-muted animate-pulse rounded-2xl flex items-center justify-center text-foreground/40 font-medium">
-      Memuatkan Peta Malaysia...
+    <div className="h-[600px] w-full bg-slate-900 animate-pulse rounded-3xl flex items-center justify-center text-white/20 font-black text-2xl tracking-tighter italic">
+      MASJID FUND EXPLORER
     </div>
   )
 });
 
-interface MapPoint {
-  name: string;
-  amount: number;
-  lat: number;
-  lng: number;
-}
-
-const STATE_COORDINATES: Record<string, { lat: number, lng: number }> = {
+// Helper for approximate coordinates based on district/state if coordinates are missing in DB
+const COORDINATE_MAP: Record<string, { lat: number, lng: number }> = {
   "Selangor": { lat: 3.0738, lng: 101.5183 },
+  "Hazelton Eco Forest": { lat: 3.2505, lng: 101.5303 },
+  "Lestari Putra": { lat: 2.9805, lng: 101.6603 },
   "Kuala Lumpur": { lat: 3.1390, lng: 101.6869 },
   "Johor": { lat: 1.4854, lng: 103.7618 },
   "Pulau Pinang": { lat: 5.4141, lng: 100.3288 },
@@ -38,50 +34,54 @@ const STATE_COORDINATES: Record<string, { lat: number, lng: number }> = {
 };
 
 export default function InteractiveMap() {
-  const [points, setPoints] = useState<MapPoint[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
 
   useEffect(() => {
     async function loadRealData() {
-      const projects = await getPublicProjects();
+      const publicProjects = await getPublicProjects();
       
-      const stateData: Record<string, number> = {};
-      projects.forEach(p => {
-        if (!stateData[p.state]) stateData[p.state] = 0;
-        stateData[p.state] += p.target_amount;
-      });
-
-      const mappedPoints: MapPoint[] = Object.entries(stateData).map(([state, total]) => {
-        const coords = STATE_COORDINATES[state] || { lat: 4, lng: 102 };
+      const mapped = publicProjects.map(p => {
+        // Use mosque name specific coords if available, else state coords with a small random jitter to avoid overlap
+        const base = COORDINATE_MAP[p.mosque_name] || COORDINATE_MAP[p.state] || { lat: 4, lng: 102 };
         return {
-          name: state,
-          amount: total,
-          lat: coords.lat,
-          lng: coords.lng
+          slug: p.slug,
+          mosque_name: p.mosque_name,
+          target_amount: p.target_amount,
+          lat: base.lat + (Math.random() - 0.5) * 0.1, // Jitter
+          lng: base.lng + (Math.random() - 0.5) * 0.1  // Jitter
         };
       });
 
-      setPoints(mappedPoints);
+      setProjects(mapped);
     }
     loadRealData();
   }, []);
 
   return (
-    <div className="w-full bg-white rounded-3xl border border-border shadow-xl overflow-hidden">
-      <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface-muted/50">
-        <div>
-          <h3 className="text-xl font-bold text-foreground">Peta Infaq Malaysia (Live)</h3>
-          <p className="text-sm text-foreground/60">Data sasaran dana sebenar yang diperlukan bagi setiap negeri.</p>
+    <div className="w-full bg-slate-950 rounded-[2.5rem] p-4 lg:p-8 border border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden">
+      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6 px-4">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+            <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span> Live Peta Infaq
+          </div>
+          <h3 className="text-3xl font-black text-white tracking-tight">Pilih & Infaq Terus</h3>
+          <p className="text-white/40 text-sm max-w-sm font-medium">Klik pada harga untuk melihat butiran penuh setiap masjid.</p>
+        </div>
+        
+        <div className="flex items-center gap-8 text-white/40 text-[10px] font-bold uppercase tracking-widest border-l border-white/10 pl-8">
+           <div className="flex flex-col gap-1">
+             <span className="text-primary text-lg leading-none font-black">{projects.length}</span>
+             <span>Projek Aktif</span>
+           </div>
+           <div className="flex flex-col gap-1">
+             <span className="text-white text-lg leading-none font-black">RM{(projects.reduce((acc, p) => acc + p.target_amount, 0) / 1000000).toFixed(1)}M</span>
+             <span>Jumlah Sasaran</span>
+           </div>
         </div>
       </div>
 
       <div className="w-full">
-        <LeafletMap points={points} />
-      </div>
-      
-      <div className="px-6 py-4 bg-surface border-t border-border flex flex-wrap gap-4 items-center justify-center text-xs text-foreground/50">
-         <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-primary rounded-full"></span> Projek Aktif Sebenar</span>
-         <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-primary/40 rounded-full border border-primary/20"></span> Geo-Sempadan Malaysia</span>
-         <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span> Data Berasaskan Pangkalan Data</span>
+        <LeafletMap projects={projects} />
       </div>
     </div>
   );
