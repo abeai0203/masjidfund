@@ -21,7 +21,7 @@ export const MOCK_PROJECTS: Project[] = [
     bank_name: "Maybank",
     account_name: "Bendahari Masjid Al-Hidayah",
     account_number: "562106712345",
-    image_url: "https://images.unsplash.com/photo-1542623024-a797a7a48d60?auto=format&fit=crop&q=80&w=800"
+    image_url: "https://images.unsplash.com/photo-1542332213-9b5a5a3fad35?auto=format&fit=crop&q=80&w=800"
   },
   {
     slug: "surau-at-taqwa-ipoh-renovasi",
@@ -43,7 +43,7 @@ export const MOCK_PROJECTS: Project[] = [
     bank_name: "CIMB Bank",
     account_name: "Jawatankuasa Surau At-Taqwa",
     account_number: "8604561234",
-    image_url: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=800"
+    image_url: "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?auto=format&fit=crop&q=80&w=800"
   },
   {
     slug: "masjid-jamek-kuala-lumpur-maintenance",
@@ -64,7 +64,7 @@ export const MOCK_PROJECTS: Project[] = [
     bank_name: "Bank Islam",
     account_name: "Lembaga Pentadbir Masjid Jamek",
     account_number: "14014010123456",
-    image_url: "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?auto=format&fit=crop&q=80&w=800"
+    image_url: "https://images.unsplash.com/photo-1609946860441-a51ffed3d12d?auto=format&fit=crop&q=80&w=800"
   },
   {
     slug: "masjid-an-nur-johor-bahru-emergency",
@@ -83,7 +83,7 @@ export const MOCK_PROJECTS: Project[] = [
     needs_donation: true,
     donation_method_type: "DuitNow QR",
     duitnow_qr_url: "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=MasjidAnNurEmergency",
-    image_url: "https://images.unsplash.com/photo-1596489807341-334148ef20ff?auto=format&fit=crop&q=80&w=800"
+    image_url: "https://images.unsplash.com/photo-1579613832107-4ba9f02e7ba7?auto=format&fit=crop&q=80&w=800"
   },
   {
     slug: "masjid-nurul-iman-penang-construction",
@@ -105,7 +105,7 @@ export const MOCK_PROJECTS: Project[] = [
     bank_name: "Public Bank",
     account_name: "Dana Pendidikan Nurul Iman",
     account_number: "3122445566",
-    image_url: "https://images.unsplash.com/photo-1584551271241-7d32cb33c415?auto=format&fit=crop&q=80&w=800"
+    image_url: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=800"
   },
   {
     slug: "surau-al-ikhlas-kuching-maintenance",
@@ -126,6 +126,6 @@ export const MOCK_PROJECTS: Project[] = [
     bank_name: "RHB Bank",
     account_name: "Jawatankuasa Pembinaan Al-Ikhlas",
     account_number: "26210600012345",
-    image_url: "https://images.unsplash.com/photo-1621506289937-23423f790c37?auto=format&fit=crop&q=80&w=800"
+    image_url: "https://images.unsplash.com/photo-1584551236674-51f1c289984f?auto=format&fit=crop&q=80&w=800"
   }
 ];
