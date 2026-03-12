@@ -46,6 +46,8 @@ export interface Lead {
   updated_at?: string;
   notes?: string;
   detected_qr?: string;
-  detected_account_info?: string;
+  detected_bank_name?: string;
+  detected_acc_number?: string;
+  detected_acc_name?: string;
   detected_project_type?: ProjectType;
 }

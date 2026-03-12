@@ -231,9 +231,10 @@ export async function approveAndConvertToProject(id: string, notes?: string): Pr
     completion_percent: 0,
     needs_donation: true,
     donation_method_type: "Both",
-    bank_name: "Maybank",
-    account_name: lead.extracted_mosque_name || "Bendahari Masjid",
-    account_number: "1234567890",
+    duitnow_qr_url: lead.detected_qr,
+    bank_name: lead.detected_bank_name || "Maybank",
+    account_name: lead.detected_acc_name || lead.extracted_mosque_name || "Bendahari Masjid",
+    account_number: lead.detected_acc_number || "1234567890",
     image_url: imageUrl
   };
 

@@ -15,10 +15,19 @@ export default function DonationModal({
   const [activeTab, setActiveTab] = useState<"qr" | "bank">(
     project.donation_method_type === "Bank Transfer" ? "bank" : "qr"
   );
+  const [copied, setCopied] = useState(false);
 
   const methodLabels = {
     bank: "Pindahan Bank",
     qr: "DuitNow QR"
+  };
+
+  const handleCopy = () => {
+    if (project.account_number) {
+      navigator.clipboard.writeText(project.account_number);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   if (!isOpen) return null;
@@ -93,15 +102,15 @@ export default function DonationModal({
                   </div>
                   <div>
                     <p className="text-xs text-foreground/60 font-medium uppercase tracking-wider mb-1">Nombor Akaun</p>
-                    <div className="flex justify-between items-center bg-white border border-border rounded-lg p-3 mt-1">
-                      <p className="font-mono text-lg font-bold text-primary tracking-widest">{project.account_number || "Contact Admin"}</p>
+                    <div className="flex justify-between items-center bg-white border border-border rounded-lg p-3 mt-1 shadow-sm">
+                      <p className="font-mono text-lg font-bold text-primary tracking-widest">{project.account_number || "Hubungi Admin"}</p>
                       <button 
-                        className="text-xs font-medium text-primary hover:text-primary-hover px-2 py-1 rounded bg-primary/10 transition-colors"
-                        onClick={() => {
-                          if (project.account_number) navigator.clipboard.writeText(project.account_number);
-                        }}
+                        className={`text-xs font-bold px-4 py-2 rounded-lg transition-all ${
+                          copied ? "bg-green-500 text-white" : "text-primary hover:text-primary-hover bg-primary/10"
+                        }`}
+                        onClick={handleCopy}
                       >
-                        Salin
+                        {copied ? "Tersalin!" : "Salin"}
                       </button>
                     </div>
                   </div>

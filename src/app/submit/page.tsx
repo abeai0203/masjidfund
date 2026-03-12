@@ -116,7 +116,10 @@ export default function SubmitPage() {
         lead_score: 50, // base score for manual submissions
         status: 'Pending',
         detected_project_type: formData.get('project_type') as ProjectType,
-        detected_account_info: `${formData.get('method_type')} | ${formData.get('bank_name')} - ${formData.get('acc_number')} (${formData.get('acc_name')})`,
+        detected_qr: files.magic_scan ? "/images/qr-cropped.png" : undefined,
+        detected_bank_name: formData.get('bank_name') as string,
+        detected_acc_number: formData.get('acc_number') as string,
+        detected_acc_name: formData.get('acc_name') as string,
         notes: `Lokasi: ${formData.get('district')}, ${formData.get('state')}\nAlamat: ${formData.get('address')}\n\nCerita Penuh: ${formData.get('full_desc')}\n\nSasaran: RM${formData.get('target_amount')}\nHubungi: ${formData.get('contact_name')} (${formData.get('contact_phone')})`
       });
       
