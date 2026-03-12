@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Tooltip, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Tooltip } from "react-leaflet";
 import L from "leaflet";
 import { useRouter } from "next/navigation";
 
-// Stylized Custom Marker Icon
+// Simplified Clean Marker Icon
 const customIcon = L.divIcon({
   className: 'custom-div-icon',
-  html: `<div class="marker-pin"><div class="marker-dot"></div></div>`,
-  iconSize: [30, 30],
-  iconAnchor: [15, 30]
+  html: `<div class="marker-dot-simple"></div>`,
+  iconSize: [12, 12],
+  iconAnchor: [6, 6]
 });
 
 interface MapProps {
@@ -33,16 +33,16 @@ export default function LeafletMap({ projects }: MapProps) {
   };
 
   return (
-    <div className="relative h-[600px] w-full rounded-3xl overflow-hidden border-4 border-white shadow-2xl bg-slate-900">
+    <div className="relative h-[550px] w-full rounded-2xl overflow-hidden border border-border shadow-md bg-[#f0f9f4]">
       <MapContainer 
         center={[4.2105, 108.6753]} 
         zoom={6} 
         scrollWheelZoom={false}
-        className="h-full w-full dark-map-theme"
+        className="h-full w-full green-tint-map"
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; OpenStreetMap'
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
         
         {projects.map((project) => (
@@ -56,12 +56,12 @@ export default function LeafletMap({ projects }: MapProps) {
               },
             }}
           >
-            <Tooltip permanent direction="top" className="premium-tooltip" offset={[0, -20]}>
-              <div className="flex flex-col items-center group cursor-pointer">
-                <span className="text-[10px] font-black text-primary uppercase tracking-tighter mb-0.5 opacity-80 group-hover:opacity-100 transition-opacity">
+            <Tooltip permanent direction="top" className="modern-label" offset={[0, -5]}>
+              <div className="flex flex-col items-center cursor-pointer group">
+                <span className="text-[9px] font-bold text-foreground/60 uppercase tracking-tighter mb-0.5 group-hover:text-primary transition-colors">
                   {project.mosque_name}
                 </span>
-                <span className="text-sm font-black text-white bg-primary px-3 py-1 rounded-lg shadow-lg transform group-hover:scale-110 transition-transform">
+                <span className="text-xs font-black text-white bg-primary px-2.5 py-1 rounded-full shadow-sm group-hover:bg-primary-hover group-hover:scale-110 transition-all border border-white/20">
                   {formatAmount(project.target_amount)}
                 </span>
               </div>
@@ -71,53 +71,40 @@ export default function LeafletMap({ projects }: MapProps) {
 
       </MapContainer>
 
-      {/* Floating Instructions */}
-      <div className="absolute bottom-6 left-6 z-[1000] bg-black/40 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10 text-white/70 text-[10px] font-bold uppercase tracking-widest pointer-events-none">
-         Klik Pada Harga Untuk Infaq Terus
+      {/* Simplified Helper */}
+      <div className="absolute bottom-4 right-4 z-[1000] bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border text-[9px] font-bold text-primary flex items-center gap-2 shadow-sm">
+         <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
+         Klik Label Untuk Infaq
       </div>
 
       <style jsx global>{`
-        .dark-map-theme .leaflet-tile-container {
-          filter: saturate(0) contrast(1.2) brightness(0.8);
+        /* Apply a subtle green tint to the whole map */
+        .green-tint-map .leaflet-tile-container {
+          filter: sepia(0.3) hue-rotate(80deg) saturate(0.6) brightness(1.05);
         }
-        .premium-tooltip {
+        
+        .modern-label {
           background: transparent !important;
           border: none !important;
           box-shadow: none !important;
           padding: 0 !important;
         }
-        .premium-tooltip:before {
+        
+        .modern-label:before {
           display: none !important;
         }
-        
-        .marker-pin {
-          width: 20px;
-          height: 20px;
-          border-radius: 50% 50% 50% 0;
-          background: #059669;
-          position: absolute;
-          transform: rotate(-45deg);
-          left: 50%;
-          top: 50%;
-          margin: -15px 0 0 -10px;
-          box-shadow: 0 0 15px rgba(5, 150, 105, 0.5);
-          animation: pulseMarker 2s infinite;
-        }
-        
-        .marker-dot {
+
+        .marker-dot-simple {
           width: 8px;
           height: 8px;
+          background: #059669;
+          border: 2px solid white;
           border-radius: 50%;
-          background: white;
-          position: absolute;
-          top: 6px;
-          left: 6px;
+          box-shadow: 0 0 10px rgba(5, 150, 105, 0.4);
         }
-
-        @keyframes pulseMarker {
-          0% { transform: rotate(-45deg) scale(1); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7); }
-          70% { transform: rotate(-45deg) scale(1.1); box-shadow: 0 0 0 10px rgba(5, 150, 105, 0); }
-          100% { transform: rotate(-45deg) scale(1); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
+        
+        .leaflet-container {
+           background: #f0f9f4 !important;
         }
       `}</style>
     </div>
