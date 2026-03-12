@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { Project, Lead } from './types';
+import { MOCK_PROJECTS } from './mock-data';
 
 export async function getPublicProjects(): Promise<Project[]> {
   const { data, error } = await supabase
@@ -8,9 +9,10 @@ export async function getPublicProjects(): Promise<Project[]> {
     .eq('publish_status', 'Published')
     .order('created_at', { ascending: false });
     
-  if (error) {
-    console.error("Error fetching projects:", error.message);
-    return [];
+  if (error || !data || data.length === 0) {
+    if (error) console.error("Error fetching projects:", error.message);
+    // Simulation fallback
+    return MOCK_PROJECTS;
   }
   return data as Project[];
 }

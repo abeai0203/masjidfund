@@ -7,17 +7,18 @@ import { Project } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
 import ProgressBar from "@/components/ui/ProgressBar";
 
-type ScopeType = "All" | "Best" | "State" | "";
+type ScopeType = "All" | "Best" | "State";
 
 export default function DonateFlowPage() {
   const [step, setStep] = useState(1);
   const [totalAmount, setTotalAmount] = useState<number | "">("");
   const [numMosques, setNumMosques] = useState<number>(3);
   
-  const [scope, setScope] = useState<ScopeType>("");
+  const [scope, setScope] = useState<ScopeType>("All");
   const [selectedState, setSelectedState] = useState<string>("");
   
   const [recommendations, setRecommendations] = useState<Project[]>([]);
+  const [currentPaymentIdx, setCurrentPaymentIdx] = useState(0);
   
   const [allStates, setAllStates] = useState<string[]>([]);
   const [allProjects, setAllProjects] = useState<Project[]>([]);
@@ -32,18 +33,22 @@ export default function DonateFlowPage() {
     let pool = [...allProjects];
     if (scope === "State" && selectedState) {
        pool = pool.filter(p => p.state.toLowerCase() === selectedState.toLowerCase());
+    } else if (scope === "Best") {
+       // Prioritize projects with lower completion %
+       pool = pool.sort((a, b) => a.completion_percent - b.completion_percent);
+    } else {
+       // Random shuffle
+       pool = pool.sort(() => 0.5 - Math.random());
     }
-    // Simple shuffle for simulation
-    return pool.sort(() => 0.5 - Math.random());
+    return pool;
   };
 
   const generateRecommendations = () => {
     const pool = getCandidateProjects();
-    // Cap at available projects or selected number
     const count = Math.min(numMosques, pool.length);
     setRecommendations(pool.slice(0, count));
     if (count > 0) setStep(3);
-    else alert("Not enough active campaigns matching this criteria. Try changing the scope.");
+    else alert("Maaf, tiada projek yang sepadan. Sila pilih skop lain.");
   };
 
   const replaceProject = (indexToReplace: number) => {
@@ -56,40 +61,40 @@ export default function DonateFlowPage() {
       newRecs[indexToReplace] = newCandidate;
       setRecommendations(newRecs);
     } else {
-      alert("No more unique campaigns available in this category to swap with.");
+      alert("Tiada lagi projek unik untuk digantikan dalam kategori ini.");
     }
   };
 
   // Derived calculations
   const parsedTotal = typeof totalAmount === "number" ? totalAmount : 0;
-  const actualNum = recommendations.length > 0 ? recommendations.length : numMosques;
+  const actualNum = recommendations.length;
   // Floor to 2 decimals
   const splitAmount = actualNum > 0 ? Math.floor((parsedTotal / actualNum) * 100) / 100 : 0;
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8 w-full">
       <div className="mb-10 text-center">
-        <h1 className="text-3xl font-bold text-foreground mb-3">Pembahagi Derma</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-3 font-serif italic">Pembahagi Derma</h1>
         <p className="text-lg text-foreground/70">
-          Agihkan sumbangan anda dengan mudah ke beberapa projek masjid yang disahkan.
+          Agihkan sumbangan anda dengan telus ke beberapa masjid terpilih.
         </p>
       </div>
 
       {/* Progress Indicator */}
       <div className="flex justify-center mb-10">
         <div className="flex items-center space-x-2">
-          {[1, 2, 3, 4].map(s => (
+          {[1, 2, 3, 4, 5].map(s => (
             <div key={s} className="flex items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-500 shadow-sm ${
                 step >= s 
-                  ? "bg-primary text-white" 
-                  : "bg-surface-muted text-foreground/40 border-2 border-border"
+                  ? "bg-primary text-white scale-110" 
+                  : "bg-surface-muted text-foreground/40 border border-border"
               }`}>
                 {s}
               </div>
-              {s < 4 && (
-                <div className={`w-8 h-1 mx-2 rounded-full transition-colors ${
-                  step > s ? "bg-primary/50" : "bg-border"
+              {s < 5 && (
+                <div className={`w-6 sm:w-12 h-1 mx-1 rounded-full transition-all duration-700 ${
+                  step > s ? "bg-primary/60" : "bg-border"
                 }`} />
               )}
             </div>
@@ -97,71 +102,85 @@ export default function DonateFlowPage() {
         </div>
       </div>
 
-      {/* STEP 1: Amount & Count */}
+      {/* STEP 1: Amount */}
       {step === 1 && (
-        <div className="bg-surface rounded-2xl border border-border p-8 shadow-sm">
-          <h2 className="text-2xl font-bold text-foreground mb-6">Langkah 1: Tentukan Impak Anda</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <label className="block text-sm font-semibold text-foreground/80 mb-2">Jumlah Derma (RM)</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-foreground/50 font-medium">RM</span>
-                <input 
-                  type="number" 
-                  value={totalAmount}
-                  onChange={(e) => setTotalAmount(e.target.value ? Number(e.target.value) : "")}
-                  min="1"
-                  className="w-full bg-surface-muted border border-border rounded-xl pl-12 pr-4 py-4 text-xl font-bold focus:outline-none focus:ring-2 focus:ring-primary/50" 
-                  placeholder="e.g. 100" 
-                />
-              </div>
+        <div className="bg-surface rounded-2xl border border-border p-8 sm:p-12 shadow-sm animate-in fade-in zoom-in-95 duration-500">
+          <div className="max-w-md mx-auto text-center">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Langkah 1: Berapa anda ingin derma?</h2>
+            <p className="text-foreground/60 mb-8">Masukkan jumlah keseluruhan (RM) yang anda ingin agihkan.</p>
+            
+            <div className="relative mb-8">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-6 text-foreground/40 text-2xl font-bold">RM</span>
+              <input 
+                type="number" 
+                value={totalAmount}
+                onChange={(e) => setTotalAmount(e.target.value ? Number(e.target.value) : "")}
+                className="w-full bg-surface-muted border-2 border-border rounded-2xl pl-16 pr-6 py-6 text-4xl font-black text-primary focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-center" 
+                placeholder="0" 
+                autoFocus
+              />
             </div>
-            <div>
-               <label className="block text-sm font-semibold text-foreground/80 mb-2">Berapa banyak masjid untuk disokong?</label>
-               <input 
-                  type="range" 
-                  min="1" 
-                  max="5" 
-                  value={numMosques}
-                  onChange={(e) => setNumMosques(Number(e.target.value))}
-                  className="w-full h-2 bg-surface-muted rounded-lg appearance-none cursor-pointer accent-primary mt-4"
-                />
-                <div className="flex justify-between text-xs font-semibold text-foreground/60 mt-2 px-1">
-                  <span>1</span>
-                  <span>Maksimum 5</span>
-                </div>
-                <div className="text-center mt-2  text-primary font-bold text-xl">
-                  {numMosques} Masjid
-                </div>
-            </div>
-          </div>
 
-          {totalAmount && totalAmount > 0 && numMosques > 0 && (
-             <div className="mt-8 bg-primary/5 border border-primary/20 rounded-xl p-4 text-center">
-                 <p className="text-foreground/80 font-medium">
-                   Kami akan memperuntukkan <span className="font-bold text-primary text-xl mx-1">RM {splitAmount.toFixed(2)}</span> setiap masjid.
-                 </p>
-             </div>
-          )}
-
-          <div className="mt-8 flex justify-end">
             <button 
               onClick={() => setStep(2)}
               disabled={!totalAmount || totalAmount <= 0}
-              className="bg-primary hover:bg-primary-hover text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-primary hover:bg-primary-hover text-white font-black py-5 px-8 rounded-2xl shadow-lg shadow-primary/20 transition-all text-xl disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed hover:-translate-y-1 active:scale-95"
             >
-              Seterusnya: Pilih Skop
+              Seterusnya
             </button>
           </div>
         </div>
       )}
 
-      {/* STEP 2: Scope */}
+      {/* STEP 2: Mosque Count */}
       {step === 2 && (
-        <div className="bg-surface rounded-2xl border border-border p-8 shadow-sm">
-           <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-foreground">Langkah 2: Di mana kami patut cari?</h2>
-              <button onClick={() => setStep(1)} className="text-sm font-medium text-foreground/60 hover:text-primary">← Kembali</button>
+        <div className="bg-surface rounded-2xl border border-border p-8 sm:p-12 shadow-sm animate-in fade-in slide-in-from-right-8 duration-500">
+          <div className="max-w-md mx-auto text-center">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Langkah 2: Agihkan kepada berapa masjid?</h2>
+            <p className="text-foreground/60 mb-8 text-lg">Jumlah RM {parsedTotal.toFixed(2)} akan dibahagi secara sama rata.</p>
+            
+            <div className="space-y-6 mb-10">
+               <div className="flex justify-between items-center bg-surface-muted p-8 rounded-3xl border border-border">
+                  <button 
+                    onClick={() => setNumMosques(prev => Math.max(1, prev - 1))}
+                    className="w-16 h-16 rounded-2xl bg-white border border-border text-2xl font-bold hover:bg-primary hover:text-white transition-colors shadow-sm"
+                  >-</button>
+                  <div className="text-center">
+                    <span className="text-6xl font-black text-primary block">{numMosques}</span>
+                    <span className="text-sm font-bold text-foreground/40 uppercase tracking-widest">Masjid</span>
+                  </div>
+                  <button 
+                    onClick={() => setNumMosques(prev => Math.min(6, prev + 1))}
+                    className="w-16 h-16 rounded-2xl bg-white border border-border text-2xl font-bold hover:bg-primary hover:text-white transition-colors shadow-sm"
+                  >+</button>
+               </div>
+               
+               <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10">
+                 <p className="text-foreground/70 font-medium">
+                   Setiap masjid akan menerima <span className="text-primary font-bold">RM {(parsedTotal / numMosques).toFixed(2)}</span>
+                 </p>
+               </div>
+            </div>
+
+            <div className="flex gap-4">
+              <button onClick={() => setStep(1)} className="flex-1 px-8 py-5 border-2 border-border rounded-2xl font-bold text-foreground/60 hover:bg-surface-muted transition-colors">Kembali</button>
+              <button 
+                onClick={() => setStep(3)}
+                className="flex-[2] bg-primary hover:bg-primary-hover text-white font-black py-5 px-8 rounded-2xl shadow-lg shadow-primary/20 transition-all text-xl hover:-translate-y-1 active:scale-95"
+              >
+                Seterusnya
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* STEP 3: Scope Selection */}
+      {step === 3 && (
+        <div className="bg-surface rounded-2xl border border-border p-8 shadow-sm animate-in fade-in slide-in-from-right-8 duration-500">
+           <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-foreground">Langkah 3: Pilih Lokasi Agihan</h2>
+              <p className="text-foreground/60 mt-1">Di mana anda ingin bantuan ini difokuskan?</p>
            </div>
            
            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
@@ -169,45 +188,49 @@ export default function DonateFlowPage() {
                  <button 
                     key={s}
                     onClick={() => setScope(s)}
-                    className={`p-4 border-2 rounded-xl text-center transition-all ${
+                    className={`p-6 border-2 rounded-2xl text-center transition-all flex flex-col items-center gap-3 ${
                       scope === s 
-                        ? "border-primary bg-primary/5 text-primary" 
+                        ? "border-primary bg-primary/5 text-primary shadow-inner" 
                         : "border-border bg-surface hover:bg-surface-muted hover:border-foreground/30 text-foreground/80"
                     }`}
                  >
-                    <div className="font-bold mb-1">
-                      {s === "All" ? "Seluruh Malaysia" : s === "Best" ? "Paling Segera" : "Mengikut Negeri"}
+                    <div className="w-12 h-12 rounded-full bg-surface border border-border flex items-center justify-center">
+                       {s === "All" && <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeWidth={2}/></svg>}
+                       {s === "Best" && <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z" strokeWidth={2}/></svg>}
+                       {s === "State" && <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" strokeWidth={2}/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" strokeWidth={2}/></svg>}
                     </div>
-                    {s === "State" && scope === "State" ? null : (
-                       <p className="text-xs opacity-70">
-                          {s === "All" && "Pilih secara rawak dari semua negeri"}
-                          {s === "Best" && "Utamakan projek dengan dana terendah"}
-                          {s === "State" && "Fokus pada lokasi tertentu"}
-                       </p>
-                    )}
+                    <div className="font-black">
+                      {s === "All" ? "Seluruh Malaysia" : s === "Best" ? "Terpaling Urgent" : "Negeri Tertentu"}
+                    </div>
+                    <p className="text-xs opacity-70">
+                       {s === "All" && "Agihan rawak ke mana-mana negeri"}
+                       {s === "Best" && "Utamakan projek perlukan dana segera"}
+                       {s === "State" && "Fokus bantuan ikut lokaliti pilihan"}
+                    </p>
                  </button>
               ))}
            </div>
 
            {scope === "State" && (
-              <div className="mb-8 p-6 bg-surface-muted rounded-xl border border-border animate-in fade-in slide-in-from-top-4 duration-300">
-                 <label className="block text-sm font-semibold text-foreground/80 mb-2">Pilih Negeri</label>
+              <div className="mb-8 p-6 bg-surface-muted rounded-2xl border border-border animate-in slide-in-from-top-4 duration-300">
+                 <label className="block text-sm font-bold text-foreground/80 mb-3">Pilih Negeri</label>
                  <select 
                     value={selectedState}
                     onChange={(e) => setSelectedState(e.target.value)}
-                    className="w-full sm:w-1/2 bg-surface border border-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full sm:w-1/2 bg-surface border border-border rounded-xl px-4 py-4 focus:outline-none focus:ring-4 focus:ring-primary/10 font-medium"
                  >
-                    <option value="">Pilih negeri...</option>
+                    <option value="">-- Pilih Negeri --</option>
                     {allStates.map(state => <option key={state} value={state}>{state}</option>)}
                  </select>
               </div>
            )}
 
-           <div className="flex justify-end">
+           <div className="flex gap-4">
+            <button onClick={() => setStep(2)} className="flex-1 px-8 py-5 border-2 border-border rounded-2xl font-bold text-foreground/60 hover:bg-surface-muted transition-colors">Kembali</button>
             <button 
               onClick={generateRecommendations}
               disabled={!scope || (scope === "State" && !selectedState)}
-              className="bg-primary hover:bg-primary-hover text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-[2] bg-primary hover:bg-primary-hover text-white font-black py-5 px-8 rounded-2xl shadow-lg shadow-primary/20 transition-all text-xl disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed hover:-translate-y-1"
             >
               Lihat Cadangan
             </button>
@@ -215,52 +238,49 @@ export default function DonateFlowPage() {
         </div>
       )}
 
-      {/* STEP 3: Recommendations */}
-      {step === 3 && (
-        <div className="space-y-6">
-           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-surface p-6 rounded-2xl border border-border shadow-sm">
+      {/* STEP 4: Confirmation */}
+      {step === 4 && (
+        <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-500">
+           <div className="bg-surface p-8 rounded-3xl border border-border shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
              <div>
-                <h2 className="text-xl font-bold text-foreground">Peruntukan yang Dicadangkan</h2>
-                <p className="text-sm text-foreground/70 mt-1">Jumlah: RM {Number(totalAmount).toFixed(2)} • {actualNum} Masjid</p>
+                <h2 className="text-2xl font-bold text-foreground">Langkah 4: Sahkan Cadangan</h2>
+                <p className="text-foreground/60 mt-1">Sistem telah memilih <strong>{actualNum} masjid</strong> untuk anda sani.</p>
              </div>
-             <div className="flex gap-3 mt-4 sm:mt-0 w-full sm:w-auto">
-               <button onClick={() => setStep(2)} className="px-4 py-2 border border-border rounded-lg text-sm font-medium bg-surface hover:bg-surface-muted transition-colors flex-1 sm:flex-none text-center">← Kembali</button>
-               <button onClick={generateRecommendations} className="px-4 py-2 border border-border rounded-lg text-sm font-medium bg-surface hover:bg-surface-muted transition-colors flex-1 sm:flex-none text-center flex items-center justify-center">
-                 <svg className="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                 Segarkan Semua
-               </button>
-             </div>
+             <button onClick={generateRecommendations} className="flex items-center gap-2 px-6 py-3 bg-surface-muted border border-border rounded-xl font-bold text-sm hover:bg-white transition-all shadow-sm">
+                <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                Tukar Semua
+             </button>
            </div>
 
            <div className="grid gap-4">
               {recommendations.map((project, idx) => (
-                 <div key={project.slug} className="bg-surface border border-border rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row gap-6">
-                    <div className="flex-1">
-                       <div className="flex justify-between items-start mb-2">
+                 <div key={project.slug} className="group bg-surface border border-border rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row gap-8 items-center">
+                    <div className="flex-1 w-full">
+                       <div className="flex justify-between items-start mb-4">
                           <div>
-                            <h3 className="text-lg font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+                            <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
                                 {project.mosque_name}
                             </h3>
-                            <p className="text-sm font-medium text-foreground/60">{project.state} • {project.district}</p>
+                            <p className="text-sm font-bold text-foreground/40">{project.state} • {project.district}</p>
                           </div>
                           <Badge status={project.verification_status} />
                        </div>
-                       <p className="text-sm text-foreground/80 line-clamp-2 mt-3 mb-4">{project.title}</p>
                        <ProgressBar 
                           collectedAmount={project.collected_amount} 
                           targetAmount={project.target_amount} 
                           percentage={project.completion_percent} 
                         />
                     </div>
-                    <div className="w-full sm:w-48 flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 sm:border-l border-border pt-4 sm:pt-0 sm:pl-6">
+                    <div className="w-full sm:w-48 flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 sm:border-l border-border pt-6 sm:pt-0 sm:pl-8">
                        <div className="text-center sm:text-right">
-                          <p className="text-xs font-semibold uppercase tracking-wider text-foreground/50 mb-1">Diperuntukkan</p>
-                          <p className="text-2xl font-black text-primary">RM {splitAmount.toFixed(2)}</p>
+                          <p className="text-xs font-black uppercase tracking-widest text-foreground/40 mb-1">Penerimaan</p>
+                          <p className="text-3xl font-black text-primary">RM {splitAmount.toFixed(2)}</p>
                        </div>
                        <button 
                          onClick={() => replaceProject(idx)}
-                         className="text-xs font-medium text-foreground/60 hover:text-foreground underline underline-offset-4 decoration-border hover:decoration-foreground/40 transition-all mt-0 sm:mt-4"
+                         className="flex items-center gap-1.5 text-xs font-bold text-foreground/60 hover:text-red-600 transition-colors mt-0 sm:mt-4 px-3 py-1.5 rounded-lg border border-border hover:border-red-200 hover:bg-red-50"
                        >
+                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeWidth={2}/></svg>
                          Ganti
                        </button>
                     </div>
@@ -268,86 +288,128 @@ export default function DonateFlowPage() {
               ))}
            </div>
 
-           <div className="flex justify-center mt-8">
+           <div className="flex gap-4 pt-6">
+            <button onClick={() => setStep(3)} className="flex-1 px-8 py-5 border-2 border-border rounded-2xl font-bold text-foreground/60 hover:bg-surface-muted transition-colors">Kembali</button>
             <button 
-              onClick={() => setStep(4)}
-              className="bg-primary hover:bg-primary-hover text-white font-bold py-4 px-12 rounded-xl shadow-md transition-all text-lg transform hover:-translate-y-0.5"
+              onClick={() => setStep(5)}
+              className="flex-[2] bg-primary hover:bg-primary-hover text-white font-black py-5 px-8 rounded-2xl shadow-xl shadow-primary/30 transition-all text-xl hover:-translate-y-1 active:scale-95"
             >
-              Sahkan Pilihan
+              Sahkan & Mula Derma
             </button>
           </div>
         </div>
       )}
 
-      {/* STEP 4: Final Summary / Payment info */}
-      {step === 4 && (
-        <div className="space-y-6">
-           <div className="text-center mb-8">
-             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-             </div>
-             <h2 className="text-2xl font-extrabold text-foreground">Sedia untuk Menderma</h2>
-             <p className="text-foreground/70 mt-2 max-w-lg mx-auto">
-               Niat derma anda sebanyak <strong>RM {Number(totalAmount).toFixed(2)}</strong> telah diperuntukkan kepada {actualNum} projek yang disahkan.
-               Sila lengkapkan pindahan ke akaun rasmi di bawah.
-             </p>
-           </div>
-
-           <div className="bg-surface rounded-2xl border border-border overflow-hidden shadow-sm">
-             <div className="divide-y divide-border">
-                {recommendations.map(project => (
-                   <div key={project.slug} className="p-6 sm:p-8 flex flex-col md:flex-row gap-6">
-                     <div className="md:w-1/3 pr-4 border-b md:border-b-0 md:border-r border-border pb-4 md:pb-0">
-                        <h3 className="font-bold text-foreground">{project.mosque_name}</h3>
-                        <p className="text-sm mt-1 text-foreground/60 line-clamp-2 mb-3">{project.title}</p>
-                        <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 inline-block">
-                           <p className="text-xs font-semibold text-foreground/60 uppercase tracking-wider mb-0.5">Derma Anda</p>
-                           <p className="text-xl font-black text-primary">RM {splitAmount.toFixed(2)}</p>
-                        </div>
-                     </div>
-                     <div className="md:w-2/3">
-                        <h4 className="text-sm font-semibold text-foreground/80 mb-3 border-b border-border pb-2 uppercase tracking-wider">Butiran Pembayaran Rasmi</h4>
-                        
-                        {project.donation_method_type === "Both" || project.donation_method_type === "Bank Transfer" ? (
-                          <div className="mb-4 bg-surface-muted rounded-xl p-4 border border-border">
-                              <p className="text-xs font-semibold text-foreground/50 mb-1">Pindahan Terus</p>
-                              <p className="font-medium text-foreground">{project.bank_name}</p>
-                              <p className="font-mono text-lg tracking-wide text-foreground my-1">{project.account_number}</p>
-                              <p className="text-sm font-semibold text-foreground/80 uppercase mt-2">{project.account_name}</p>
-                          </div>
-                        ) : null}
-
-                        {project.donation_method_type === "Both" || project.donation_method_type === "DuitNow QR" ? (
-                          <div className="bg-surface-muted rounded-xl p-4 border border-border flex items-center justify-between">
-                             <div>
-                               <p className="text-xs font-semibold text-foreground/50 mb-1">Imbas untuk Bayar</p>
-                               <p className="font-medium text-foreground mb-1">DuitNow QR Tersedia</p>
-                               <p className="text-xs text-foreground/60">Imbas menggunakan aplikasi perbankan mudah alih anda.</p>
-                             </div>
-                             {project.duitnow_qr_url ? (
-                               <div className="w-16 h-16 bg-white border border-border rounded-lg p-1">
-                                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img src={project.duitnow_qr_url} alt="QR Code" className="w-full h-full object-contain opacity-50 sepia grayscale" />
-                               </div>
-                             ) : (
-                                <div className="w-16 h-16 bg-border/50 rounded-lg"></div>
-                             )}
-                          </div>
-                        ) : null}
-
-                     </div>
+      {/* STEP 5: Sequential Payment */}
+      {step === 5 && (
+        <div className="max-w-2xl mx-auto animate-in slide-in-from-bottom-8 duration-700">
+           {recommendations[currentPaymentIdx] && (
+             <div className="space-y-8">
+                <div className="text-center py-4">
+                   <div className="inline-flex items-center bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-bold border border-primary/20 mb-4 animate-bounce">
+                      Sumbangan {currentPaymentIdx + 1} daripada {actualNum}
                    </div>
-                ))}
-             </div>
-           </div>
+                   <h2 className="text-4xl font-black text-foreground mb-2">Resit Pembayaran</h2>
+                   <p className="text-foreground/60">Sila lengkapkan bayaran kepada akaun masjid yang sah.</p>
+                </div>
 
-           <div className="flex justify-center mt-8">
-             <Link href="/" className="px-6 py-3 border-2 border-border text-foreground hover:bg-surface-muted rounded-xl font-medium transition-colors">
-               Kembali ke Halaman Utama
-             </Link>
-           </div>
+                <div className="bg-surface rounded-3xl border-2 border-primary/20 p-8 shadow-2xl relative overflow-hidden">
+                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-16 -mt-16 pointer-events-none" />
+                   
+                   <div className="flex flex-col items-center mb-10 text-center relative z-10">
+                      <div className="w-20 h-20 rounded-2xl bg-primary text-white flex items-center justify-center font-black text-3xl mb-4 shadow-lg shadow-primary/30">
+                         {recommendations[currentPaymentIdx].mosque_name.charAt(0)}
+                      </div>
+                      <h3 className="text-2xl font-bold text-foreground">{recommendations[currentPaymentIdx].mosque_name}</h3>
+                      <p className="text-foreground/50 font-medium">{recommendations[currentPaymentIdx].state}</p>
+                      
+                      <div className="mt-8 bg-black text-white px-8 py-4 rounded-2xl">
+                         <span className="text-xs font-bold uppercase tracking-widest block opacity-50 mb-1">Jumlah Perlu Dibayar</span>
+                         <span className="text-4xl font-black tabular-nums">RM {splitAmount.toFixed(2)}</span>
+                      </div>
+                   </div>
+
+                   <div className="space-y-6 relative z-10">
+                      {/* Payment Methods toggle or both */}
+                      <div className="grid grid-cols-1 gap-4">
+                         {recommendations[currentPaymentIdx].donation_method_type !== "DuitNow QR" && (
+                            <div className="bg-surface-muted rounded-2xl p-6 border border-border">
+                               <p className="text-xs font-black text-foreground/40 uppercase tracking-widest mb-3">Pindahan Bank</p>
+                               <div className="flex justify-between items-center">
+                                  <div>
+                                     <p className="font-bold text-foreground text-lg">{recommendations[currentPaymentIdx].bank_name}</p>
+                                     <p className="font-mono text-xl tracking-wider text-primary font-black mt-1">
+                                        {recommendations[currentPaymentIdx].account_number}
+                                     </p>
+                                     <p className="text-sm font-bold text-foreground/60 uppercase mt-2">{recommendations[currentPaymentIdx].account_name}</p>
+                                  </div>
+                                  <button 
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(recommendations[currentPaymentIdx].account_number || "");
+                                      alert("Nombor akaun disalin!");
+                                    }}
+                                    className="p-3 bg-white border border-border rounded-xl hover:bg-primary/5 hover:border-primary/50 transition-all active:scale-90"
+                                  >
+                                     <svg className="w-6 h-6 text-foreground/40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" strokeWidth={2}/></svg>
+                                  </button>
+                               </div>
+                            </div>
+                         )}
+
+                         {recommendations[currentPaymentIdx].donation_method_type !== "Bank Transfer" && (
+                            <div className="bg-surface-muted rounded-2xl p-6 border-2 border-primary/10 flex flex-col items-center">
+                               <p className="text-xs font-black text-foreground/40 uppercase tracking-widest mb-4">Imbas DuitNow QR</p>
+                               <div className="w-48 h-48 bg-white border-4 border-white rounded-3xl shadow-lg relative p-2 group overflow-hidden">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img 
+                                    src={recommendations[currentPaymentIdx].duitnow_qr_url} 
+                                    alt="QR Payment" 
+                                    className="w-full h-full object-contain"
+                                  />
+                               </div>
+                               <p className="text-xs font-bold text-foreground/50 mt-4 text-center px-4">Imbas guna aplikasi bank anda untuk bayaran terus ke akaun masjid.</p>
+                            </div>
+                         )}
+                      </div>
+                   </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-4">
+                   <button 
+                     disabled={currentPaymentIdx === 0}
+                     onClick={() => setCurrentPaymentIdx(prev => prev - 1)}
+                     className="px-8 py-5 border-2 border-border rounded-2xl font-black text-foreground/60 hover:bg-surface-muted transition-all disabled:opacity-0"
+                   >
+                     Sebelumnya
+                   </button>
+                   
+                   {currentPaymentIdx < actualNum - 1 ? (
+                      <button 
+                        onClick={() => setCurrentPaymentIdx(prev => prev + 1)}
+                        className="flex-1 bg-primary hover:bg-primary-hover text-white font-black py-5 px-8 rounded-2xl shadow-xl shadow-primary/30 transition-all text-xl hover:-translate-y-1"
+                      >
+                        Selesai & Ke Masjid Seterusnya
+                      </button>
+                   ) : (
+                      <Link 
+                        href="/"
+                        className="flex-1 bg-black hover:bg-zinc-800 text-white font-black py-5 px-8 rounded-2xl shadow-xl transition-all text-xl text-center hover:-translate-y-1"
+                      >
+                        Selesai Semua Derma
+                      </Link>
+                   )}
+                </div>
+
+                <div className="text-center">
+                   <button 
+                     onClick={() => setStep(4)}
+                     className="text-sm font-bold text-foreground/40 hover:text-primary transition-colors underline"
+                   >
+                     Kemaskini Senarai Masjid
+                   </button>
+                </div>
+             </div>
+           )}
         </div>
       )}
 
