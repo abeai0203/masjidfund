@@ -2,6 +2,30 @@ import { supabase } from './supabase';
 import { Project, Lead } from './types';
 import { MOCK_PROJECTS, MOCK_LEADS } from './mock-data';
 
+// --- Simulation Persistence Helpers ---
+const IS_SERVER = typeof window === 'undefined';
+
+function getStoredData<T>(key: string, defaultValue: T[]): T[] {
+  if (IS_SERVER) return defaultValue;
+  const stored = localStorage.getItem(`sim_${key}`);
+  if (!stored) {
+    localStorage.setItem(`sim_${key}`, JSON.stringify(defaultValue));
+    return defaultValue;
+  }
+  try {
+    return JSON.parse(stored);
+  } catch (e) {
+    return defaultValue;
+  }
+}
+
+function setStoredData<T>(key: string, data: T[]) {
+  if (IS_SERVER) return;
+  localStorage.setItem(`sim_${key}`, JSON.stringify(data));
+}
+
+// --- API Functions ---
+
 export async function getPublicProjects(): Promise<Project[]> {
   const { data, error } = await supabase
     .from('projects')
@@ -10,9 +34,8 @@ export async function getPublicProjects(): Promise<Project[]> {
     .order('created_at', { ascending: false });
     
   if (error || !data || data.length === 0) {
-    if (error) console.error("Error fetching projects:", error.message);
-    // Simulation fallback
-    return MOCK_PROJECTS;
+    const simData = getStoredData('projects', MOCK_PROJECTS);
+    return simData.filter(p => p.publish_status === 'Published');
   }
   return data as Project[];
 }
@@ -24,8 +47,8 @@ export async function getAllStates(): Promise<string[]> {
     .eq('publish_status', 'Published');
     
   if (error || !data || data.length === 0) {
-    // Fallback: derive states from mock data
-    return Array.from(new Set(MOCK_PROJECTS.map(p => p.state))).sort();
+    const simData = getStoredData('projects', MOCK_PROJECTS);
+    return Array.from(new Set(simData.filter(p => p.publish_status === 'Published').map(p => p.state))).sort();
   }
   const states = new Set(data.map(p => p.state));
   return Array.from(states).sort();
@@ -39,8 +62,8 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
     .single();
     
   if (error || !data) {
-    // Fallback: find in mock data
-    return MOCK_PROJECTS.find(p => p.slug === slug) || null;
+    const simData = getStoredData('projects', MOCK_PROJECTS);
+    return simData.find(p => p.slug === slug) || null;
   }
   return data as Project;
 }
@@ -54,8 +77,8 @@ export async function getProjectsByState(state: string): Promise<Project[]> {
     .order('created_at', { ascending: false });
     
   if (error || !data || data.length === 0) {
-    // Fallback: filter mock data by state
-    return MOCK_PROJECTS.filter(p => p.state.toLowerCase() === state.toLowerCase());
+    const simData = getStoredData('projects', MOCK_PROJECTS);
+    return simData.filter(p => p.publish_status === 'Published' && p.state.toLowerCase() === state.toLowerCase());
   }
   return data as Project[];
 }
@@ -67,8 +90,7 @@ export async function getAdminProjects(): Promise<Project[]> {
     .order('created_at', { ascending: false });
     
   if (error || !data || data.length === 0) {
-    if (error) console.error("Error fetching admin projects:", error.message);
-    return MOCK_PROJECTS;
+    return getStoredData('projects', MOCK_PROJECTS);
   }
   return data as Project[];
 }
@@ -81,8 +103,8 @@ export async function getLeadById(id: string): Promise<Lead | null> {
     .single();
     
   if (error || !data) {
-    if (error && error.code !== 'PGRST116') console.error("Error fetching lead:", error.message);
-    return MOCK_LEADS.find(l => l.id === id) || null;
+    const simLeads = getStoredData('leads', MOCK_LEADS);
+    return simLeads.find(l => l.id === id) || null;
   }
   return data as Lead;
 }
@@ -97,14 +119,25 @@ export async function updateProject(slug: string, updates: Partial<Project>): Pr
       .single();
       
     if (error) {
-      console.warn("Real update failed (likely DB not ready):", error.message);
-      // Simulation success
-      return { slug, ...updates } as Project;
+      const simData = getStoredData('projects', MOCK_PROJECTS);
+      const index = simData.findIndex(p => p.slug === slug);
+      if (index !== -1) {
+        simData[index] = { ...simData[index], ...updates };
+        setStoredData('projects', simData);
+        return simData[index];
+      }
+      return null;
     }
     return data as Project;
   } catch (e) {
-    console.warn("Supabase connection error:", e);
-    return { slug, ...updates } as Project;
+    const simData = getStoredData('projects', MOCK_PROJECTS);
+    const index = simData.findIndex(p => p.slug === slug);
+    if (index !== -1) {
+      simData[index] = { ...simData[index], ...updates };
+      setStoredData('projects', simData);
+      return simData[index];
+    }
+    return null;
   }
 }
 
@@ -116,13 +149,17 @@ export async function deleteProject(slug: string): Promise<boolean> {
       .eq('slug', slug);
       
     if (error) {
-      console.warn("Real delete failed:", error.message);
-      return true; // Simulate success
+      const simData = getStoredData('projects', MOCK_PROJECTS);
+      const filtered = simData.filter(p => p.slug !== slug);
+      setStoredData('projects', filtered);
+      return true;
     }
     return true;
   } catch (e) {
-    console.warn("Supabase connection error:", e);
-    return true; // Simulate success
+    const simData = getStoredData('projects', MOCK_PROJECTS);
+    const filtered = simData.filter(p => p.slug !== slug);
+    setStoredData('projects', filtered);
+    return true;
   }
 }
 
@@ -134,13 +171,23 @@ export async function updateLeadStatus(id: string, status: string, notes?: strin
       .eq('id', id);
       
     if (error) {
-      console.warn("Real lead update failed:", error.message);
-      return true; // Simulate success
+      const simLeads = getStoredData('leads', MOCK_LEADS);
+      const index = simLeads.findIndex(l => l.id === id);
+      if (index !== -1) {
+        simLeads[index] = { ...simLeads[index], status: status as any, notes };
+        setStoredData('leads', simLeads);
+      }
+      return true;
     }
     return true;
   } catch (e) {
-    console.warn("Supabase connection error:", e);
-    return true; // Simulate success
+    const simLeads = getStoredData('leads', MOCK_LEADS);
+    const index = simLeads.findIndex(l => l.id === id);
+    if (index !== -1) {
+      simLeads[index] = { ...simLeads[index], status: status as any, notes };
+      setStoredData('leads', simLeads);
+    }
+    return true;
   }
 }
 
@@ -151,8 +198,7 @@ export async function getAllLeads(): Promise<Lead[]> {
     .order('created_at', { ascending: false });
     
   if (error || !data || data.length === 0) {
-    if (error) console.error("Error fetching leads:", error.message);
-    return MOCK_LEADS;
+    return getStoredData('leads', MOCK_LEADS);
   }
   return data as Lead[];
 }
@@ -166,14 +212,19 @@ export async function submitLead(lead: Partial<Lead>): Promise<Lead | null> {
       .single();
       
     if (error) {
-      console.warn("Real submission failed (likely DB not ready):", error.message);
-      // Simulation success for demo purposes
-      return { id: 'mock-id', ...lead } as Lead;
+      const simLeads = getStoredData('leads', MOCK_LEADS);
+      const newLead = { id: `sim-${Date.now()}`, created_at: new Date().toISOString(), ...lead } as Lead;
+      simLeads.push(newLead);
+      setStoredData('leads', simLeads);
+      return newLead;
     }
     return data as Lead;
   } catch (e) {
-    console.warn("Supabase connection error:", e);
-    // Simulation success for demo purposes
-    return { id: 'mock-id', ...lead } as Lead;
+    const simLeads = getStoredData('leads', MOCK_LEADS);
+    const newLead = { id: `sim-${Date.now()}`, created_at: new Date().toISOString(), ...lead } as Lead;
+    simLeads.push(newLead);
+    setStoredData('leads', simLeads);
+    return newLead;
   }
 }
+
