@@ -26,34 +26,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-full">
-      {/* Hero Section */}
-      <section className="bg-surface-muted py-20 px-4 sm:px-6 lg:px-8 border-b border-border">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground tracking-tight mb-6">
-            Perkasa Komuniti Melalui <span className="text-primary">Infaq yang Diyakini</span>
-          </h1>
-          <p className="text-lg sm:text-xl text-foreground/80 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Temui dan sokong pembinaan masjid, pengubahsuaian, dan keperluan dana segera yang disahkan di seluruh Malaysia. Pastikan sumbangan anda sampai kepada mereka yang benar-benar memerlukan.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/donate"
-              className="bg-primary hover:bg-primary-hover text-white px-10 py-4 rounded-xl text-lg font-bold transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:-translate-y-1 flex items-center justify-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-              Agihkan Derma Anda
-            </Link>
-            <Link
-              href="/projects"
-              className="bg-surface border-2 border-border text-foreground hover:bg-surface-muted px-8 py-4 rounded-xl text-lg font-medium transition-all shadow-sm"
-            >
-              Semak Projek
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Magic CTA Banner - Moved Up & Enhanced */}
+      {/* Magic CTA Banner - Primary Focus */}
       <section className="bg-primary py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -164,6 +137,33 @@ export default function Home() {
               <h3 className="font-semibold text-lg mb-2">Status Telus</h3>
               <p className="text-sm text-foreground/70 leading-relaxed">Penunjuk lencana yang jelas menunjukkan tahap pengesahan yang telah dilengkapkan untuk setiap projek.</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Hero Section - Moved to Bottom per User Request */}
+      <section className="bg-surface-muted py-24 px-4 sm:px-6 lg:px-8 border-t border-border">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl sm:text-5xl font-extrabold text-foreground tracking-tight mb-6">
+            Perkasa Komuniti Melalui <span className="text-primary">Infaq yang Diyakini</span>
+          </h2>
+          <p className="text-lg sm:text-xl text-foreground/80 mb-10 max-w-2xl mx-auto leading-relaxed">
+            Temui dan sokong pembinaan masjid, pengubahsuaian, dan keperluan dana segera yang disahkan di seluruh Malaysia. Pastikan sumbangan anda sampai kepada mereka yang benar-benar memerlukan.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/donate"
+              className="bg-primary hover:bg-primary-hover text-white px-10 py-4 rounded-xl text-lg font-bold transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:-translate-y-1 flex items-center justify-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+              Agihkan Derma Anda
+            </Link>
+            <Link
+              href="/projects"
+              className="bg-surface border-2 border-border text-foreground hover:bg-surface-muted px-8 py-4 rounded-xl text-lg font-medium transition-all shadow-sm"
+            >
+              Semak Projek
+            </Link>
           </div>
         </div>
       </section>
