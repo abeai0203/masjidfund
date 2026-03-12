@@ -70,10 +70,8 @@ export default function DonationModal({
             {activeTab === "qr" && project.duitnow_qr_url ? (
               <div className="text-center w-full">
                 <p className="text-sm font-medium text-foreground mb-4">Imbas menggunakan aplikasi perbankan anda</p>
-                <div className="bg-surface-muted border-2 border-dashed border-border p-4 rounded-xl inline-block max-w-[250px] w-full aspect-square flex items-center justify-center mx-auto mb-4">
-                  <span className="text-foreground/40 text-sm font-medium">Ruang Letak Kod QR</span>
-                  {/* Replace with actual image when available */}
-                  {/* <img src={project.duitnow_qr_url} alt="DuitNow QR" className="w-full h-auto rounded-lg" /> */}
+                <div className="bg-white border-2 border-border p-4 rounded-xl inline-block max-w-[250px] w-full aspect-square flex items-center justify-center mx-auto mb-4 overflow-hidden">
+                  <img src={project.duitnow_qr_url} alt="DuitNow QR" className="w-full h-auto rounded-lg object-contain" />
                 </div>
                 <div className="bg-primary-light/30 text-primary-hover px-4 py-3 rounded-lg text-sm mb-2 text-left border border-primary/20">
                   <div className="font-semibold mb-1">Nota Penting:</div>
