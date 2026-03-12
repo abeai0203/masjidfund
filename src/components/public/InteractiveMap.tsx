@@ -1,45 +1,65 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
+import * as d3 from "d3-geo";
 import { getPublicProjects } from "@/lib/api";
+import malaysiaGeoJSON from "@/lib/malaysia.json";
 
-const COORDINATES: Record<string, { x: number, y: number }> = {
-  "Selangor": { x: 22, y: 55 },
-  "Hazelton Eco Forest": { x: 25, y: 53 },
-  "Lestari Putra": { x: 19, y: 58 },
-  "Al-Hidayah": { x: 23, y: 56 },
-  "Kuala Lumpur": { x: 24, y: 58 },
-  "Johor": { x: 38, y: 80 },
-  "Pulau Pinang": { x: 15, y: 28 },
-  "Perak": { x: 18, y: 42 },
-  "Kedah": { x: 13, y: 20 },
-  "Pahang": { x: 32, y: 52 },
-  "Terengganu": { x: 38, y: 36 },
-  "Kelantan": { x: 32, y: 24 },
-  "Sarawak": { x: 70, y: 72 },
-  "Sabah": { x: 88, y: 35 },
-};
+interface ProjectPoint {
+  slug: string;
+  mosque_name: string;
+  target_amount: number;
+  x: number;
+  y: number;
+}
 
 export default function InteractiveMap() {
-  const [projects, setProjects] = useState<any[]>([]);
+  const [projects, setProjects] = useState<ProjectPoint[]>([]);
   const [activeProject, setActiveProject] = useState<string | null>(null);
+
+  // Setup D3 Projection to match the reference image style
+  const projection = useMemo(() => {
+    return d3.geoMercator()
+      .center([109.5, 4.2]) // Centered between Semenanjung and Borneo
+      .scale(2800)         // Adjusted for a good fit
+      .translate([500, 225]); // Half of 1000x450
+  }, []);
+
+  const pathGenerator = d3.geoPath().projection(projection);
 
   useEffect(() => {
     async function loadData() {
-      const data = await getPublicProjects();
-      const mapped = data.map(p => {
-        const coords = COORDINATES[p.mosque_name] || COORDINATES[p.state] || { x: 50, y: 50 };
+      const publicProjects = await getPublicProjects();
+      
+      const mapped = publicProjects.map(p => {
+        // Find center of the state in GeoJSON to place the label generally
+        const stateFeature = (malaysiaGeoJSON as any).features.find((f: any) => 
+          f.properties.name.toLowerCase().includes(p.state.toLowerCase()) ||
+          p.state.toLowerCase().includes(f.properties.name.toLowerCase())
+        );
+
+        let coords: [number, number] = [101.9758, 4.2105]; // Default center
+        if (stateFeature) {
+          const center = d3.geoCentroid(stateFeature);
+          coords = [center[0], center[1]];
+        }
+
+        const [x, y] = projection(coords) || [0, 0];
+
         return {
-          ...p,
-          x: coords.x + (Math.random() - 0.5) * 4, // Jitter
-          y: coords.y + (Math.random() - 0.5) * 4
+          slug: p.slug,
+          mosque_name: p.mosque_name,
+          target_amount: p.target_amount,
+          x: x / 10, // Scale to % for absolute positioning
+          y: y / 4.5
         };
       });
+
       setProjects(mapped);
     }
     loadData();
-  }, []);
+  }, [projection]);
 
   const formatAmount = (num: number) => {
     if (num >= 1000000) return `RM${(num / 1000000).toFixed(1)}M`;
@@ -48,80 +68,91 @@ export default function InteractiveMap() {
   };
 
   return (
-    <div className="w-full bg-[#fdfbf7] p-4 lg:p-12">
+    <div className="w-full bg-white py-12 px-4">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-16">
-          <div className="space-y-3">
-             <div className="inline-flex items-center gap-2 bg-primary/5 text-primary px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border border-primary/10">
-               <span className="w-2 h-2 bg-primary rounded-full animate-ping"></span> Live Infaq Explorer
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div className="space-y-2">
+             <div className="inline-flex items-center gap-2 bg-[#88b2b6]/10 text-[#88b2b6] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-[#88b2b6]/20">
+               Live Infaq Explorer
              </div>
-             <h2 className="text-4xl font-black text-foreground tracking-tight">Cari Masjid Berdekatan.</h2>
-             <p className="text-foreground/50 max-w-sm font-medium">Klik pada tag harga untuk melihat butiran & infaq terus.</p>
+             <h2 className="text-3xl font-black text-slate-800 tracking-tight">Terokai Masjid di Malaysia</h2>
+             <p className="text-slate-500 text-sm font-medium">Klik pada harga untuk butiran projek.</p>
           </div>
           
-          <div className="flex gap-4 items-center">
-             <div className="text-right">
-                <span className="block text-[10px] font-black text-foreground/30 uppercase tracking-widest">Dana Diperlukan</span>
-                <span className="text-3xl font-black text-primary">RM{(projects.reduce((acc, p) => acc + p.target_amount, 0) / 1000000).toFixed(1)}M</span>
+          <div className="flex gap-8">
+             <div className="text-right border-r border-slate-100 pr-8">
+                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dana Diperlukan</span>
+                <span className="text-2xl font-black text-primary">RM{(projects.reduce((acc, p) => acc + p.target_amount, 0) / 1000000).toFixed(1)}M</span>
              </div>
-             <div className="w-px h-12 bg-border"></div>
              <div className="text-right">
-                <span className="block text-[10px] font-black text-foreground/30 uppercase tracking-widest">Masjid Aktif</span>
-                <span className="text-3xl font-black text-foreground">{projects.length}</span>
+                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Projek Aktif</span>
+                <span className="text-2xl font-black text-slate-800">{projects.length}</span>
              </div>
           </div>
         </div>
 
-        {/* The "Map" - Custom SVG Look */}
-        <div className="relative aspect-[21/9] w-full bg-white rounded-[3rem] border border-border shadow-2xl shadow-primary/5 overflow-hidden group">
-           {/* Abstract Malaysia Background */}
-           <div className="absolute inset-0 flex items-center justify-center opacity-[0.05] grayscale brightness-125 pointer-events-none transition-transform duration-1000 group-hover:scale-105">
-              <svg className="w-full h-full p-20" viewBox="0 0 1000 450" fill="currentColor">
-                 {/* Simplified Peninsular */}
-                 <path d="M100 50 Q 150 20, 200 50 T 250 150 Q 280 250, 220 350 T 150 400 Q 80 350, 60 250 T 100 50 Z" />
-                 {/* Simplified Borneo */}
-                 <path d="M550 200 Q 650 150, 800 180 T 900 250 Q 850 350, 700 380 T 550 300 Z" />
-              </svg>
-           </div>
+        {/* The Map Component */}
+        <div className="relative w-full aspect-[21/9] bg-slate-50/50 rounded-[40px] border border-slate-100 overflow-hidden group">
+           
+           {/* SVG Map Data (Matching the reference style) */}
+           <svg 
+             viewBox="0 0 1000 450" 
+             className="absolute inset-0 w-full h-full drop-shadow-xl"
+           >
+             <g className="map-paths">
+               {(malaysiaGeoJSON as any).features.map((feature: any, i: number) => (
+                 <path
+                   key={i}
+                   d={pathGenerator(feature) || ""}
+                   className="fill-[#88b2b6] stroke-white stroke-[0.8] hover:fill-[#7aa1a5] transition-colors duration-300"
+                 />
+               ))}
+             </g>
+           </svg>
 
-           {/* Floating Grid pattern */}
-           <div className="absolute inset-0 bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:40px_40px] opacity-[0.03]"></div>
-
-           {/* Live Project Tags */}
-           <div className="relative w-full h-full p-12">
+           {/* Interactive Markers (Price Tags) */}
+           <div className="absolute inset-0 pointer-events-none">
               {projects.map((project) => (
                 <div 
                   key={project.slug}
-                  className="absolute z-20 transition-all duration-300 transform"
-                  style={{ left: `${project.x}%`, top: `${project.y}%` }}
+                  className="absolute pointer-events-auto"
+                  style={{ 
+                    left: `${project.x}%`, 
+                    top: `${project.y}%`,
+                    transform: 'translate(-50%, -100%)' 
+                  }}
                   onMouseEnter={() => setActiveProject(project.slug)}
                   onMouseLeave={() => setActiveProject(null)}
                 >
                   <Link href={`/projects/${project.slug}`} className="block">
-                    <div className="relative group/tag">
-                       {/* Connection Line */}
-                       <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-px h-12 bg-gradient-to-t from-primary/30 to-transparent"></div>
-                       
-                       {/* The Tag */}
+                    <div className="relative">
+                       {/* Floating Label */}
                        <div className={`
-                         flex flex-col items-center whitespace-nowrap transition-all duration-500
+                         flex flex-col items-center whitespace-nowrap transition-all duration-300
                          ${activeProject === project.slug ? '-translate-y-2' : ''}
                        `}>
                           <span className={`
-                            text-[10px] font-black text-foreground/40 uppercase tracking-tighter mb-1 transition-opacity
+                            text-[9px] font-black text-[#5a8084] uppercase tracking-tighter mb-1 transition-opacity
                             ${activeProject === project.slug ? 'opacity-100' : 'opacity-0'}
                           `}>
                             {project.mosque_name}
                           </span>
+                          
                           <div className={`
-                            px-4 py-2 rounded-2xl shadow-xl flex items-center gap-3 border-2 transition-all
+                            px-3 py-1.5 rounded-xl shadow-lg border transition-all duration-300 flex items-center gap-2
                             ${activeProject === project.slug 
                               ? 'bg-primary border-primary text-white scale-110 shadow-primary/30' 
-                              : 'bg-white border-white text-foreground hover:border-primary/20'}
+                              : 'bg-white/90 backdrop-blur-sm border-slate-200 text-slate-800'}
                           `}>
-                             <div className={`w-2 h-2 rounded-full ${activeProject === project.slug ? 'bg-white animate-pulse' : 'bg-primary'}`}></div>
-                             <span className="text-sm font-black tracking-tight">{formatAmount(project.target_amount)}</span>
+                             <div className={`w-1.5 h-1.5 rounded-full ${activeProject === project.slug ? 'bg-white animate-pulse' : 'bg-primary'}`}></div>
+                             <span className="text-xs font-black tracking-tight">{formatAmount(project.target_amount)}</span>
                           </div>
+                          
+                          {/* Anchor Pointer */}
+                          <div className={`
+                            w-2 h-2 rotate-45 -mt-1 border-r border-b transition-colors
+                            ${activeProject === project.slug ? 'bg-primary border-primary' : 'bg-white/90 border-slate-200'}
+                          `}></div>
                        </div>
                     </div>
                   </Link>
@@ -129,19 +160,18 @@ export default function InteractiveMap() {
               ))}
            </div>
 
-           {/* Map Legend */}
-           <div className="absolute bottom-8 left-8 flex items-center gap-6 bg-white/80 backdrop-blur-md px-6 py-3 rounded-2xl border border-border shadow-sm pointer-events-none">
-              <div className="flex items-center gap-2">
-                 <div className="w-2.5 h-2.5 bg-primary rounded-full"></div>
-                 <span className="text-[10px] font-bold text-foreground/60 uppercase tracking-widest">Projek Terkini</span>
-              </div>
-              <div className="flex items-center gap-2">
-                 <div className="w-2.5 h-2.5 bg-primary/20 rounded-full border border-primary/40"></div>
-                 <span className="text-[10px] font-bold text-foreground/60 uppercase tracking-widest">Sokongan Diperlukan</span>
-              </div>
+           {/* Custom Instructions */}
+           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/40 text-[10px] font-bold text-[#5a8084] uppercase tracking-widest shadow-sm">
+             Klik pada masjid untuk infaq
            </div>
         </div>
       </div>
+
+      <style jsx global>{`
+        .map-paths path {
+          cursor: pointer;
+        }
+      `}</style>
     </div>
   );
 }
