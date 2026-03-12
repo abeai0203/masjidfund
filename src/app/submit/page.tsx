@@ -233,6 +233,7 @@ export default function SubmitPage() {
 
       if (formRef.current) {
         const f = formRef.current;
+        f.reset(); // Clear old data first
 
         // Fill Everything
         if (isLestari) {
