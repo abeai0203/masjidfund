@@ -9,10 +9,24 @@ export default function SubmitPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [states, setStates] = useState<string[]>([]);
+  const [files, setFiles] = useState<Record<string, File | null>>({
+    qr: null,
+    main_image: null,
+    document: null
+  });
 
   useEffect(() => {
     getAllStates().then(setStates);
   }, []);
+
+  const handleFileChange = (key: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setFiles(prev => ({ ...prev, [key]: file }));
+  };
+
+  const triggerInput = (id: string) => {
+    document.getElementById(id)?.click();
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -224,13 +238,37 @@ export default function SubmitPage() {
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-foreground/80 mb-2">Muat Naik Imej DuitNow QR</label>
-              <div className="border-2 border-dashed border-border rounded-xl p-6 text-center bg-surface hover:bg-surface-muted transition-colors cursor-pointer">
-                <svg className="mx-auto h-10 w-10 text-foreground/30 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
-                <span className="text-sm font-medium text-primary">Klik untuk muat naik</span>
-                <span className="text-sm text-foreground/60"> atau seret dan lepas</span>
-                <p className="text-xs text-foreground/40 mt-1">PNG, JPG sehingga 5MB</p>
+              <input 
+                type="file" 
+                id="qr_input" 
+                className="hidden" 
+                accept="image/*" 
+                onChange={handleFileChange('qr')}
+              />
+              <div 
+                onClick={() => triggerInput('qr_input')}
+                className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer ${
+                  files.qr ? 'border-primary bg-primary/5' : 'border-border bg-surface hover:bg-surface-muted'
+                }`}
+              >
+                {files.qr ? (
+                  <div className="flex flex-col items-center">
+                    <svg className="h-10 w-10 text-primary mb-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-sm font-bold text-primary">{files.qr.name}</span>
+                    <span className="text-xs text-foreground/50 mt-1">Klik untuk tukar</span>
+                  </div>
+                ) : (
+                  <>
+                    <svg className="mx-auto h-10 w-10 text-foreground/30 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <span className="text-sm font-medium text-primary">Klik untuk muat naik</span>
+                    <span className="text-sm text-foreground/60"> atau seret dan lepas</span>
+                    <p className="text-xs text-foreground/40 mt-1">PNG, JPG sehingga 5MB</p>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -245,21 +283,68 @@ export default function SubmitPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-semibold text-foreground/80 mb-2">Imej Utama Projek *</label>
-              <div className="border-2 border-dashed border-border rounded-xl p-6 text-center bg-surface-muted hover:bg-surface-muted/70 transition-colors cursor-pointer">
-                <svg className="mx-auto h-8 w-8 text-foreground/30 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span className="text-sm font-medium text-primary">Muat Naik Gambar Kenit</span>
+              <input 
+                type="file" 
+                id="main_image_input" 
+                className="hidden" 
+                accept="image/*" 
+                required
+                onChange={handleFileChange('main_image')}
+              />
+              <div 
+                onClick={() => triggerInput('main_image_input')}
+                className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer ${
+                  files.main_image ? 'border-primary bg-primary/5' : 'border-border bg-surface-muted hover:bg-surface-muted/70'
+                }`}
+              >
+                {files.main_image ? (
+                  <div className="flex flex-col items-center">
+                    <svg className="h-8 w-8 text-primary mb-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-sm font-bold text-primary truncate max-w-full">{files.main_image.name}</span>
+                  </div>
+                ) : (
+                  <>
+                    <svg className="mx-auto h-8 w-8 text-foreground/30 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-sm font-medium text-primary">Muat Naik Gambar Kenit</span>
+                  </>
+                )}
               </div>
             </div>
              <div>
               <label className="block text-sm font-semibold text-foreground/80 mb-2">Dokumen Sokongan (Pilihan)</label>
-              <div className="border-2 border-dashed border-border rounded-xl p-6 text-center bg-surface-muted hover:bg-surface-muted/70 transition-colors cursor-pointer">
-                 <svg className="mx-auto h-8 w-8 text-foreground/30 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span className="text-sm font-medium text-primary">Muat Naik dokumen PDF</span>
-                 <p className="text-xs text-foreground/40 mt-1">cth. Surat rasmi majlis</p>
+              <input 
+                type="file" 
+                id="doc_input" 
+                className="hidden" 
+                accept=".pdf" 
+                onChange={handleFileChange('document')}
+              />
+              <div 
+                onClick={() => triggerInput('doc_input')}
+                className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer ${
+                  files.document ? 'border-primary bg-primary/5' : 'border-border bg-surface-muted hover:bg-surface-muted/70'
+                }`}
+              >
+                {files.document ? (
+                  <div className="flex flex-col items-center">
+                    <svg className="h-8 w-8 text-primary mb-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm2 10a1 1 0 100 2h4a1 1 0 100-2H8z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-sm font-bold text-primary truncate max-w-full">{files.document.name}</span>
+                  </div>
+                ) : (
+                  <>
+                    <svg className="mx-auto h-8 w-8 text-foreground/30 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span className="text-sm font-medium text-primary">Muat Naik dokumen PDF</span>
+                    <p className="text-xs text-foreground/40 mt-1">cth. Surat rasmi majlis</p>
+                  </>
+                )}
               </div>
             </div>
           </div>
