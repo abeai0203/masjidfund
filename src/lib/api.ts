@@ -338,10 +338,26 @@ export async function submitLead(lead: Partial<Lead>): Promise<Lead | null> {
 }
 
 export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
+  // 1. Fetch existing data for deduplication
+  const [existingProjects, existingLeads] = await Promise.all([
+    getAdminProjects(),
+    getAllLeads()
+  ]);
+
+  const existingUrls = new Set([
+    ...existingProjects.map(p => p.slug), // Slugs are often derived from urls or names
+    ...existingLeads.map(l => l.source_url).filter(Boolean)
+  ]);
+
+  const existingAccounts = new Set([
+    ...existingProjects.map(p => p.account_number).filter(Boolean),
+    ...existingLeads.map(l => l.detected_acc_number).filter(Boolean)
+  ]);
+
   // Simulate an AI search process
-  await new Promise(resolve => setTimeout(resolve, 2500));
+  await new Promise(resolve => setTimeout(resolve, 2000));
   
-  return [
+  const rawResults: DiscoveryLead[] = [
     {
       discovery_id: "disc_001",
       confidence: 98,
@@ -389,4 +405,13 @@ export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
       image_url: "https://images.unsplash.com/photo-1592591544534-82000214a601?auto=format&fit=crop&q=80&w=800"
     }
   ];
+
+  // STRICT FILTERING:
+  // 1. Must have QR
+  // 2. Must not exist in DB (Deduplication)
+  return rawResults.filter(item => {
+    const hasQr = !!item.detected_qr;
+    const isDuplicate = existingUrls.has(item.source_url!) || (item.detected_acc_number && existingAccounts.has(item.detected_acc_number));
+    return hasQr && !isDuplicate;
+  });
 }
