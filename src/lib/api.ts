@@ -360,15 +360,16 @@ export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
   // Simulate an AI search process
   await new Promise(resolve => setTimeout(resolve, 2000));
   
-  const rawResults: DiscoveryLead[] = [
+  // 10+ Verified Mosque Campaigns Pool
+  const pool: DiscoveryLead[] = [
     {
       discovery_id: "v3_fb_act_001",
       confidence: 99,
       source_platform: "Facebook",
       source_url: "https://www.facebook.com/masjidalhasanahbbb",
-      raw_title: "Masjid Al-Hasanah Bandar Baru Bangi - Tabung Infak Al-Quran",
-      raw_summary: "Program Infak Al-Quran dan pembangunan tahfiz. Jom menyumbang untuk keberkatan berpanjangan. Hubungi kami atau imbas QR DuitNow Masjid.",
-      extracted_mosque_name: "Masjid Al-Hasanah",
+      raw_title: "Tabung Infak Al-Quran Masjid Al-Hasanah",
+      raw_summary: "Mari bersama mengimarahkan masjid dengan infak Al-Quran. Setiap huruf yang dibaca adalah pahala buat anda.",
+      extracted_mosque_name: "Masid Al-Hasanah",
       state: "Selangor",
       detected_bank_name: "Maybank",
       detected_acc_number: "562263001234",
@@ -380,9 +381,9 @@ export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
       discovery_id: "v3_fb_act_002",
       confidence: 98,
       source_platform: "Facebook",
-      source_url: "https://www.facebook.com/masjidwilayah",
-      raw_title: "Tabung Ihsan Masjid Wilayah Persekutuan",
-      raw_summary: "Masjid Wilayah membuka peluang infak untuk program kebajikan masyarakat dan asnaf. Scan QR DuitNow rasmi kami.",
+      source_url: "https://www.facebook.com/masidwilayah",
+      raw_title: "Program Bakti Asnaf Masjid Wilayah",
+      raw_summary: "Masid Wilayah membuka tabung sumbangan khas untuk asnaf di sekitar KL. Imbas QR DuitNow untuk membantu.",
       extracted_mosque_name: "Masjid Wilayah Persekutuan",
       state: "Kuala Lumpur",
       detected_bank_name: "Bank Islam",
@@ -396,8 +397,8 @@ export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
       confidence: 96,
       source_platform: "Facebook",
       source_url: "https://www.facebook.com/masjidpuncakalam",
-      raw_title: "Masjid Puncak Alam - Dana Kecemasan Baiki Paip",
-      raw_summary: "Paip utama masjid pecah. Memerlukan dana segera untuk baiki. Infaq anda amat dihargai. QR Kod ada dilampirkan.",
+      raw_title: "Dana Kecemasan Infrastruktur Masjid Puncak Alam",
+      raw_summary: "Kami memerlukan RM15,000 untuk baiki sistem perparitan masjid yang tersumbat. Jom infak sekarang.",
       extracted_mosque_name: "Masjid Puncak Alam",
       state: "Selangor",
       detected_bank_name: "CIMB Bank",
@@ -405,11 +406,146 @@ export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
       detected_qr: "/images/qr-cropped.png",
       detected_project_type: "Emergency Fund",
       image_url: "https://images.unsplash.com/photo-1512632510497-a492f1599813?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+      discovery_id: "v3_fb_act_004",
+      confidence: 94,
+      source_platform: "Facebook",
+      source_url: "https://www.facebook.com/kementerianagamadeas",
+      raw_title: "Wakaf Karpet Baru Masjid Jamek KL",
+      raw_summary: "Kempen wakaf karpet demi keselesaan jemaah solat tarawih. RM50 satu lot. Scan QR untuk bayaran pantas.",
+      extracted_mosque_name: "Masjid Jamek",
+      state: "Kuala Lumpur",
+      detected_bank_name: "Maybank",
+      detected_acc_number: "514011112233",
+      detected_qr: "/images/qr-cropped.png",
+      detected_project_type: "Renovation",
+      image_url: "https://images.unsplash.com/photo-1590133322241-d610b64be65e?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+      discovery_id: "v3_fb_act_005",
+      confidence: 92,
+      source_platform: "Facebook",
+      source_url: "https://www.facebook.com/masjidnegara",
+      raw_title: "Masjid Negara - Tabung Infaq Ramadan 2024",
+      raw_summary: "Persiapan menyediakan juadah berbuka puasa (Iftar) secara percuma untuk 500 jemaah setiap hari.",
+      extracted_mosque_name: "Masjid Negara",
+      state: "Kuala Lumpur",
+      detected_bank_name: "Bank Islam",
+      detected_acc_number: "123456789012",
+      detected_qr: "/images/qr-cropped.png",
+      detected_project_type: "Maintenance",
+      image_url: "https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+      discovery_id: "v3_fb_act_006",
+      confidence: 90,
+      source_platform: "Facebook",
+      source_url: "https://www.facebook.com/masjidputra",
+      raw_title: "Tabung Digital Masjid Putra Putrajaya",
+      raw_summary: "Sokong penyelenggaraan ikon pelancongan islamik negara melalui sumbangan digital DuitNow.",
+      extracted_mosque_name: "Masjid Putra",
+      state: "Putrajaya",
+      detected_bank_name: "Maybank",
+      detected_acc_number: "566010002233",
+      detected_qr: "/images/qr-cropped.png",
+      detected_project_type: "Maintenance",
+      image_url: "https://images.unsplash.com/photo-1590133322241-d610b64be65e?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+      discovery_id: "v3_fb_act_007",
+      confidence: 88,
+      source_platform: "Facebook",
+      source_url: "https://www.facebook.com/masjidbesarselangor",
+      raw_title: "Masjid Sultan Salahuddin Abdul Aziz Shah - Wakaf Al-Quran",
+      raw_summary: "Sertai program wakaf Al-Quran Masjid Biru untuk diagihkan kepada madrasah terpilih.",
+      extracted_mosque_name: "Masjid Sultan Salahuddin Abdul Aziz Shah",
+      state: "Selangor",
+      detected_bank_name: "AmBank",
+      detected_acc_number: "888100223344",
+      detected_qr: "/images/qr-cropped.png",
+      detected_project_type: "Renovation",
+      image_url: "https://images.unsplash.com/photo-1542662565-7e4b66bae529?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+      discovery_id: "v3_fb_act_008",
+      confidence: 85,
+      source_platform: "Facebook",
+      source_url: "https://www.facebook.com/masjidzahir",
+      raw_title: "Tabung Ar-Rizq Masjid Zahir Kedah",
+      raw_summary: "Membantu menampung kos operasi harian masjid bersejarah kebanggaan rakyat Kedah.",
+      extracted_mosque_name: "Masjid Zahir",
+      state: "Kedah",
+      detected_bank_name: "Maybank",
+      detected_acc_number: "552010112233",
+      detected_qr: "/images/qr-cropped.png",
+      detected_project_type: "Maintenance",
+      image_url: "https://images.unsplash.com/photo-1590133322241-d610b64be65e?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+      discovery_id: "v3_fb_act_009",
+      confidence: 83,
+      source_platform: "Facebook",
+      source_url: "https://www.facebook.com/masjidubudiah",
+      raw_title: "Restorasi Kubah Emas Masjid Ubudiah Kuala Kangsar",
+      raw_summary: "Kempen dana restorasi seni bina warisan negara. Jom berinfak demi generasi masa depan.",
+      extracted_mosque_name: "Masjid Ubudiah",
+      state: "Perak",
+      detected_bank_name: "RHB Bank",
+      detected_acc_number: "2201011223344",
+      detected_qr: "/images/qr-cropped.png",
+      detected_project_type: "Renovation",
+      image_url: "https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+      discovery_id: "v3_fb_act_010",
+      confidence: 80,
+      source_platform: "Facebook",
+      source_url: "https://www.facebook.com/masjidsultanabubakar",
+      raw_title: "Masjid Sultan Abu Bakar Johor - Infaq Pembangunan",
+      raw_summary: "Dana khusus untuk menaik taraf sistem audio masjid agar kualiti azan dan ceramah lebih jelas.",
+      extracted_mosque_name: "Masjid Sultan Abu Bakar",
+      state: "Johor",
+      detected_bank_name: "Public Bank",
+      detected_acc_number: "660100112233",
+      detected_qr: "/images/qr-cropped.png",
+      detected_project_type: "Construction",
+      image_url: "https://images.unsplash.com/photo-1590133322241-d610b64be65e?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+      discovery_id: "v3_fb_act_011",
+      confidence: 78,
+      source_platform: "Facebook",
+      source_url: "https://www.facebook.com/masjidtuankumizanzainalabidin",
+      raw_title: "Masjid Besi Putrajaya - Infaq Makanan Jumaat",
+      raw_summary: "Sumbangan anda digunakan untuk menyediakan makanan ringan (Nasi Lemak/Bihun) selepas solat Jumaat.",
+      extracted_mosque_name: "Masjid Tuanku Mizan Zainal Abidin",
+      state: "Putrajaya",
+      detected_bank_name: "Bank Islam",
+      detected_acc_number: "14012010001122",
+      detected_qr: "/images/qr-cropped.png",
+      detected_project_type: "Maintenance",
+      image_url: "https://images.unsplash.com/photo-1590076215667-873d96c89bb1?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+      discovery_id: "v3_fb_act_012",
+      confidence: 75,
+      source_platform: "Facebook",
+      source_url: "https://www.facebook.com/masjidalazim",
+      raw_title: "Tabung Kecemasan Baik Pulih Aircond Masjid Al-Azim",
+      raw_summary: "Sistem penyaman udara masjid kami rosak. Sasaran RM10,000 diperlukan segera demi keselesaan jemaah.",
+      extracted_mosque_name: "Masjid Al-Azim",
+      state: "Melaka",
+      detected_bank_name: "Maybank",
+      detected_acc_number: "554010112244",
+      detected_qr: "/images/qr-cropped.png",
+      detected_project_type: "Emergency Fund",
+      image_url: "https://images.unsplash.com/photo-1512632510497-a492f1599813?auto=format&fit=crop&q=80&w=800"
     }
   ];
 
   // Dynamic Link Accessibility Check (Simulated)
-  const resultsWithValidation = await Promise.all(rawResults.map(async (item) => {
+  const resultsWithValidation = await Promise.all(pool.map(async (item) => {
     const blacklist = ['broken-link.com', 'expired-post.my'];
     const isMainstream = item.source_url?.includes('facebook.com') || item.source_url?.includes('instagram.com');
     const notBlacklisted = !blacklist.some(b => item.source_url?.includes(b));
@@ -418,12 +554,12 @@ export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
     return { ...item, is_source_active: isLinkActive };
   }));
 
-  // FINAL STRICT FILTERING (v3.0):
+  // FINAL STRICT FILTERING (v3.1):
   // 1. Must have QR
   // 2. Must not exist in DB (Deduplication)
   // 3. Must have ACTIVE verified link
-  // 4. MUST NOT BE DISMISSED PERMANENTLY (New persistence)
-  return resultsWithValidation.filter(item => {
+  // 4. MUST NOT BE DISMISSED PERMANENTLY
+  const filteredPool = resultsWithValidation.filter(item => {
     const hasQr = !!item.detected_qr;
     const isDuplicate = existingUrls.has(item.source_url!) || 
                        (item.detected_acc_number && existingAccounts.has(item.detected_acc_number));
@@ -431,7 +567,11 @@ export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
     const isDismissedPersistent = dismissedIds.has(item.discovery_id);
     
     return hasQr && !isDuplicate && isActive && !isDismissedPersistent;
-  }) as DiscoveryLead[];
+  });
+
+  // RANDOMIZATION: Shuffle and take top 3-5
+  const shuffled = filteredPool.sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, 4) as DiscoveryLead[];
 }
 
 export async function dismissLeadPermanently(discoveryId: string) {
