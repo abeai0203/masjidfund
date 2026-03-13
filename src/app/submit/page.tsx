@@ -7,6 +7,7 @@ import { ProjectType } from "@/lib/types";
 
 import Tesseract from 'tesseract.js';
 import jsQR from 'jsqr';
+import ImageEditor from "@/components/public/ImageEditor";
 
 export default function SubmitPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,6 +24,9 @@ export default function SubmitPage() {
     document: null,
     magic_scan: null
   });
+
+  const [isEditingQr, setIsEditingQr] = useState(false);
+  const [editingImageUrl, setEditingImageUrl] = useState<string | null>(null);
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -308,6 +312,20 @@ export default function SubmitPage() {
 
   const triggerInput = (id: string) => {
     document.getElementById(id)?.click();
+  };
+
+  const handleEditQr = () => {
+    // Determine which image to edit
+    const url = extractedQrUrl || (files.qr ? URL.createObjectURL(files.qr) : null);
+    if (url) {
+      setEditingImageUrl(url);
+      setIsEditingQr(true);
+    }
+  };
+
+  const handleSaveCrop = (croppedImageUrl: string) => {
+    setExtractedQrUrl(croppedImageUrl);
+    setIsEditingQr(false);
   };
 
   const handleFileChange = (key: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -609,6 +627,19 @@ export default function SubmitPage() {
                     )}
                     {(extractedQrUrl || extractedType) && <span className="absolute top-3 right-3 bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg animate-pulse">EXTRACTED</span>}
                   </div>
+                  
+                  {(extractedQrUrl || files.qr) && (
+                    <button
+                      type="button"
+                      onClick={handleEditQr}
+                      className="w-full mt-2 bg-surface border border-border hover:border-primary text-foreground/70 hover:text-primary py-2 px-4 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                      SUNting QR (ZOOM/CROP)
+                    </button>
+                  )}
                 </div>
 
                 {/* Perspective Image Extraction */}
@@ -648,6 +679,14 @@ export default function SubmitPage() {
         </div>
 
       </form>
+
+      {isEditingQr && editingImageUrl && (
+        <ImageEditor 
+          image={editingImageUrl} 
+          onCropComplete={handleSaveCrop} 
+          onCancel={() => setIsEditingQr(false)} 
+        />
+      )}
     </div>
   );
 }
