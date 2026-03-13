@@ -68,6 +68,21 @@ export default function InteractiveMap() {
     }, 2000);
   };
 
+  const handleManualZoom = (direction: 'in' | 'out') => {
+    setZoomState(prev => {
+      const step = 0.5;
+      const newScale = direction === 'in' 
+        ? Math.min(prev.scale + step, 4) 
+        : Math.max(prev.scale - step, 1);
+      
+      if (newScale === 1) {
+        return { x: 500, y: 225, scale: 1 };
+      }
+      return { ...prev, scale: newScale };
+    });
+    setFoundProject(null);
+  };
+
   const formatAmount = (num: number) => {
     if (num >= 1000000) return `RM${(num / 1000000).toFixed(1)}M`;
     if (num >= 1000) return `RM${(num / 1000).toFixed(0)}k`;
@@ -112,7 +127,32 @@ export default function InteractiveMap() {
         </div>
 
         {/* The Map Component */}
-        <div className="relative w-full aspect-[21/9] min-h-[500px] md:min-h-0 bg-slate-50/50 rounded-[40px] border border-slate-100 overflow-hidden shadow-inner">
+        <div className="relative w-full aspect-[21/9] min-h-[500px] md:min-h-0 bg-slate-50/50 rounded-[40px] border border-slate-100 overflow-hidden shadow-inner group/map">
+           
+           {/* Zoom Controls Overlay */}
+           <div className="absolute top-6 left-6 z-[60] flex flex-col gap-2 opacity-0 group-hover/map:opacity-100 transition-opacity duration-300">
+              <button 
+                onClick={() => handleManualZoom('in')}
+                className="w-10 h-10 bg-white rounded-xl shadow-lg border border-slate-100 flex items-center justify-center text-slate-600 hover:text-primary hover:scale-105 transition-all"
+                title="Zoom In"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>
+              </button>
+              <button 
+                onClick={() => handleManualZoom('out')}
+                className="w-10 h-10 bg-white rounded-xl shadow-lg border border-slate-100 flex items-center justify-center text-slate-600 hover:text-primary hover:scale-105 transition-all"
+                title="Zoom Out"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 12H4" /></svg>
+              </button>
+              <button 
+                onClick={() => { setZoomState({ x: 500, y: 225, scale: 1 }); setFoundProject(null); }}
+                className="w-10 h-10 bg-white rounded-xl shadow-lg border border-slate-100 flex items-center justify-center text-slate-400 hover:text-red-500 hover:scale-105 transition-all"
+                title="Reset Peta"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+              </button>
+           </div>
            
            {/* SVG Map Container for Zooming */}
            <div 
