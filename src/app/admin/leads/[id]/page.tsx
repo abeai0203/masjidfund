@@ -116,9 +116,15 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                 <p className="text-sm font-medium">{lead.detected_acc_name || "T/D"}</p>
               </div>
               {lead.detected_qr && (
-                <div className="sm:col-span-2 mt-4 p-4 border border-border rounded-lg bg-surface-muted/50">
+                <div className="sm:col-span-1 mt-4 p-4 border border-border rounded-lg bg-surface-muted/50">
                    <p className="text-xs font-semibold text-foreground/60 mb-3 uppercase tracking-wider">QR Dikesan</p>
-                   <img src={lead.detected_qr} alt="Detected QR" className="w-32 h-32 rounded-lg shadow-sm border border-border bg-white" />
+                   <img src={lead.detected_qr} alt="Detected QR" className="w-full h-auto max-w-[128px] rounded-lg shadow-sm border border-border bg-white" />
+                </div>
+              )}
+              {lead.image_url && (
+                <div className="sm:col-span-1 mt-4 p-4 border border-border rounded-lg bg-surface-muted/50">
+                   <p className="text-xs font-semibold text-foreground/60 mb-3 uppercase tracking-wider">Imej Utama</p>
+                   <img src={lead.image_url} alt="Main Image" className="w-full h-auto rounded-lg shadow-sm border border-border" />
                 </div>
               )}
             </div>

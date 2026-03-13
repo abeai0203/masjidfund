@@ -52,7 +52,10 @@ CREATE TABLE public.leads (
     status TEXT NOT NULL DEFAULT 'Pending',
     notes TEXT,
     detected_qr TEXT,
-    detected_account_info TEXT,
+    detected_bank_name TEXT,
+    detected_acc_number TEXT,
+    detected_acc_name TEXT,
+    image_url TEXT,
     detected_project_type TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL

@@ -234,10 +234,10 @@ export async function approveAndConvertToProject(id: string, notes?: string): Pr
     needs_donation: true,
     donation_method_type: "Both",
     duitnow_qr_url: lead.detected_qr || "/images/qr-cropped.png",
-    bank_name: lead.detected_bank_name || "Maybank",
+    bank_name: lead.detected_bank_name || lead.detected_account_info?.split(':')[0]?.trim() || "Maybank",
     account_name: lead.detected_acc_name || lead.extracted_mosque_name || "Bendahari Masjid",
-    account_number: lead.detected_acc_number || "1234567890",
-    image_url: imageUrl
+    account_number: lead.detected_acc_number || lead.detected_account_info?.split(':')[1]?.trim() || "1234567890",
+    image_url: lead.image_url || imageUrl
   };
 
   // 3. Insert into Supabase
