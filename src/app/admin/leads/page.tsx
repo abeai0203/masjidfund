@@ -51,13 +51,77 @@ export default function AdminLeadsPage() {
       </div>
 
       <div className="bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
-        {/* ... table content ... */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm text-foreground/80">
+            <thead className="bg-surface-muted border-b border-border text-xs uppercase font-semibold text-foreground/60">
+              <tr>
+                <th className="px-6 py-4">Tajuk / Masjid</th>
+                <th className="px-6 py-4">Sumber</th>
+                <th className="px-6 py-4">Tarikh</th>
+                <th className="px-6 py-4">Skor</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4 text-right">Tindakan</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {filteredLeads.length > 0 ? (
+                filteredLeads.map((lead) => (
+                  <tr key={lead.id} className="hover:bg-surface-muted/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="font-semibold text-foreground line-clamp-1">{lead.raw_title}</div>
+                      <div className="text-xs text-foreground/60 mt-1">
+                        {lead.extracted_mosque_name || "Masjid Tidak Diketahui"} 
+                        {lead.state ? ` • ${lead.state}` : ""}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-surface-muted border border-border">
+                        {lead.source_type}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-xs">
+                      {new Date(lead.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center">
+                        <div className="w-16 bg-surface-muted rounded-full h-1.5 mr-2 overflow-hidden border border-border">
+                          <div 
+                            className={`h-1.5 rounded-full ${lead.lead_score > 80 ? 'bg-green-500' : lead.lead_score > 50 ? 'bg-yellow-500' : 'bg-red-500'}`} 
+                            style={{ width: `${lead.lead_score}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-xs font-medium">{lead.lead_score}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <StatusPill status={lead.status} />
+                    </td>
+                    <td className="px-6 py-4 text-right font-medium">
+                      <Link 
+                        href={`/admin/leads/${lead.id}`}
+                        className="text-primary hover:text-primary-hover bg-primary/5 hover:bg-primary/10 px-3 py-1.5 rounded-md transition-colors"
+                      >
+                        Semak
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-foreground/60">
+                    Tiada lead yang sepadan dengan penapis yang dipilih.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Version Indicator */}
       <div className="mt-12 pt-8 border-t border-slate-100 flex justify-center">
         <div className="bg-slate-50 px-4 py-2 rounded-full border border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-          Lead Management v4.0 (Auto-Filter Approved)
+          Lead Management v4.1 (UI Hotfix)
         </div>
       </div>
     </div>
