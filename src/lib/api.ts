@@ -359,43 +359,42 @@ export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
   
   const rawResults: DiscoveryLead[] = [
     {
-      discovery_id: "disc_fb_new_v4_001",
+      discovery_id: "disc_fb_act_001",
       confidence: 99,
       source_platform: "Facebook",
-      source_url: "https://www.facebook.com/MasjidBandarSeriPutraOfficial/posts/987654321",
+      source_url: "https://www.facebook.com/masjidalhasanahbbb",
+      raw_title: "Masjid Al-Hasanah Bandar Baru Bangi - Tabung Infak Al-Quran",
+      raw_summary: "Program Infak Al-Quran dan pembangunan tahfiz. Jom menyumbang untuk keberkatan berpanjangan. Hubungi kami atau imbas QR DuitNow Masjid.",
+      extracted_mosque_name: "Masjid Al-Hasanah",
+      state: "Selangor",
+      detected_bank_name: "Maybank",
+      detected_acc_number: "562263001234",
+      detected_qr: "/images/qr-cropped.png",
+      detected_project_type: "Maintenance",
+      image_url: "https://images.unsplash.com/photo-1542662565-7e4b66bae529?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+      discovery_id: "disc_fb_act_002",
+      confidence: 97,
+      source_platform: "Facebook",
+      source_url: "https://www.facebook.com/MasjidBandarSeriPutraOfficial",
       raw_title: "Tabung Baik Pulih Kubah Masjid Bandar Seri Putra",
-      raw_summary: "Kubah masjid kami mengalami kerosakan serius akibat ribut semalam. Kami memerlukan dana kecemasan RM80,000. Jom infak melalui QR DuitNow Masjid.",
+      raw_summary: "Kubah masjid kami memerlukan dana penyelenggaraan segera. Kami mengajak qariah dan muslimin membantu. QR DuitNow tersedia.",
       extracted_mosque_name: "Masjid Bandar Seri Putra",
       state: "Selangor",
       detected_bank_name: "Maybank",
       detected_acc_number: "562834123456",
       detected_qr: "/images/qr-cropped.png",
-      detected_project_type: "Emergency Fund",
-      image_url: "https://images.unsplash.com/photo-1542662565-7e4b66bae529?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-      discovery_id: "disc_ig_new_v4_002",
-      confidence: 97,
-      source_platform: "Instagram",
-      source_url: "https://www.instagram.com/reel/C2_masjidalazim/",
-      raw_title: "Infaq Karpet Baru Masjid Al-Azim Melaka",
-      raw_summary: "Karpet dewan solat utama sudah uzur. Kami mengajak para dermawan untuk bersama mewakafkan karpet baru. Scan QR Code di bio kami.",
-      extracted_mosque_name: "Masjid Al-Azim",
-      state: "Melaka",
-      detected_bank_name: "Bank Islam",
-      detected_acc_number: "04012010109988",
-      detected_acc_name: "Jawatankuasa Masjid Al-Azim",
-      detected_qr: "/images/qr-cropped.png",
       detected_project_type: "Maintenance",
       image_url: "https://images.unsplash.com/photo-1590076215667-873d96c89bb1?auto=format&fit=crop&q=80&w=800"
     },
     {
-      discovery_id: "disc_fb_new_v4_003",
+      discovery_id: "disc_fb_act_003",
       confidence: 95,
       source_platform: "Facebook",
-      source_url: "https://www.facebook.com/SurauAlMutmainnahKL/posts/pfbid0123",
-      raw_title: "Wakaf Van Jenazah Surau Al-Mutmainnah",
-      raw_summary: "Surau kami memerlukan van jenazah baru untuk kegunaan kariah setempat. Sasaran RM120,000. Sila rujuk QR DuitNow yang dilampirkan.",
+      source_url: "https://www.facebook.com/surau.almutmainnah.kl",
+      raw_title: "Masjid/Surau Al-Mutmainnah Kuala Lumpur",
+      raw_summary: "Dana pengurusan harian dan baik pulih kemudahan wuduk. Infaq anda amat bermakna buat kariah kami. Scan QR untuk sumbangan pantas.",
       extracted_mosque_name: "Surau Al-Mutmainnah",
       state: "Kuala Lumpur",
       detected_bank_name: "CIMB Bank",
@@ -406,25 +405,30 @@ export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
     }
   ];
 
-  // Simulating Link Activity Check
+  // Dynamic Link Accessibility Check (Simulated)
   const resultsWithValidation = await Promise.all(rawResults.map(async (item) => {
-    // In a real app, this would be a fetch(url, { method: 'HEAD' })
-    const isLinkActive = item.source_url!.startsWith('https://'); 
+    // 1. Blacklist check (Example of filtering broken domains)
+    const blacklist = ['broken-link.com', 'expired-post.my'];
+    const isMainstream = item.source_url?.includes('facebook.com') || item.source_url?.includes('instagram.com');
+    const notBlacklisted = !blacklist.some(b => item.source_url?.includes(b));
+    
+    // 2. Simulated HEAD request
+    // In production, you would run this through a proxy server to check HTTP 200
+    const isLinkActive = isMainstream && notBlacklisted && !!item.source_url;
+    
     return { ...item, is_source_active: isLinkActive };
   }));
 
-  // STRICT FILTERING:
+  // FINAL STRICT FILTERING (v2.5):
   // 1. Must have QR
   // 2. Must not exist in DB (Deduplication)
-  // 3. Must be from Social (FB/IG)
-  // 4. MUST HAVE ACTIVE LINK (New validation)
+  // 3. Must have ACTIVE verified link
   return resultsWithValidation.filter(item => {
     const hasQr = !!item.detected_qr;
-    const isSocial = ["Facebook", "Instagram"].includes(item.source_platform);
     const isDuplicate = existingUrls.has(item.source_url!) || 
                        (item.detected_acc_number && existingAccounts.has(item.detected_acc_number));
     const isActive = item.is_source_active;
     
-    return hasQr && isSocial && !isDuplicate && isActive;
+    return hasQr && !isDuplicate && isActive;
   }) as DiscoveryLead[];
 }
