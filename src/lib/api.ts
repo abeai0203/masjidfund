@@ -151,15 +151,13 @@ export async function deleteProject(slug: string): Promise<boolean> {
       .eq('slug', slug);
       
     if (error) {
-       console.warn("Supabase delete fail, falling back to local simulation:", error.message);
-      const simData = getStoredData('projects', MOCK_PROJECTS);
-      const filtered = simData.filter(p => p.slug !== slug);
-      setStoredData('projects', filtered);
-      return true;
+      console.error("Supabase project deletion failed:", error.message);
+      return false;
     }
     return true;
   } catch (e) {
-    return true;
+    console.error("Unexpected error during project deletion:", e);
+    return false;
   }
 }
 
