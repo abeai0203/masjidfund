@@ -354,23 +354,42 @@ export default function SubmitPage() {
       let finalMainImageUrl = "";
       if (files.main_image) {
         const uploadedUrl = await uploadImage(files.main_image);
-        if (uploadedUrl) finalMainImageUrl = uploadedUrl;
+        if (uploadedUrl) {
+          finalMainImageUrl = uploadedUrl;
+        } else {
+          alert("Gagal memuat naik imej utama. Sila periksa sambungan internet atau tetapan database.");
+          setIsSubmitting(false);
+          return;
+        }
       }
 
       let finalQrUrl = extractedQrUrl;
       // If it's a blob/base64 from cropper or magic scan, upload it
       if (extractedQrUrl && (extractedQrUrl.startsWith('blob:') || extractedQrUrl.startsWith('data:'))) {
         const uploadedQrUrl = await uploadImage(extractedQrUrl);
-        if (uploadedQrUrl) finalQrUrl = uploadedQrUrl;
+        if (uploadedQrUrl) {
+          finalQrUrl = uploadedQrUrl;
+        } else {
+          alert("Gagal memuat naik imej QR. Sila cuba lagi.");
+          setIsSubmitting(false);
+          return;
+        }
       } else if (!extractedQrUrl && files.qr) {
         // If user uploaded a QR file manually but didn't crop
         const uploadedQrUrl = await uploadImage(files.qr);
-        if (uploadedQrUrl) finalQrUrl = uploadedQrUrl;
+        if (uploadedQrUrl) {
+          finalQrUrl = uploadedQrUrl;
+        } else {
+          alert("Gagal memuat naik imej QR. Sila cuba lagi.");
+          setIsSubmitting(false);
+          return;
+        }
       }
 
       // Handle template QR fallback if none uploaded
       const detectedQr = finalQrUrl || (files.magic_scan ? (extractedType === 'hazelton' ? "/images/qr-hazelton.png" : extractedType === 'lestari' ? "/images/qr-cropped.png" : undefined) : undefined);
 
+      console.log("Submitting lead with images:", { main: finalMainImageUrl, qr: detectedQr });
       // 2. Submit Lead with permanent URLs
       await submitLead({
         raw_title: formData.get('title') as string,
@@ -688,13 +707,24 @@ export default function SubmitPage() {
         {/* Submit */}
         <div className="flex flex-col items-center border-t border-border pt-10">
           <input type="hidden" name="method_type" value="Both" />
-          <button 
-            type="submit" 
-            disabled={isSubmitting}
-            className="w-full md:w-auto min-w-[280px] bg-primary hover:bg-primary-hover text-white font-black py-5 px-10 rounded-2xl shadow-xl shadow-primary/20 transition-all transform hover:-translate-y-1 active:scale-95 disabled:opacity-70 flex justify-center items-center gap-3"
-          >
-            {isSubmitting ? "Sila Tunggu..." : "HANTAR KEMPEN"}
-          </button>
+            <button 
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-primary hover:bg-primary-hover text-white font-black py-4 rounded-xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
+            >
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Sedang Menghantar...
+                </>
+              ) : (
+                "Hantar Kempen Sekarang"
+              )}
+            </button>
+            <p className="text-[10px] text-center text-foreground/30 mt-2 uppercase font-bold tracking-tighter">System v1.2 (Storage Push Active)</p>
           <p className="text-[10px] text-foreground/40 mt-6 text-center uppercase font-bold tracking-widest">
             Semua penyerahan akan melalui proses pengesahan manual sebelum dilancarkan
           </p>
