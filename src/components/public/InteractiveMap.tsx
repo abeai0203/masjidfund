@@ -18,6 +18,8 @@ export default function InteractiveMap() {
   const [isSearching, setIsSearching] = useState(false);
   const [foundProject, setFoundProject] = useState<ProjectPoint | null>(null);
   const [zoomState, setZoomState] = useState({ x: 500, y: 225, scale: 1 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   // Setup D3 Projection
   const projection = useMemo(() => {
@@ -83,6 +85,36 @@ export default function InteractiveMap() {
     setFoundProject(null);
   };
 
+  const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
+    if (zoomState.scale === 1) return;
+    setIsDragging(true);
+    const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+    setDragStart({ x: clientX, y: clientY });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDragging) return;
+    
+    const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+    
+    const dx = (dragStart.x - clientX) / zoomState.scale;
+    const dy = (dragStart.y - clientY) / zoomState.scale;
+
+    setZoomState(prev => ({
+      ...prev,
+      x: prev.x + dx,
+      y: prev.y + dy
+    }));
+
+    setDragStart({ x: clientX, y: clientY });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
   const formatAmount = (num: number) => {
     if (num >= 1000000) return `RM${(num / 1000000).toFixed(1)}M`;
     if (num >= 1000) return `RM${(num / 1000).toFixed(0)}k`;
@@ -127,26 +159,35 @@ export default function InteractiveMap() {
         </div>
 
         {/* The Map Component */}
-        <div className="relative w-full aspect-[21/9] min-h-[500px] md:min-h-0 bg-slate-50/50 rounded-[40px] border border-slate-100 overflow-hidden shadow-inner group/map">
+        <div 
+          className={`relative w-full aspect-[21/9] min-h-[500px] md:min-h-0 bg-slate-50/50 rounded-[40px] border border-slate-100 overflow-hidden shadow-inner group/map ${zoomState.scale > 1 ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : ''}`}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onTouchStart={handleMouseDown}
+          onTouchMove={handleMouseMove}
+          onTouchEnd={handleMouseUp}
+        >
            
            {/* Zoom Controls Overlay */}
            <div className="absolute top-6 left-6 z-[60] flex flex-col gap-2 opacity-0 group-hover/map:opacity-100 transition-opacity duration-300">
               <button 
-                onClick={() => handleManualZoom('in')}
+                onClick={(e) => { e.stopPropagation(); handleManualZoom('in'); }}
                 className="w-10 h-10 bg-white rounded-xl shadow-lg border border-slate-100 flex items-center justify-center text-slate-600 hover:text-primary hover:scale-105 transition-all"
                 title="Zoom In"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>
               </button>
               <button 
-                onClick={() => handleManualZoom('out')}
+                onClick={(e) => { e.stopPropagation(); handleManualZoom('out'); }}
                 className="w-10 h-10 bg-white rounded-xl shadow-lg border border-slate-100 flex items-center justify-center text-slate-600 hover:text-primary hover:scale-105 transition-all"
                 title="Zoom Out"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 12H4" /></svg>
               </button>
               <button 
-                onClick={() => { setZoomState({ x: 500, y: 225, scale: 1 }); setFoundProject(null); }}
+                onClick={(e) => { e.stopPropagation(); setZoomState({ x: 500, y: 225, scale: 1 }); setFoundProject(null); }}
                 className="w-10 h-10 bg-white rounded-xl shadow-lg border border-slate-100 flex items-center justify-center text-slate-400 hover:text-red-500 hover:scale-105 transition-all"
                 title="Reset Peta"
               >
@@ -156,7 +197,7 @@ export default function InteractiveMap() {
            
            {/* SVG Map Container for Zooming */}
            <div 
-             className="absolute inset-0 transition-transform duration-1000 ease-in-out"
+             className={`absolute inset-0 transition-transform ${isDragging ? 'duration-0' : 'duration-1000'} ease-in-out`}
              style={{ 
                transform: `scale(${zoomState.scale}) translate(${(500 - zoomState.x)}px, ${(225 - zoomState.y)}px)`,
                transformOrigin: '500px 225px'
