@@ -49,9 +49,13 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
       needs_donation: formData.get('needs_donation') === 'on',
       donation_method_type: formData.get('donation_method_type') as any,
       bank_name: formData.get('bank_name') as string,
-      account_number: formData.get('account_number') as string,
       account_name: formData.get('account_name') as string,
+      account_number: formData.get('account_number') as string,
       duitnow_qr_url: formData.get('duitnow_qr_url') as string,
+      contact_person: formData.get('contact_person') as string,
+      contact_phone: formData.get('contact_phone') as string,
+      address: formData.get('address') as string,
+      google_maps_url: formData.get('google_maps_url') as string,
       publish_status: isPublish ? 'Published' : 'Draft'
     };
 
@@ -311,6 +315,56 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
                 />
               </div>
            </div>
+        </div>
+
+        {/* Enriched Details Section */}
+        <div className="bg-surface border border-border rounded-xl p-6 sm:p-8 shadow-sm">
+          <h2 className="text-lg font-bold text-foreground mb-6 pb-2 border-b border-border">Maklumat Hubungi & Lokasi (v5.0)</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-foreground/80 mb-2">Orang Bertanggungjawab (PIC)</label>
+              <input 
+                name="contact_person"
+                type="text" 
+                defaultValue={project.contact_person}
+                className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                placeholder="Nama penuh wakil masjid"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-foreground/80 mb-2">No. Telefon (WhatsApp)</label>
+              <input 
+                name="contact_phone"
+                type="text" 
+                defaultValue={project.contact_phone}
+                className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                placeholder="Contoh: 60123456789"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-foreground/80 mb-2">Alamat Penuh</label>
+              <textarea 
+                name="address"
+                defaultValue={project.address}
+                rows={2}
+                className="w-full bg-surface-muted border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-foreground/80 mb-2">URL Google Maps Embed (iframe src)</label>
+              <input 
+                name="google_maps_url"
+                type="url" 
+                defaultValue={project.google_maps_url}
+                className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                placeholder="https://www.google.com/maps/embed?pb=..."
+              />
+                <p className="text-[10px] text-foreground/50 mt-1 uppercase font-bold">Nota: Masukkan pautan iframe 'src' dari Google Maps Share &gt; Embed a map</p>
+            </div>
+          </div>
         </div>
 
         {/* Sticky Actions Footer */}

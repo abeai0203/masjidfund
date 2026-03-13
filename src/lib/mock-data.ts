@@ -37,6 +37,32 @@ export const MOCK_LEADS: Lead[] = [
 
 export const MOCK_PROJECTS: Project[] = [
   {
+    slug: "masjid-lestari-putra-construction",
+    mosque_name: "Masjid Lestari Putra",
+    state: "Selangor",
+    district: "Seri Kembangan",
+    title: "Tapak Pembangunan Masjid Lestari Putra",
+    short_description: "Pembangunan tapak masjid baru untuk komuniti Lestari Putra.",
+    full_description: "Pembangunan tapak masjid baru untuk komuniti Lestari Putra yang sedang berkembang pesat. Mari bersama berwakaf untuk rumah Allah.",
+    project_type: "Construction",
+    verification_status: "Verified",
+    publish_status: "Published",
+    target_amount: 500000,
+    collected_amount: 150000,
+    completion_percent: 30,
+    needs_donation: true,
+    donation_method_type: "Both",
+    duitnow_qr_url: "/images/qr-cropped.png",
+    bank_name: "Maybank",
+    account_name: "MASJID LESTARI PUTRA",
+    account_number: "562807545820",
+    image_url: "/images/masjid-lestari-putra.png",
+    contact_person: "Haji Rozali Bin Lebai Awang",
+    contact_phone: "60108443594",
+    address: "Persiaran Lestari Putra 3, Taman Lestari Putra, Bandar Putra Permai, 43300 Seri Kembangan, Selangor.",
+    google_maps_url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15937.662762391054!2d101.666111!3d3.011111!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31cdb5a034638a29%3A0xe5a363a0a3a60!2sMasjid%20Lestari%20Putra!5e0!3m2!1sen!2smy!4v1710330000000!5m2!1sen!2smy"
+  },
+  {
     slug: "masjid-al-hidayah-shah-alam-pembinaan",
     mosque_name: "Masjid Al-Hidayah",
     state: "Selangor",

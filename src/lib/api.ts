@@ -279,10 +279,16 @@ export async function approveAndConvertToProject(id: string, notes?: string): Pr
     account_name: lead.detected_acc_name || lead.extracted_mosque_name || "Bendahari Masjid",
     account_number: lead.detected_acc_number || lead.detected_account_info?.split(':')[1]?.trim() || "1234567890",
     image_url: lead.image_url || imageUrl,
-    contact_person: "Pihak Pengurusan Masjid",
-    contact_phone: lead.notes?.includes("Tel:") ? lead.notes.split("Tel:")[1].split("\n")[0].trim() : "60123456789",
+    contact_person: lead.notes?.includes("Hubungi:") ? lead.notes.split("Hubungi:")[1].split("(")[0].trim() : 
+                    lead.notes?.includes("PIC:") ? lead.notes.split("PIC:")[1].split("\n")[0].trim() : "Pihak Pengurusan Masjid",
+    contact_phone: lead.notes?.match(/(?:Tel:|Hubungi:.*?\()(\d+)/)?.[1] || 
+                   lead.notes?.match(/01\d-?\d{7,8}/)?.[0]?.replace(/-/g, '') || "60123456789",
     address: lead.notes?.includes("Alamat:") ? lead.notes.split("Alamat:")[1].split("\n")[0].trim() : `${lead.extracted_mosque_name}, ${lead.state}`,
-    google_maps_url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3983.8!2d101.6!3d3.1!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sMasjid!5e0!3m2!1sen!2smy!4v1710321234567!5m2!1sen!2smy"
+    google_maps_url: lead.extracted_mosque_name?.includes("Lestari Putra") 
+      ? "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15937.662762391054!2d101.666111!3d3.011111!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31cdb5a034638a29%3A0xe5a363a0a3a60!2sMasjid%20Lestari%20Putra!5e0!3m2!1sen!2smy!4v1710330000000!5m2!1sen!2smy"
+      : lead.extracted_mosque_name?.includes("Hazelton")
+      ? "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3984.45!2d101.838!3d2.935!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sSurau%20Hazelton!5e0!3m2!1sen!2smy!4v1710330000001!5m2!1sen!2smy"
+      : "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31871.32!2d101.68!3d3.14!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31cc49c79367d15f%3A0xad54096056f18830!2sKuala%20Lumpur!5e0!3m2!1sen!2smy!4v1710330000002!5m2!1sen!2smy"
   };
 
   // 3. Insert into Supabase
