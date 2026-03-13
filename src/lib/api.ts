@@ -287,12 +287,30 @@ export async function approveAndConvertToProject(id: string, notes?: string): Pr
       if (!m) return "60123456789";
       return m.startsWith('0') ? `6${m}` : m;
     })(),
-    address: lead.notes?.includes("Alamat:") ? lead.notes.split("Alamat:")[1].split("\n")[0].trim() : `${lead.extracted_mosque_name}, ${lead.state}`,
-    google_maps_url: lead.extracted_mosque_name?.includes("Lestari Putra") 
-      ? "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1500!2d101.666!3d3.010!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31cdb5a034638a29%3A0xe5a363a0a3a60!2sMasjid%20Lestari%20Putra!5e0!3m2!1sen!2smy!4v1710332000000!5m2!1sen!2smy"
-      : lead.extracted_mosque_name?.includes("Hazelton")
-      ? "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3000!2d101.838!3d2.935!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sSurau%20Hazelton!5e0!3m2!1sen!2smy!4v1710332000001!5m2!1sen!2smy"
-      : "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31871.32!2d101.68!3d3.14!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31cc49c79367d15f%3A0xad54096056f18830!2sKuala%20Lumpur!5e0!3m2!1sen!2smy!4v1710332000002!5m2!1sen!2smy"
+    address: (() => {
+      const notes = lead.notes || "";
+      const addressMatch = notes.match(/(?:Alamat|Lokasi):\s*([^\n]+)/i);
+      if (addressMatch) return addressMatch[1].trim();
+      return lead.extracted_mosque_name ? `${lead.extracted_mosque_name}, ${lead.state}` : `${lead.raw_title}, ${lead.state}`;
+    })(),
+    google_maps_url: (() => {
+      const notes = lead.notes || "";
+      const addressMatch = notes.match(/(?:Alamat|Lokasi):\s*([^\n]+)/i);
+      const extractedAddress = addressMatch ? addressMatch[1].trim() : null;
+      
+      // Preserve specific coordinates for known mosques if no explicit address is provided
+      if (!extractedAddress) {
+        if (lead.extracted_mosque_name?.includes("Lestari Putra")) {
+          return "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1500!2d101.666!3d3.010!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31cdb5a034638a29%3A0xe5a363a0a3a60!2sMasjid%20Lestari%20Putra!5e0!3m2!1sen!2smy!4v1710332000000!5m2!1sen!2smy";
+        }
+        if (lead.extracted_mosque_name?.includes("Hazelton")) {
+          return "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3000!2d101.838!3d2.935!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sSurau%20Hazelton!5e0!3m2!1sen!2smy!4v1710332000001!5m2!1sen!2smy";
+        }
+      }
+
+      const searchTarget = extractedAddress || (lead.extracted_mosque_name ? `${lead.extracted_mosque_name}, ${lead.state}` : `${lead.raw_title}, ${lead.state}`);
+      return `https://www.google.com/maps?q=${encodeURIComponent(searchTarget)}&output=embed`;
+    })()
   };
 
   // 3. Insert into Supabase
