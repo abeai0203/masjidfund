@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { Project, Lead } from './types';
+import { Project, Lead, DiscoveryLead } from './types';
 import { MOCK_PROJECTS, MOCK_LEADS } from './mock-data';
 
 // --- Simulation Persistence Helpers ---
@@ -335,4 +335,56 @@ export async function submitLead(lead: Partial<Lead>): Promise<Lead | null> {
   } catch (e) {
     return null;
   }
+}
+
+export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
+  // Simulate an AI search process
+  await new Promise(resolve => setTimeout(resolve, 2500));
+  
+  return [
+    {
+      discovery_id: "disc_001",
+      confidence: 98,
+      source_platform: "onpay.my",
+      source_url: "https://raudhatulsalam.onpay.my/",
+      raw_title: "Sumbangan Pembinaan Surau Raudhatul Salam",
+      raw_summary: "Pembinaan surau komuniti di Taman Iringan Bayu, Seremban. Memerlukan dana RM2.5 juta.",
+      extracted_mosque_name: "Surau Raudhatul Salam",
+      state: "Negeri Sembilan",
+      detected_bank_name: "Bank Islam",
+      detected_acc_number: "05012010104558",
+      detected_project_type: "Construction",
+      image_url: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+      discovery_id: "disc_002",
+      confidence: 92,
+      source_platform: "herepay.org",
+      source_url: "https://herepay.org/surau-al-husna",
+      raw_title: "Tabung Pembangunan Surau Al-Husna",
+      raw_summary: "Naik taraf kemudahan Surau Al-Husna di Nibong Tebal, Pulau Pinang.",
+      extracted_mosque_name: "Surau Al-Husna",
+      state: "Pulau Pinang",
+      detected_bank_name: "Bank Rakyat",
+      detected_acc_number: "1101097130",
+      detected_acc_name: "Surau Al Husna",
+      detected_project_type: "Renovation",
+      image_url: "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+      discovery_id: "disc_003",
+      confidence: 85,
+      source_platform: "donationmvm.org",
+      source_url: "https://donationmvm.org/surau-orang-asli",
+      raw_title: "Infaq Surau Komuniti Orang Asli",
+      raw_summary: "Membina surau untuk komuniti Orang Asli melalui Muslim Volunteer Malaysia.",
+      extracted_mosque_name: "Surau Komuniti Orang Asli",
+      state: "Pahang",
+      detected_bank_name: "Maybank",
+      detected_acc_number: "564801647699",
+      detected_acc_name: "Pertubuhan Sukarelawan Muslim Malaysia",
+      detected_project_type: "Construction",
+      image_url: "https://images.unsplash.com/photo-1592591544534-82000214a601?auto=format&fit=crop&q=80&w=800"
+    }
+  ];
 }

@@ -52,3 +52,9 @@ export interface Lead {
   detected_project_type?: ProjectType;
   image_url?: string;
 }
+
+export interface DiscoveryLead extends Partial<Lead> {
+  confidence: number;
+  source_platform: string;
+  discovery_id: string;
+}
