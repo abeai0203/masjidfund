@@ -85,7 +85,6 @@ export default function DonatePage() {
     const newAmount = (currentProject.collected_amount || 0) + splitAmount;
     await updateProject(currentProject.slug, {
       collected_amount: newAmount,
-      completion_percent: Math.min(100, Math.floor((newAmount / currentProject.target_amount) * 100))
     });
 
     // Record for Summary

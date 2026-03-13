@@ -231,7 +231,6 @@ export async function approveAndConvertToProject(id: string, notes?: string): Pr
     publish_status: "Published",
     target_amount: targetAmount,
     collected_amount: 0,
-    completion_percent: 0,
     needs_donation: true,
     donation_method_type: "Both",
     duitnow_qr_url: lead.detected_qr || "/images/qr-cropped.png",
