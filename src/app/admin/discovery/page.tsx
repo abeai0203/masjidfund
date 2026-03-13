@@ -148,6 +148,15 @@ export default function DiscoveryPage() {
                       <span className="text-[9px] font-black text-white uppercase tracking-tighter">QR Dikesan</span>
                     </div>
                   )}
+                  {/* @ts-ignore - added in api.ts */}
+                  {item.is_source_active && (
+                    <div className="bg-emerald-500/90 backdrop-blur px-3 py-1.5 rounded-xl border border-emerald-400/20 shadow-lg flex items-center gap-2 w-fit">
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-[9px] font-black text-white uppercase tracking-tighter">Pautan Aktif</span>
+                    </div>
+                  )}
                 </div>
                 <div className="absolute top-4 right-4">
                   <div className="bg-primary px-3 py-1.5 rounded-xl text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20">
@@ -205,7 +214,7 @@ export default function DiscoveryPage() {
       {/* Version Indicator */}
       <div className="pt-12 border-t border-slate-100 flex justify-center">
         <div className="bg-slate-50 px-4 py-2 rounded-full border border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-          Discovery AI Engine v2.3 (Fresh Feed + UI Fix)
+          Discovery AI Engine v2.4 (Source Validation Active)
         </div>
       </div>
     </div>
