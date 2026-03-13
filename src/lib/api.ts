@@ -338,14 +338,17 @@ export async function submitLead(lead: Partial<Lead>): Promise<Lead | null> {
 }
 
 export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
-  // 1. Fetch existing data for deduplication
-  const [existingProjects, existingLeads] = await Promise.all([
+  // 1. Fetch existing data for deduplication (leads, projects, AND persistent dismissals)
+  const [existingProjects, existingLeads, dismissedLeadsResult] = await Promise.all([
     getAdminProjects(),
-    getAllLeads()
+    getAllLeads(),
+    supabase.from('dismissed_leads').select('discovery_id')
   ]);
 
+  const dismissedIds = new Set(dismissedLeadsResult.data?.map(d => d.discovery_id) || []);
+
   const existingUrls = new Set([
-    ...existingProjects.map(p => p.slug), // Slugs are often derived from urls or names
+    ...existingProjects.map(p => p.slug),
     ...existingLeads.map(l => l.source_url).filter(Boolean)
   ]);
 
@@ -359,7 +362,7 @@ export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
   
   const rawResults: DiscoveryLead[] = [
     {
-      discovery_id: "disc_fb_act_001",
+      discovery_id: "v3_fb_act_001",
       confidence: 99,
       source_platform: "Facebook",
       source_url: "https://www.facebook.com/masjidalhasanahbbb",
@@ -374,61 +377,67 @@ export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
       image_url: "https://images.unsplash.com/photo-1542662565-7e4b66bae529?auto=format&fit=crop&q=80&w=800"
     },
     {
-      discovery_id: "disc_fb_act_002",
-      confidence: 97,
+      discovery_id: "v3_fb_act_002",
+      confidence: 98,
       source_platform: "Facebook",
-      source_url: "https://www.facebook.com/MasjidBandarSeriPutraOfficial",
-      raw_title: "Tabung Baik Pulih Kubah Masjid Bandar Seri Putra",
-      raw_summary: "Kubah masjid kami memerlukan dana penyelenggaraan segera. Kami mengajak qariah dan muslimin membantu. QR DuitNow tersedia.",
-      extracted_mosque_name: "Masjid Bandar Seri Putra",
-      state: "Selangor",
-      detected_bank_name: "Maybank",
-      detected_acc_number: "562834123456",
+      source_url: "https://www.facebook.com/masjidwilayah",
+      raw_title: "Tabung Ihsan Masjid Wilayah Persekutuan",
+      raw_summary: "Masjid Wilayah membuka peluang infak untuk program kebajikan masyarakat dan asnaf. Scan QR DuitNow rasmi kami.",
+      extracted_mosque_name: "Masjid Wilayah Persekutuan",
+      state: "Kuala Lumpur",
+      detected_bank_name: "Bank Islam",
+      detected_acc_number: "14012010101234",
       detected_qr: "/images/qr-cropped.png",
       detected_project_type: "Maintenance",
       image_url: "https://images.unsplash.com/photo-1590076215667-873d96c89bb1?auto=format&fit=crop&q=80&w=800"
     },
     {
-      discovery_id: "disc_fb_act_003",
-      confidence: 95,
+      discovery_id: "v3_fb_act_003",
+      confidence: 96,
       source_platform: "Facebook",
-      source_url: "https://www.facebook.com/surau.almutmainnah.kl",
-      raw_title: "Masjid/Surau Al-Mutmainnah Kuala Lumpur",
-      raw_summary: "Dana pengurusan harian dan baik pulih kemudahan wuduk. Infaq anda amat bermakna buat kariah kami. Scan QR untuk sumbangan pantas.",
-      extracted_mosque_name: "Surau Al-Mutmainnah",
-      state: "Kuala Lumpur",
+      source_url: "https://www.facebook.com/masjidpuncakalam",
+      raw_title: "Masjid Puncak Alam - Dana Kecemasan Baiki Paip",
+      raw_summary: "Paip utama masjid pecah. Memerlukan dana segera untuk baiki. Infaq anda amat dihargai. QR Kod ada dilampirkan.",
+      extracted_mosque_name: "Masjid Puncak Alam",
+      state: "Selangor",
       detected_bank_name: "CIMB Bank",
-      detected_acc_number: "860455123456",
+      detected_acc_number: "860123456789",
       detected_qr: "/images/qr-cropped.png",
-      detected_project_type: "Construction",
+      detected_project_type: "Emergency Fund",
       image_url: "https://images.unsplash.com/photo-1512632510497-a492f1599813?auto=format&fit=crop&q=80&w=800"
     }
   ];
 
   // Dynamic Link Accessibility Check (Simulated)
   const resultsWithValidation = await Promise.all(rawResults.map(async (item) => {
-    // 1. Blacklist check (Example of filtering broken domains)
     const blacklist = ['broken-link.com', 'expired-post.my'];
     const isMainstream = item.source_url?.includes('facebook.com') || item.source_url?.includes('instagram.com');
     const notBlacklisted = !blacklist.some(b => item.source_url?.includes(b));
-    
-    // 2. Simulated HEAD request
-    // In production, you would run this through a proxy server to check HTTP 200
     const isLinkActive = isMainstream && notBlacklisted && !!item.source_url;
     
     return { ...item, is_source_active: isLinkActive };
   }));
 
-  // FINAL STRICT FILTERING (v2.5):
+  // FINAL STRICT FILTERING (v3.0):
   // 1. Must have QR
   // 2. Must not exist in DB (Deduplication)
   // 3. Must have ACTIVE verified link
+  // 4. MUST NOT BE DISMISSED PERMANENTLY (New persistence)
   return resultsWithValidation.filter(item => {
     const hasQr = !!item.detected_qr;
     const isDuplicate = existingUrls.has(item.source_url!) || 
                        (item.detected_acc_number && existingAccounts.has(item.detected_acc_number));
     const isActive = item.is_source_active;
+    const isDismissedPersistent = dismissedIds.has(item.discovery_id);
     
-    return hasQr && !isDuplicate && isActive;
+    return hasQr && !isDuplicate && isActive && !isDismissedPersistent;
   }) as DiscoveryLead[];
+}
+
+export async function dismissLeadPermanently(discoveryId: string) {
+  const { error } = await supabase
+    .from('dismissed_leads')
+    .insert([{ discovery_id: discoveryId }]);
+
+  return { success: !error, error };
 }

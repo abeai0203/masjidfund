@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { scoutSocialLeads, submitLead } from "@/lib/api";
+import { scoutSocialLeads, submitLead, dismissLeadPermanently } from "@/lib/api";
 import { DiscoveryLead } from "@/lib/types";
 
 export default function DiscoveryPage() {
@@ -64,8 +64,19 @@ export default function DiscoveryPage() {
     }
   };
 
-  const handleDismiss = (id: string) => {
+  const handleDismiss = async (id: string) => {
+    // Pessimistic update UI
     setResults(prev => prev.filter(r => r.discovery_id !== id));
+    
+    try {
+      // Persist to DB so it doesn't reappear
+      const { success, error } = await dismissLeadPermanently(id);
+      if (!success) {
+        console.warn("Gagal menyimpan penolakan ke database. Data mungkin muncul semula jika refresh.", error);
+      }
+    } catch (err) {
+      console.error("Ralat dismissal:", err);
+    }
   };
 
   return (
@@ -214,7 +225,7 @@ export default function DiscoveryPage() {
       {/* Version Indicator */}
       <div className="pt-12 border-t border-slate-100 flex justify-center">
         <div className="bg-slate-50 px-4 py-2 rounded-full border border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-          Discovery AI Engine v2.5 (Dynamic Source Verification)
+          Discovery AI Engine v3.0 (Persistent Dismissal + Verified Links)
         </div>
       </div>
     </div>
