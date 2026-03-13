@@ -31,16 +31,18 @@ export default function DonatePage() {
 
   const generateRecommendations = async () => {
     const all = await getPublicProjects();
-    let filtered = all;
+    // Filter out mosques that have reached their target
+    const activeProjects = all.filter(p => p.collected_amount < p.target_amount);
+    let filtered = activeProjects;
 
     if (scope === "State" && selectedState) {
-      filtered = all.filter(p => p.state === selectedState);
+      filtered = activeProjects.filter(p => p.state === selectedState);
     } else if (scope === "Best") {
       // Sort by completion percent ascending (most urgent)
-      filtered = [...all].sort((a, b) => (a.completion_percent || 0) - (b.completion_percent || 0));
+      filtered = [...activeProjects].sort((a, b) => (a.completion_percent || 0) - (b.completion_percent || 0));
     } else {
       // Randomize "All"
-      filtered = [...all].sort(() => Math.random() - 0.5);
+      filtered = [...activeProjects].sort(() => Math.random() - 0.5);
     }
 
     setRecommendations(filtered.slice(0, numMosques));
@@ -49,9 +51,9 @@ export default function DonatePage() {
 
   const replaceProject = async (index: number) => {
     const all = await getPublicProjects();
-    // Exclude current recommendations
+    // Exclude current recommendations AND mosques that are full
     const currentSlugs = recommendations.map(r => r.slug);
-    const available = all.filter(p => !currentSlugs.includes(p.slug));
+    const available = all.filter(p => !currentSlugs.includes(p.slug) && p.collected_amount < p.target_amount);
     
     if (available.length > 0) {
       const random = available[Math.floor(Math.random() * available.length)];

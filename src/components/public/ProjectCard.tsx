@@ -26,6 +26,13 @@ export default function ProjectCard({ project }: { project: Project }) {
           <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-md text-xs font-semibold text-primary shadow-sm">
             {project.project_type}
           </div>
+          {project.collected_amount >= project.target_amount && (
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center p-4">
+               <div className="bg-green-500 text-white px-4 py-1.5 rounded-full text-sm font-black shadow-lg border-2 border-white/20 animate-pulse">
+                 DANA MENCUKUPI
+               </div>
+            </div>
+          )}
         </div>
         
         <div className="p-5 flex flex-col flex-grow">

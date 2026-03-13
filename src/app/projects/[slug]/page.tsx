@@ -141,9 +141,15 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
               </div>
             </div>
 
-            {/* Sticky Action Button */}
             <div className="bg-surface-muted -mx-6 -mb-6 p-6 rounded-b-2xl border-t border-border mt-auto">
-              {project.needs_donation ? (
+              {project.collected_amount >= project.target_amount ? (
+                 <div className="w-full bg-surface border border-border text-foreground/60 font-bold py-3.5 px-4 rounded-xl text-center flex items-center justify-center">
+                   <svg className="w-5 h-5 mr-2 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                   </svg>
+                   Dana Mencukupi. Terima kasih!
+                 </div>
+              ) : project.needs_donation ? (
                 <>
                   <p className="text-sm text-foreground/70 mb-4 text-center">
                     Derma terus ke akaun rasmi masjid.
