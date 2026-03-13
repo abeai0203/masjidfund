@@ -60,7 +60,7 @@ export const MOCK_PROJECTS: Project[] = [
     contact_person: "Haji Rozali Bin Lebai Awang",
     contact_phone: "60108443594",
     address: "Persiaran Lestari Putra 3, Taman Lestari Putra, Bandar Putra Permai, 43300 Seri Kembangan, Selangor.",
-    google_maps_url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15937.662762391054!2d101.666111!3d3.011111!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31cdb5a034638a29%3A0xe5a363a0a3a60!2sMasjid%20Lestari%20Putra!5e0!3m2!1sen!2smy!4v1710330000000!5m2!1sen!2smy"
+    google_maps_url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1500!2d101.666111!3d3.010111!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31cdb5a034638a29%3A0xe5a363a0a3a60!2sMasjid%20Lestari%20Putra!5e0!3m2!1sen!2smy!4v1710332000000!5m2!1sen!2smy"
   },
   {
     slug: "masjid-al-hidayah-shah-alam-pembinaan",
