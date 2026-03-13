@@ -73,9 +73,31 @@ CREATE POLICY "Public profiles are viewable by everyone."
 ON public.projects FOR SELECT 
 USING (publish_status = 'Published');
 
+-- Projects Insert Policy: Allow lead conversion
+CREATE POLICY "Anyone can insert projects." 
+ON public.projects FOR INSERT 
+WITH CHECK (true);
+
+-- Projects Update Policy: Allow admin edits and donation updates
+CREATE POLICY "Anyone can update projects." 
+ON public.projects FOR UPDATE 
+USING (true)
+WITH CHECK (true);
+
 -- Lead Insert Policy: Anyone can submit a lead (e.g. via the /submit form)
 CREATE POLICY "Anyone can submit a lead." 
 ON public.leads FOR INSERT 
+WITH CHECK (true);
+
+-- Lead Select Policy: Allow admin to view leads
+CREATE POLICY "Anyone can view leads." 
+ON public.leads FOR SELECT 
+USING (true);
+
+-- Lead Update Policy: Allow admin to update lead status
+CREATE POLICY "Anyone can update lead status." 
+ON public.leads FOR UPDATE 
+USING (true)
 WITH CHECK (true);
 
 -- (NOTE: For Admin operations like Update/Delete or viewing Drafts, 

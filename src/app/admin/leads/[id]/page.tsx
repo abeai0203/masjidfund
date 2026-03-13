@@ -33,10 +33,14 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
     const resolvedParams = await params;
     
     if (action === "Approved") {
-      await approveAndConvertToProject(resolvedParams.id, notes);
+      const success = await approveAndConvertToProject(resolvedParams.id, notes);
       setIsActing(false);
-      alert("Berjaya: Lead diluluskan dan projek baru telah diterbitkan secara automatik!");
-      router.push('/admin/projects');
+      if (success) {
+        alert("Berjaya: Lead diluluskan dan projek baru telah diterbitkan secara automatik!");
+        router.push('/admin/projects');
+      } else {
+        alert("Gagal: Ralat berlaku semasa menukar lead kepada projek. Sila periksa log atau database.");
+      }
       return;
     }
     
