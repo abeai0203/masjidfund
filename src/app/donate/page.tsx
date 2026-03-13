@@ -255,15 +255,17 @@ export default function DonatePage() {
 
            {scope === "State" && (
               <div className="mb-8 p-6 bg-surface-muted rounded-2xl border border-border animate-in slide-in-from-top-4 duration-300">
-                 <label className="block text-sm font-bold text-foreground/80 mb-3">Pilih Negeri</label>
-                 <select 
+                 <label className="block text-sm font-bold text-foreground/80 mb-3">Taip atau Pilih Negeri</label>
+                 <input 
                     value={selectedState}
                     onChange={(e) => setSelectedState(e.target.value)}
+                    list="state-filter-list"
                     className="w-full sm:w-1/2 bg-surface border border-border rounded-xl px-4 py-4 focus:outline-none focus:ring-4 focus:ring-primary/10 font-medium"
-                 >
-                    <option value="">-- Pilih Negeri --</option>
-                    {allStates.map(state => <option key={state} value={state}>{state}</option>)}
-                 </select>
+                    placeholder="Contoh: Selangor"
+                 />
+                 <datalist id="state-filter-list">
+                   {allStates.map(state => <option key={state} value={state} />)}
+                 </datalist>
               </div>
            )}
 

@@ -133,8 +133,14 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
                 name="state"
                 type="text" 
                 defaultValue={project.state}
+                list="admin-state-list"
                 className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
+              <datalist id="admin-state-list">
+                {["Selangor", "Johor", "Perak", "Pahang", "Kedah", "Terengganu", "Kelantan", "Pulau Pinang", "Melaka", "Negeri Sembilan", "Sabah", "Sarawak", "Perlis", "W.P. Kuala Lumpur"].map(s => (
+                  <option key={s} value={s} />
+                ))}
+              </datalist>
             </div>
 
             <div>

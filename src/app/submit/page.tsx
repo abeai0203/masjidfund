@@ -501,10 +501,17 @@ export default function SubmitPage() {
             </div>
             <div>
               <label htmlFor="state" className="block text-sm font-semibold text-foreground/80 mb-2">Negeri *</label>
-              <select name="state" required id="state" className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm">
-                <option value="">Pilih Negeri</option>
-                {states.map(state => <option key={state} value={state}>{state}</option>)}
-              </select>
+              <input 
+                name="state" 
+                required 
+                id="state" 
+                list="state-list"
+                className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" 
+                placeholder="Taip atau pilih negeri"
+              />
+              <datalist id="state-list">
+                {states.map(state => <option key={state} value={state} />)}
+              </datalist>
             </div>
             <div>
               <label htmlFor="district" className="block text-sm font-semibold text-foreground/80 mb-2">Daerah/Bandar *</label>
