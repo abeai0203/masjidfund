@@ -1,82 +1,116 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { getPublicProjects } from "@/lib/api";
-import { MOCK_PROJECTS } from "@/lib/mock-data";
-import { Project } from "@/lib/types";
-import Badge from "@/components/ui/Badge";
-import ProgressBar from "@/components/ui/ProgressBar";
+import { Badge } from "@/components/ui/Badge";
+import { ProgressBar } from "@/components/ui/ProgressBar";
+import { getPublicProjects, updateProject } from "@/lib/api";
 
 type ScopeType = "All" | "Best" | "State";
 
-export default function DonateFlowPage() {
+export default function DonatePage() {
   const [step, setStep] = useState(1);
-  const [totalAmount, setTotalAmount] = useState<number | "">("");
-  const [numMosques, setNumMosques] = useState<number>(3);
-  
-  const [scope, setScope] = useState<ScopeType>("All");
-  const [selectedState, setSelectedState] = useState<string>("");
-  
-  const [recommendations, setRecommendations] = useState<Project[]>([]);
+  const [totalAmount, setTotalAmount] = useState<number | "">(10);
+  const [numMosques, setNumMosques] = useState(3);
+  const [scope, setScope] = useState<ScopeType>("Best");
+  const [selectedState, setSelectedState] = useState("");
+  const [recommendations, setRecommendations] = useState<any[]>([]);
   const [currentPaymentIdx, setCurrentPaymentIdx] = useState(0);
   
-  const [allStates, setAllStates] = useState<string[]>([]);
-  const [allProjects, setAllProjects] = useState<Project[]>(MOCK_PROJECTS);
-  
-  useEffect(() => {
-    // Always start with mock data, replace with live data if available
-    getPublicProjects().then(data => {
-      const projects = data && data.length > 0 ? data : MOCK_PROJECTS;
-      setAllProjects(projects);
-      // Derive states from whatever data we have
-      const states = Array.from(new Set(projects.map(p => p.state))).sort();
-      setAllStates(states);
-    });
-  }, []);
-  
-  // Helpers for recommendations
-  const getCandidateProjects = () => {
-    let pool = [...allProjects];
+  // NEW STATES for completion flow
+  const [showAlhamdulillah, setShowAlhamdulillah] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [records, setRecords] = useState<{name: string, amount: number, total_after: number}[]>([]);
+  const [randomHadith, setRandomHadith] = useState({ text: "", source: "" });
+
+  const allStates = [
+    "Selangor", "Johor", "Perak", "Pahang", "Kedah", "Terengganu", 
+    "Kelantan", "Pulau Pinang", "Melaka", "Negeri Sembilan", 
+    "Sabah", "Sarawak", "Perlis", "W.P. Kuala Lumpur"
+  ];
+
+  const generateRecommendations = async () => {
+    const all = await getPublicProjects();
+    let filtered = all;
+
     if (scope === "State" && selectedState) {
-       pool = pool.filter(p => p.state.toLowerCase() === selectedState.toLowerCase());
+      filtered = all.filter(p => p.state === selectedState);
     } else if (scope === "Best") {
-       // Prioritize projects with lower completion %
-       pool = pool.sort((a, b) => a.completion_percent - b.completion_percent);
+      // Sort by completion percent ascending (most urgent)
+      filtered = [...all].sort((a, b) => (a.completion_percent || 0) - (b.completion_percent || 0));
     } else {
-       // Random shuffle
-       pool = pool.sort(() => 0.5 - Math.random());
+      // Randomize "All"
+      filtered = [...all].sort(() => Math.random() - 0.5);
     }
-    return pool;
+
+    setRecommendations(filtered.slice(0, numMosques));
+    setStep(4);
   };
 
-  const generateRecommendations = () => {
-    const pool = getCandidateProjects();
-    const count = Math.min(numMosques, pool.length);
-    setRecommendations(pool.slice(0, count));
-    if (count > 0) setStep(4);
-    else alert("Maaf, tiada projek yang sepadan. Sila pilih skop lain.");
-  };
-
-  const replaceProject = (indexToReplace: number) => {
-    const currentSlugs = new Set(recommendations.map(r => r.slug));
-    const pool = getCandidateProjects();
-    const newCandidate = pool.find(p => !currentSlugs.has(p.slug));
+  const replaceProject = async (index: number) => {
+    const all = await getPublicProjects();
+    // Exclude current recommendations
+    const currentSlugs = recommendations.map(r => r.slug);
+    const available = all.filter(p => !currentSlugs.includes(p.slug));
     
-    if (newCandidate) {
+    if (available.length > 0) {
+      const random = available[Math.floor(Math.random() * available.length)];
       const newRecs = [...recommendations];
-      newRecs[indexToReplace] = newCandidate;
+      newRecs[index] = random;
       setRecommendations(newRecs);
-    } else {
-      alert("Tiada lagi projek unik untuk digantikan dalam kategori ini.");
     }
   };
 
-  // Derived calculations
   const parsedTotal = typeof totalAmount === "number" ? totalAmount : 0;
   const actualNum = recommendations.length;
   // Floor to 2 decimals
   const splitAmount = actualNum > 0 ? Math.floor((parsedTotal / actualNum) * 100) / 100 : 0;
+
+  const HADITHS = [
+    { text: "Sedekah itu dapat menghapus dosa sebagaimana air memadamkan api.", source: "HR. At-Tirmidzi" },
+    { text: "Tangan yang di atas lebih baik daripada tangan yang di bawah.", source: "HR. Al-Bukhari & Muslim" },
+    { text: "Harta tidak akan berkurang dengan sedekah.", source: "HR. Muslim" },
+    { text: "Naungan bagi seorang mukmin pada hari kiamat adalah sedekahnya.", source: "HR. Ahmad" },
+    { text: "Sesungguhnya sedekah itu benar-benar dapat memadamkan kemurkaan Allah dan menghindarkan diri dari mati yang buruk.", source: "HR. At-Tirmidzi" }
+  ];
+
+  const handleCompletePayment = async () => {
+    const currentProject = recommendations[currentPaymentIdx];
+    if (!currentProject) return;
+
+    setIsProcessing(true);
+    setShowAlhamdulillah(true);
+
+    // Update Project in Database/Simulation
+    const newAmount = (currentProject.collected_amount || 0) + splitAmount;
+    await updateProject(currentProject.slug, {
+      collected_amount: newAmount,
+      completion_percent: Math.min(100, Math.floor((newAmount / currentProject.target_amount) * 100))
+    });
+
+    // Record for Summary
+    setRecords(prev => [...prev, {
+      name: currentProject.mosque_name,
+      amount: splitAmount,
+      total_after: newAmount
+    }]);
+
+    // Pick a random hadith for the end
+    if (currentPaymentIdx === actualNum - 1) {
+      setRandomHadith(HADITHS[Math.floor(Math.random() * HADITHS.length)]);
+    }
+
+    setTimeout(() => {
+      setShowAlhamdulillah(false);
+      setIsProcessing(false);
+      
+      if (currentPaymentIdx < actualNum - 1) {
+        setCurrentPaymentIdx(prev => prev + 1);
+      } else {
+        setStep(6);
+      }
+    }, 3000);
+  };
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8 w-full">
@@ -88,18 +122,18 @@ export default function DonateFlowPage() {
       </div>
 
       {/* Progress Indicator */}
-      <div className="flex justify-center mb-10">
+      <div className="flex justify-center mb-10 no-print">
         <div className="flex items-center space-x-2">
-          {[1, 2, 3, 4, 5].map(s => (
+          {[1, 2, 3, 4, 5, 6].map(s => (
             <div key={s} className="flex items-center">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-500 shadow-sm ${
                 step >= s 
                   ? "bg-primary text-white scale-110" 
                   : "bg-surface-muted text-foreground/40 border border-border"
               }`}>
-                {s}
+                {s === 6 ? "✓" : s}
               </div>
-              {s < 5 && (
+              {s < 6 && (
                 <div className={`w-6 sm:w-12 h-1 mx-1 rounded-full transition-all duration-700 ${
                   step > s ? "bg-primary/60" : "bg-border"
                 }`} />
@@ -381,45 +415,136 @@ export default function DonateFlowPage() {
                    </div>
                 </div>
 
-                <div className="flex items-center justify-between gap-4">
-                   <button 
-                     disabled={currentPaymentIdx === 0}
-                     onClick={() => setCurrentPaymentIdx(prev => prev - 1)}
-                     className="px-8 py-5 border-2 border-border rounded-2xl font-black text-foreground/60 hover:bg-surface-muted transition-all disabled:opacity-0"
-                   >
-                     Sebelumnya
-                   </button>
-                   
-                   {currentPaymentIdx < actualNum - 1 ? (
-                      <button 
-                        onClick={() => setCurrentPaymentIdx(prev => prev + 1)}
-                        className="flex-1 bg-primary hover:bg-primary-hover text-white font-black py-5 px-8 rounded-2xl shadow-xl shadow-primary/30 transition-all text-xl hover:-translate-y-1"
-                      >
-                        Selesai & Ke Masjid Seterusnya
-                      </button>
-                   ) : (
-                      <Link 
-                        href="/"
-                        className="flex-1 bg-black hover:bg-zinc-800 text-white font-black py-5 px-8 rounded-2xl shadow-xl transition-all text-xl text-center hover:-translate-y-1"
-                      >
-                        Selesai Semua Derma
-                      </Link>
-                   )}
-                </div>
+                 <div className="flex items-center justify-between gap-4">
+                    <button 
+                      disabled={currentPaymentIdx === 0 || isProcessing}
+                      onClick={() => setCurrentPaymentIdx(prev => prev - 1)}
+                      className="px-8 py-5 border-2 border-border rounded-2xl font-black text-foreground/60 hover:bg-surface-muted transition-all disabled:opacity-0"
+                    >
+                      Sebelumnya
+                    </button>
+                    
+                    <button 
+                      onClick={handleCompletePayment}
+                      disabled={isProcessing}
+                      className="flex-1 bg-primary hover:bg-primary-hover text-white font-black py-5 px-8 rounded-2xl shadow-xl shadow-primary/30 transition-all text-xl hover:-translate-y-1 active:scale-95 disabled:opacity-70"
+                    >
+                      {currentPaymentIdx < actualNum - 1 ? "Selesai & Ke Masjid Seterusnya" : "Selesai Semua Derma"}
+                    </button>
+                 </div>
+
+                 {/* Success Modal */}
+                 {showAlhamdulillah && (
+                   <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+                      <div className="bg-white rounded-[40px] p-12 text-center shadow-2xl border-4 border-primary/20 scale-110 animate-in zoom-in-95 duration-500">
+                         <div className="w-32 h-32 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
+                            <svg className="w-16 h-16 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                         </div>
+                         <h2 className="text-5xl font-black text-slate-800 mb-4 font-serif italic">Alhamdulillah!</h2>
+                         <p className="text-slate-500 text-lg font-bold">Terima kasih atas sumbangan anda.</p>
+                         <p className="text-primary font-black mt-2 text-sm uppercase tracking-widest">Sistem sedang dikemaskini...</p>
+                      </div>
+                   </div>
+                 )}
 
                 <div className="text-center">
                    <button 
+                     disabled={isProcessing}
                      onClick={() => setStep(4)}
-                     className="text-sm font-bold text-foreground/40 hover:text-primary transition-colors underline"
+                     className="text-sm font-bold text-foreground/40 hover:text-primary transition-colors underline disabled:opacity-30"
                    >
                      Kemaskini Senarai Masjid
                    </button>
                 </div>
-             </div>
-           )}
+              </div>
+            )}
+         </div>
+       )}
+
+      {/* STEP 6: Summary & Receipt */}
+      {step === 6 && (
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
+           <div className="bg-white rounded-[40px] border-2 border-slate-100 shadow-2xl p-8 sm:p-12 overflow-hidden print:p-0 print:border-0 print:shadow-none">
+              <div className="text-center mb-12">
+                 <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-6 no-print">
+                    <svg className="w-10 h-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                 </div>
+                 <h2 className="text-4xl font-black text-slate-800 tracking-tight mb-2">Ringkasan Sumbangan</h2>
+                 <p className="text-slate-500 font-medium">Terima kasih kerana menyuburkan rumah Allah.</p>
+              </div>
+
+              <div className="space-y-4 mb-12">
+                 {records.map((rec, i) => (
+                    <div key={i} className="flex justify-between items-center p-6 bg-slate-50 rounded-2xl border border-slate-100 transition-hover border-primary/20">
+                       <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center font-black text-slate-400 text-xs shadow-sm">
+                             {i + 1}
+                          </div>
+                          <div>
+                             <h4 className="font-bold text-slate-800">{rec.name}</h4>
+                             <p className="text-[10px] font-black text-primary uppercase tracking-widest">
+                                Jumlah Baharu: RM {(rec.total_after / 1000).toFixed(1)}k
+                             </p>
+                          </div>
+                       </div>
+                       <div className="text-right">
+                          <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Infaq</span>
+                          <span className="text-xl font-black text-slate-800">RM {rec.amount.toFixed(2)}</span>
+                       </div>
+                    </div>
+                 ))}
+              </div>
+
+              <div className="border-t-2 border-dashed border-slate-100 pt-8 mt-8">
+                 <div className="flex justify-between items-center bg-slate-800 text-white p-6 rounded-2xl shadow-xl shadow-slate-900/20">
+                    <div>
+                       <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Jumlah Keseluruhan</span>
+                       <span className="text-sm text-slate-300 font-medium italic">Dibahagi kepada {actualNum} masjid</span>
+                    </div>
+                    <span className="text-4xl font-black tabular-nums tracking-tight">RM {parsedTotal.toFixed(2)}</span>
+                 </div>
+              </div>
+
+              {/* Hadith Section */}
+              <div className="mt-12 p-8 bg-primary/5 rounded-3xl border border-primary/10 text-center relative overflow-hidden group">
+                 <div className="absolute top-0 right-0 p-4 opacity-10 no-print">
+                   <svg className="w-12 h-12 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21L14.017 18C14.017 16.8954 13.1216 16 12.017 16C10.9124 16 10.017 16.8954 10.017 18V21M10.017 21H3.983C3.43072 21 2.983 20.5523 2.983 20V4C2.983 3.44772 3.43072 3 3.983 3H20.017C20.5693 3 21.017 3.44772 21.017 4V20C21.017 20.5523 20.5693 21 20.017 21H14.017" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                 </div>
+                 <div className="relative z-10">
+                    <p className="text-lg font-serif italic text-slate-700 leading-relaxed max-w-2xl mx-auto mb-4">
+                       "{randomHadith.text}"
+                    </p>
+                    <span className="text-xs font-black text-primary uppercase tracking-[0.2em]">
+                       {randomHadith.source}
+                    </span>
+                 </div>
+              </div>
+           </div>
+
+           <div className="flex flex-col sm:flex-row gap-4 no-print">
+              <button 
+                onClick={() => window.print()}
+                className="flex-1 bg-white border-2 border-slate-200 text-slate-800 font-black py-5 rounded-2xl hover:bg-slate-50 transition-all flex items-center justify-center gap-3 shadow-xl"
+              >
+                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                 Muat Turun Resit
+              </button>
+              <Link 
+                href="/"
+                className="flex-1 bg-primary hover:bg-primary-hover text-white text-center font-black py-5 rounded-2xl shadow-xl shadow-primary/20 transition-all hover:-translate-y-1"
+              >
+                 Kembali ke Halaman Utama
+              </Link>
+           </div>
         </div>
       )}
 
+      <style jsx global>{`
+        @media print {
+          .no-print { display: none !important; }
+          body { background: white !important; }
+        }
+      `}</style>
     </div>
   );
 }
