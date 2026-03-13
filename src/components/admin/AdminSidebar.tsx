@@ -1,6 +1,28 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { getAllLeads } from "@/lib/api";
 
 export default function AdminSidebar() {
+  const [pendingCount, setPendingCount] = useState<number>(0);
+
+  useEffect(() => {
+    // Initial fetch
+    getAllLeads().then(leads => {
+      setPendingCount(leads.filter(l => l.status === 'Pending').length);
+    });
+
+    // Poll for new leads every 30 seconds
+    const interval = setInterval(() => {
+      getAllLeads().then(leads => {
+        setPendingCount(leads.filter(l => l.status === 'Pending').length);
+      });
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <aside className="w-full md:w-64 bg-surface border-r border-border p-6 hidden md:block">
       <div className="text-lg font-bold text-foreground mb-8">Dashboard Admin</div>
@@ -8,8 +30,13 @@ export default function AdminSidebar() {
         <Link href="/admin" className="block px-3 py-2 rounded-md text-sm font-medium hover:bg-surface-muted hover:text-primary transition-colors text-foreground">
           Gambaran Keseluruhan
         </Link>
-        <Link href="/admin/leads" className="block px-3 py-2 rounded-md text-sm font-medium hover:bg-surface-muted hover:text-primary transition-colors text-foreground">
-          Penyerahan & Lead
+        <Link href="/admin/leads" className="flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium hover:bg-surface-muted hover:text-primary transition-colors text-foreground group">
+          <span>Penyerahan & Lead</span>
+          {pendingCount > 0 && (
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-black text-white shadow-sm animate-pulse">
+              {pendingCount}
+            </span>
+          )}
         </Link>
         <Link href="/admin/projects" className="block px-3 py-2 rounded-md text-sm font-medium hover:bg-surface-muted hover:text-primary transition-colors text-foreground">
           Projek Aktif
