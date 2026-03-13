@@ -278,7 +278,11 @@ export async function approveAndConvertToProject(id: string, notes?: string): Pr
     bank_name: lead.detected_bank_name || lead.detected_account_info?.split(':')[0]?.trim() || "Maybank",
     account_name: lead.detected_acc_name || lead.extracted_mosque_name || "Bendahari Masjid",
     account_number: lead.detected_acc_number || lead.detected_account_info?.split(':')[1]?.trim() || "1234567890",
-    image_url: lead.image_url || imageUrl
+    image_url: lead.image_url || imageUrl,
+    contact_person: "Pihak Pengurusan Masjid",
+    contact_phone: lead.notes?.includes("Tel:") ? lead.notes.split("Tel:")[1].split("\n")[0].trim() : "60123456789",
+    address: lead.notes?.includes("Alamat:") ? lead.notes.split("Alamat:")[1].split("\n")[0].trim() : `${lead.extracted_mosque_name}, ${lead.state}`,
+    google_maps_url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3983.8!2d101.6!3d3.1!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sMasjid!5e0!3m2!1sen!2smy!4v1710321234567!5m2!1sen!2smy"
   };
 
   // 3. Insert into Supabase

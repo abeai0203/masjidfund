@@ -56,7 +56,11 @@ export const MOCK_PROJECTS: Project[] = [
     bank_name: "Maybank",
     account_name: "Bendahari Masjid Al-Hidayah",
     account_number: "562106712345",
-    image_url: "https://images.unsplash.com/photo-1542667593-37ad9224edd0?auto=format&fit=crop&q=80&w=800"
+    image_url: "https://images.unsplash.com/photo-1542667593-37ad9224edd0?auto=format&fit=crop&q=80&w=800",
+    contact_person: "Haji Ahmad Bin Mansur",
+    contact_phone: "60123456789",
+    address: "Persiaran Masjid, Seksyen 7, 40000 Shah Alam, Selangor",
+    google_maps_url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15936.438415785002!2d101.488667!3d3.073333!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31cc52e18585ea15%3A0xc6a80436d6a2f44!2sMasjid%20Al-Hidayah!5e0!3m2!1sen!2smy!4v1710321234567!5m2!1sen!2smy"
   },
   {
     slug: "surau-at-taqwa-ipoh-renovasi",
@@ -78,7 +82,11 @@ export const MOCK_PROJECTS: Project[] = [
     bank_name: "CIMB Bank",
     account_name: "Jawatankuasa Surau At-Taqwa",
     account_number: "8604561234",
-    image_url: "https://images.unsplash.com/photo-1591147139223-8367561333ec?auto=format&fit=crop&q=80&w=800"
+    image_url: "https://images.unsplash.com/photo-1591147139223-8367561333ec?auto=format&fit=crop&q=80&w=800",
+    contact_person: "Ustaz Hamdan",
+    contact_phone: "601122334455",
+    address: "Jalan Taqwa, Kampung Melayu, 30000 Ipoh, Perak",
+    google_maps_url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3976.920245648873!2d101.075!3d4.59!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sSurau%20At-Taqwa!5e0!3m2!1sen!2smy!4v1710321234568!5m2!1sen!2smy"
   },
   {
     slug: "masjid-jamek-kuala-lumpur-maintenance",
@@ -100,7 +108,11 @@ export const MOCK_PROJECTS: Project[] = [
     bank_name: "Bank Islam",
     account_name: "Lembaga Pentadbir Masjid Jamek",
     account_number: "14014010123456",
-    image_url: "https://images.unsplash.com/photo-1542667593-37ad9224edd0?auto=format&fit=crop&q=80&w=800"
+    image_url: "https://images.unsplash.com/photo-1542667593-37ad9224edd0?auto=format&fit=crop&q=80&w=800",
+    contact_person: "Imam Khalil",
+    contact_phone: "60177788990",
+    address: "Jalan Tun Perak, City Centre, 50050 Kuala Lumpur",
+    google_maps_url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3983.824245648873!2d101.696!3d3.149!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31cc482705096a6f%3A0x7d6c5d18585ea15!2sMasjid%20Jamek%20Sultan%20Abdul%20Samad!5e0!3m2!1sen!2smy!4v1710321234569!5m2!1sen!2smy"
   },
   {
     slug: "masjid-an-nur-johor-bahru-emergency",

@@ -111,6 +111,71 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
               </Link>
             </div>
           </section>
+
+          {/* Contact & Location Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* PIC Info */}
+            <section className="bg-surface rounded-2xl p-6 border border-border shadow-sm">
+              <h2 className="text-lg font-bold text-foreground mb-4 flex items-center">
+                <svg className="w-5 h-5 text-primary mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                Maklumat Hubungi
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-foreground/40 uppercase tracking-widest block mb-1">Orang Bertanggungjawab</label>
+                  <p className="font-bold text-foreground">{project.contact_person || "Pihak Pengurusan Masjid"}</p>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-foreground/40 uppercase tracking-widest block mb-1">No. Telefon</label>
+                  <div className="flex items-center gap-3">
+                    <p className="font-bold text-foreground">{project.contact_phone || "-"}</p>
+                    {project.contact_phone && (
+                      <Link 
+                        href={`https://wa.me/${project.contact_phone.replace(/[^0-9]/g, '')}`} 
+                        target="_blank"
+                        className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-lg transition-all flex items-center gap-2 text-xs font-bold shadow-sm"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.483 8.412-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.308 1.656zm6.29-4.131c1.517.9 3.313 1.381 5.143 1.382 5.61 0 10.169-4.559 10.173-10.17.001-2.716-1.058-5.271-2.982-7.195a10.024 10.024 0 0 0-7.195-2.981c-5.611 0-10.17 4.559-10.174 10.173a10.141 10.141 0 0 0 1.514 5.32l-.993 3.654 3.707-.975zM17.47 15.3c-.308-.154-1.821-.898-2.103-1-s-.487-.154-.692.154-.795 1-1.012 1.244-.411.231-.718.077c-.308-.154-1.299-.478-2.474-1.527-.913-.815-1.53-1.821-1.71-2.129-.179-.308-.019-.475.134-.627.139-.136.308-.359.461-.538.154-.179.205-.308.308-.513s.051-.385-.026-.538c-.077-.154-.692-1.667-.948-2.282-.25-.601-.502-.519-.691-.529-.179-.009-.385-.011-.59-.011a1.14 1.14 0 0 0-.821.385c-.282.308-1.077 1.051-1.077 2.564s1.103 2.974 1.256 3.179c.154.205 2.167 3.308 5.248 4.641.733.318 1.305.508 1.748.648.736.234 1.406.201 1.936.12.59-.09 1.821-.744 2.077-1.462.256-.718.256-1.333.179-1.462-.076-.128-.282-.205-.59-.359z" />
+                        </svg>
+                        WhatsApp
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Address */}
+            <section className="bg-surface rounded-2xl p-6 border border-border shadow-sm">
+              <h2 className="text-lg font-bold text-foreground mb-4 flex items-center">
+                <svg className="w-5 h-5 text-primary mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Alamat & Lokasi
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-foreground/40 uppercase tracking-widest block mb-1">Alamat Penuh</label>
+                  <p className="font-bold text-foreground">{project.address || `${project.mosque_name}, ${project.district}, ${project.state}`}</p>
+                </div>
+                {project.google_maps_url && (
+                  <div className="aspect-[4/3] rounded-xl overflow-hidden border border-border">
+                    <iframe 
+                      src={project.google_maps_url}
+                      className="w-full h-full border-0"
+                      allowFullScreen={true}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    ></iframe>
+                  </div>
+                )}
+              </div>
+            </section>
+          </div>
         </div>
 
         {/* Right Column - Sticky Donation Card */}

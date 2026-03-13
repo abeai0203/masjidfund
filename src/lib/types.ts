@@ -26,6 +26,10 @@ export interface Project {
   account_name?: string;
   account_number?: string;
   image_url?: string;
+  contact_person?: string;
+  contact_phone?: string;
+  address?: string;
+  google_maps_url?: string;
 }
 
 // --- Admin Enums & Types ---
