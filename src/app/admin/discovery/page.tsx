@@ -14,7 +14,13 @@ export default function DiscoveryPage() {
     setIsScouting(true);
     try {
       const data = await scoutSocialLeads();
-      setResults(data);
+      // Sort: items with detected_qr first
+      const sorted = [...data].sort((a, b) => {
+        if (a.detected_qr && !b.detected_qr) return -1;
+        if (!a.detected_qr && b.detected_qr) return 1;
+        return b.confidence - a.confidence;
+      });
+      setResults(sorted);
     } catch (error) {
       console.error(error);
       alert("Gagal menjalankan pencarian AI.");
@@ -36,11 +42,12 @@ export default function DiscoveryPage() {
         source_url: item.source_url,
         lead_score: item.confidence,
         status: "Pending",
+        detected_qr: item.detected_qr,
         detected_bank_name: item.detected_bank_name,
         detected_acc_number: item.detected_acc_number,
         detected_acc_name: item.detected_acc_name,
         detected_project_type: item.detected_project_type,
-        notes: `[Auto-Discovered from ${item.source_platform}]\nOriginal Content: ${item.raw_summary}`
+        notes: `[Auto-Discovered from ${item.source_platform}${item.detected_qr ? ' with QR' : ''}]\nOriginal Content: ${item.raw_summary}`
       });
 
       if (success) {
@@ -121,11 +128,19 @@ export default function DiscoveryPage() {
                     </svg>
                   </div>
                 )}
-                <div className="absolute top-4 left-4">
-                  <div className="bg-white/90 backdrop-blur px-3 py-1.5 rounded-xl border border-white shadow-sm flex items-center gap-2">
+                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                  <div className="bg-white/90 backdrop-blur px-3 py-1.5 rounded-xl border border-white shadow-sm flex items-center gap-2 w-fit">
                     <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
                     <span className="text-[10px] font-black text-slate-800">{item.confidence}% Confidence</span>
                   </div>
+                  {item.detected_qr && (
+                    <div className="bg-primary/90 backdrop-blur px-3 py-1.5 rounded-xl border border-primary/20 shadow-lg flex items-center gap-2 w-fit animate-bounce duration-[2000ms]">
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                      </svg>
+                      <span className="text-[9px] font-black text-white uppercase tracking-tighter">QR Dikesan</span>
+                    </div>
+                  )}
                 </div>
                 <div className="absolute top-4 right-4">
                   <div className="bg-primary px-3 py-1.5 rounded-xl text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20">

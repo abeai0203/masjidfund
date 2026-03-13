@@ -353,6 +353,7 @@ export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
       state: "Negeri Sembilan",
       detected_bank_name: "Bank Islam",
       detected_acc_number: "05012010104558",
+      detected_qr: "/images/qr-cropped.png",
       detected_project_type: "Construction",
       image_url: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=800"
     },
@@ -368,6 +369,7 @@ export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
       detected_bank_name: "Bank Rakyat",
       detected_acc_number: "1101097130",
       detected_acc_name: "Surau Al Husna",
+      detected_qr: "/images/qr-cropped.png",
       detected_project_type: "Renovation",
       image_url: "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?auto=format&fit=crop&q=80&w=800"
     },
