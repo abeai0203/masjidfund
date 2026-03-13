@@ -353,11 +353,11 @@ export default function SubmitPage() {
       // 1. Upload Images to Supabase Storage
       let finalMainImageUrl = "";
       if (files.main_image) {
-        const uploadedUrl = await uploadImage(files.main_image);
-        if (uploadedUrl) {
-          finalMainImageUrl = uploadedUrl;
+        const { url, error } = await uploadImage(files.main_image);
+        if (url) {
+          finalMainImageUrl = url;
         } else {
-          alert("Gagal memuat naik imej utama. Sila periksa sambungan internet atau tetapan database.");
+          alert(`Gagal memuat naik imej utama: ${error}. Sila periksa tetapan database.`);
           setIsSubmitting(false);
           return;
         }
@@ -366,21 +366,21 @@ export default function SubmitPage() {
       let finalQrUrl = extractedQrUrl;
       // If it's a blob/base64 from cropper or magic scan, upload it
       if (extractedQrUrl && (extractedQrUrl.startsWith('blob:') || extractedQrUrl.startsWith('data:'))) {
-        const uploadedQrUrl = await uploadImage(extractedQrUrl);
+        const { url: uploadedQrUrl, error: qrError } = await uploadImage(extractedQrUrl);
         if (uploadedQrUrl) {
           finalQrUrl = uploadedQrUrl;
         } else {
-          alert("Gagal memuat naik imej QR. Sila cuba lagi.");
+          alert(`Gagal memuat naik imej QR: ${qrError}. Sila cuba lagi.`);
           setIsSubmitting(false);
           return;
         }
       } else if (!extractedQrUrl && files.qr) {
         // If user uploaded a QR file manually but didn't crop
-        const uploadedQrUrl = await uploadImage(files.qr);
+        const { url: uploadedQrUrl, error: qrError } = await uploadImage(files.qr);
         if (uploadedQrUrl) {
           finalQrUrl = uploadedQrUrl;
         } else {
-          alert("Gagal memuat naik imej QR. Sila cuba lagi.");
+          alert(`Gagal memuat naik imej QR: ${qrError}. Sila cuba lagi.`);
           setIsSubmitting(false);
           return;
         }

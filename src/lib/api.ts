@@ -27,7 +27,7 @@ function setStoredData<T>(key: string, data: T[]) {
 }
 
 // --- Storage Helper ---
-export async function uploadImage(file: File | Blob | string, bucket: string = 'images'): Promise<string | null> {
+export async function uploadImage(file: File | Blob | string, bucket: string = 'images'): Promise<{ url: string | null, error: string | null }> {
   try {
     let finalFile: File | Blob;
     let fileName: string;
@@ -39,7 +39,9 @@ export async function uploadImage(file: File | Blob | string, bucket: string = '
       fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
     } else {
       finalFile = file;
-      fileName = `${Date.now()}-${(file as any).name || Math.random().toString(36).substring(7)}`;
+      const originalName = (file as any).name || 'image.jpg';
+      const extension = originalName.split('.').pop();
+      fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${extension}`;
     }
 
     const { data, error } = await supabase.storage
@@ -51,17 +53,17 @@ export async function uploadImage(file: File | Blob | string, bucket: string = '
 
     if (error) {
       console.error("Storage upload error:", error);
-      return null;
+      return { url: null, error: error.message };
     }
 
     const { data: { publicUrl } } = supabase.storage
       .from(bucket)
       .getPublicUrl(data.path);
 
-    return publicUrl;
-  } catch (e) {
+    return { url: publicUrl, error: null };
+  } catch (e: any) {
     console.error("Upload process error:", e);
-    return null;
+    return { url: null, error: e.message || "Unknown error" };
   }
 }
 
