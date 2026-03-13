@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { getAllStates, submitLead } from "@/lib/api";
+import { getAllStates, submitLead, uploadImage } from "@/lib/api";
 import { ProjectType } from "@/lib/types";
 
 import Tesseract from 'tesseract.js';
@@ -350,6 +350,28 @@ export default function SubmitPage() {
     setIsSubmitting(true);
     const formData = new FormData(e.currentTarget);
     try {
+      // 1. Upload Images to Supabase Storage
+      let finalMainImageUrl = "";
+      if (files.main_image) {
+        const uploadedUrl = await uploadImage(files.main_image);
+        if (uploadedUrl) finalMainImageUrl = uploadedUrl;
+      }
+
+      let finalQrUrl = extractedQrUrl;
+      // If it's a blob/base64 from cropper or magic scan, upload it
+      if (extractedQrUrl && (extractedQrUrl.startsWith('blob:') || extractedQrUrl.startsWith('data:'))) {
+        const uploadedQrUrl = await uploadImage(extractedQrUrl);
+        if (uploadedQrUrl) finalQrUrl = uploadedQrUrl;
+      } else if (!extractedQrUrl && files.qr) {
+        // If user uploaded a QR file manually but didn't crop
+        const uploadedQrUrl = await uploadImage(files.qr);
+        if (uploadedQrUrl) finalQrUrl = uploadedQrUrl;
+      }
+
+      // Handle template QR fallback if none uploaded
+      const detectedQr = finalQrUrl || (files.magic_scan ? (extractedType === 'hazelton' ? "/images/qr-hazelton.png" : extractedType === 'lestari' ? "/images/qr-cropped.png" : undefined) : undefined);
+
+      // 2. Submit Lead with permanent URLs
       await submitLead({
         raw_title: formData.get('title') as string,
         raw_summary: formData.get('short_desc') as string,
@@ -360,11 +382,11 @@ export default function SubmitPage() {
         lead_score: 98,
         status: 'Pending',
         detected_project_type: formData.get('project_type') as ProjectType,
-        detected_qr: extractedQrUrl || (files.magic_scan ? (extractedType === 'hazelton' ? "/images/qr-hazelton.png" : extractedType === 'lestari' ? "/images/qr-cropped.png" : undefined) : undefined),
+        detected_qr: detectedQr,
         detected_bank_name: formData.get('bank_name') as string,
         detected_acc_number: formData.get('acc_number') as string,
         detected_acc_name: formData.get('acc_name') as string,
-        image_url: files.main_image ? URL.createObjectURL(files.main_image) : undefined,
+        image_url: finalMainImageUrl,
         notes: `Lokasi: ${formData.get('district')}, ${formData.get('state')}\nAlamat: ${formData.get('address')}\n\nCerita Penuh: ${formData.get('full_desc')}\n\nSasaran: RM${formData.get('target_amount')}\nHubungi: ${formData.get('contact_name')} (${formData.get('contact_phone')})\n\n[Extracted via Magic Scan]`
       });
       setIsSubmitting(false);

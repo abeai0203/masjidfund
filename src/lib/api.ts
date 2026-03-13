@@ -26,6 +26,45 @@ function setStoredData<T>(key: string, data: T[]) {
   localStorage.setItem(`sim_${key}`, JSON.stringify(data));
 }
 
+// --- Storage Helper ---
+export async function uploadImage(file: File | Blob | string, bucket: string = 'images'): Promise<string | null> {
+  try {
+    let finalFile: File | Blob;
+    let fileName: string;
+
+    if (typeof file === 'string') {
+      // Handle base64 / data URL
+      const response = await fetch(file);
+      finalFile = await response.blob();
+      fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+    } else {
+      finalFile = file;
+      fileName = `${Date.now()}-${(file as any).name || Math.random().toString(36).substring(7)}`;
+    }
+
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .upload(fileName, finalFile, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) {
+      console.error("Storage upload error:", error);
+      return null;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(data.path);
+
+    return publicUrl;
+  } catch (e) {
+    console.error("Upload process error:", e);
+    return null;
+  }
+}
+
 // --- API Functions ---
 
 export async function getPublicProjects(): Promise<Project[]> {
