@@ -33,6 +33,7 @@ CREATE TABLE public.projects (
     account_name TEXT,
     account_number TEXT,
     image_url TEXT,
+    source_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );

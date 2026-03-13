@@ -145,6 +145,21 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                     )}
                   </div>
                 </div>
+                {project.source_url && (
+                  <div className="pt-4 border-t border-border mt-4">
+                    <label className="text-xs font-bold text-foreground/40 uppercase tracking-widest block mb-1">Pautan Sumber</label>
+                    <Link 
+                      href={project.source_url} 
+                      target="_blank"
+                      className="text-sm text-primary hover:text-primary-hover font-bold flex items-center gap-2 break-all group"
+                    >
+                      <svg className="w-4 h-4 flex-shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      Buka Pautan Asal
+                    </Link>
+                  </div>
+                )}
               </div>
             </section>
 

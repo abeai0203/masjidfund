@@ -30,6 +30,7 @@ export interface Project {
   contact_phone?: string;
   address?: string;
   google_maps_url?: string;
+  source_url?: string;
 }
 
 // --- Admin Enums & Types ---

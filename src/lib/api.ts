@@ -287,6 +287,7 @@ export async function approveAndConvertToProject(id: string, notes?: string): Pr
       if (!m) return "60123456789";
       return m.startsWith('0') ? `6${m}` : m;
     })(),
+    source_url: lead.source_url,
     address: (() => {
       const notes = lead.notes || "";
       const addressMatch = notes.match(/(?:Alamat|Lokasi):\s*([^\n]+)/i);
