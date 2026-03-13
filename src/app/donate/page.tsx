@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Badge } from "@/components/ui/Badge";
-import { ProgressBar } from "@/components/ui/ProgressBar";
+import Badge from "@/components/ui/Badge";
+import ProgressBar from "@/components/ui/ProgressBar";
 import { getPublicProjects, updateProject } from "@/lib/api";
 
 type ScopeType = "All" | "Best" | "State";
