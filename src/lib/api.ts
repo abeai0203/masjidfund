@@ -359,12 +359,12 @@ export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
   
   const rawResults: DiscoveryLead[] = [
     {
-      discovery_id: "disc_001",
-      confidence: 98,
-      source_platform: "onpay.my",
-      source_url: "https://raudhatulsalam.onpay.my/",
-      raw_title: "Sumbangan Pembinaan Surau Raudhatul Salam",
-      raw_summary: "Pembinaan surau komuniti di Taman Iringan Bayu, Seremban. Memerlukan dana RM2.5 juta.",
+      discovery_id: "disc_fb_001",
+      confidence: 96,
+      source_platform: "Facebook",
+      source_url: "https://facebook.com/kariah.raudhatulsalam/posts/123456789",
+      raw_title: "Rayuan Infaq Pembinaan Surau Raudhatul Salam",
+      raw_summary: "Mari bersama membina rumah Allah. Keperluan RM2.5 juta untuk fasa akhir pembinaan surau di Seremban. Imbas QR DuitNow untuk menyumbang.",
       extracted_mosque_name: "Surau Raudhatul Salam",
       state: "Negeri Sembilan",
       detected_bank_name: "Bank Islam",
@@ -374,12 +374,12 @@ export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
       image_url: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=800"
     },
     {
-      discovery_id: "disc_002",
-      confidence: 92,
-      source_platform: "herepay.org",
-      source_url: "https://herepay.org/surau-al-husna",
+      discovery_id: "disc_ig_002",
+      confidence: 94,
+      source_platform: "Instagram",
+      source_url: "https://instagram.com/p/suraualhusna_official",
       raw_title: "Tabung Pembangunan Surau Al-Husna",
-      raw_summary: "Naik taraf kemudahan Surau Al-Husna di Nibong Tebal, Pulau Pinang.",
+      raw_summary: "Kempen menaik taraf surau di Nibong Tebal. Sila guna QR code yang dilampirkan atau transfer terus ke akaun Bank Rakyat.",
       extracted_mosque_name: "Surau Al-Husna",
       state: "Pulau Pinang",
       detected_bank_name: "Bank Rakyat",
@@ -390,18 +390,18 @@ export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
       image_url: "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?auto=format&fit=crop&q=80&w=800"
     },
     {
-      discovery_id: "disc_003",
-      confidence: 85,
-      source_platform: "donationmvm.org",
-      source_url: "https://donationmvm.org/surau-orang-asli",
-      raw_title: "Infaq Surau Komuniti Orang Asli",
-      raw_summary: "Membina surau untuk komuniti Orang Asli melalui Muslim Volunteer Malaysia.",
-      extracted_mosque_name: "Surau Komuniti Orang Asli",
-      state: "Pahang",
+      discovery_id: "disc_fb_003",
+      confidence: 88,
+      source_platform: "Facebook",
+      source_url: "https://facebook.com/groups/pendudukbatucaves/posts/99887766",
+      raw_title: "Dana Baiki Bumbung Surau Al-Ikhlas",
+      raw_summary: "Bumbung surau bocor teruk. Memerlukan RM5,000 segera. Sila scan QR code di bawah.",
+      extracted_mosque_name: "Surau Al-Ikhlas",
+      state: "Selangor",
       detected_bank_name: "Maybank",
-      detected_acc_number: "564801647699",
-      detected_acc_name: "Pertubuhan Sukarelawan Muslim Malaysia",
-      detected_project_type: "Construction",
+      detected_acc_number: "562106123456",
+      detected_qr: "/images/qr-cropped.png",
+      detected_project_type: "Maintenance",
       image_url: "https://images.unsplash.com/photo-1592591544534-82000214a601?auto=format&fit=crop&q=80&w=800"
     }
   ];
@@ -409,9 +409,13 @@ export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
   // STRICT FILTERING:
   // 1. Must have QR
   // 2. Must not exist in DB (Deduplication)
+  // 3. Must be from Social (FB/IG) - although rawResults already has this, filter ensures it.
   return rawResults.filter(item => {
     const hasQr = !!item.detected_qr;
-    const isDuplicate = existingUrls.has(item.source_url!) || (item.detected_acc_number && existingAccounts.has(item.detected_acc_number));
-    return hasQr && !isDuplicate;
+    const isSocial = ["Facebook", "Instagram"].includes(item.source_platform);
+    const isDuplicate = existingUrls.has(item.source_url!) || 
+                       (item.detected_acc_number && existingAccounts.has(item.detected_acc_number));
+    
+    return hasQr && isSocial && !isDuplicate;
   });
 }
