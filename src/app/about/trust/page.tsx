@@ -1,12 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 
-export default function TrustPage() {
+function TrustContent() {
   const [activeTab, setActiveTab] = useState(0);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const level = searchParams.get('level');
+    if (level) {
+      const levelIdx = parseInt(level) - 1;
+      if (levelIdx >= 0 && levelIdx < 3) {
+        setActiveTab(levelIdx);
+        // Scroll to the verification section
+        const section = document.getElementById('verification-levels');
+        if (section) {
+          section.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    }
+  }, [searchParams]);
 
   const verificationLevels = [
+    // ... same levels ...
     {
       title: "1. Pemeriksaan Asas",
       status: "Basic Check",
@@ -88,7 +106,7 @@ export default function TrustPage() {
       </section>
 
       {/* Verification Journey Section */}
-      <section className="py-20">
+      <section id="verification-levels" className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-16">
@@ -286,5 +304,13 @@ export default function TrustPage() {
          <div className="text-slate-300 font-black tracking-widest uppercase text-xs">Amanah & Ketelusan Digital</div>
       </footer>
     </div>
+  );
+}
+
+export default function TrustPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Memuatkan...</div>}>
+      <TrustContent />
+    </Suspense>
   );
 }
