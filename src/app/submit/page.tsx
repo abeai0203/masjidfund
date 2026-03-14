@@ -47,35 +47,57 @@ export default function SubmitPage() {
           const ctx = canvas.getContext('2d');
           if (!ctx) return resolve(null);
           
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
-          
-          let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          let code = jsQR(imageData.data, imageData.width, imageData.height);
-          
-          // Fallback: If fail, try to shrink large images (jsQR sometimes fails on too high res)
-          if (!code && (img.width > 2000 || img.height > 2000)) {
-            const scale = 0.5;
+          const tryDetect = (scale: number, useGrayscale = false): { data: string, location: any } | null => {
             canvas.width = img.width * scale;
             canvas.height = img.height * scale;
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            code = jsQR(imageData.data, imageData.width, imageData.height);
+            
+            let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            
+            if (useGrayscale) {
+              const data = imageData.data;
+              for (let i = 0; i < data.length; i += 4) {
+                const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                data[i] = avg;     // red
+                data[i + 1] = avg; // green
+                data[i + 2] = avg; // blue
+              }
+              ctx.putImageData(imageData, 0, 0);
+            }
+            
+            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+              inversionAttempts: "attemptBoth",
+            });
+            return code ? { data: code.data, location: code.location } : null;
+          };
+
+          // Try multiple strategies
+          const scales = [1.0, 0.75, 0.5, 1.5]; // Try original, smaller, and slightly larger
+          let detectedCode = null;
+
+          for (const scale of scales) {
+            // Try normal
+            detectedCode = tryDetect(scale, false);
+            if (detectedCode) break;
+            
+            // Try grayscale (helps with colored QR codes like pink)
+            detectedCode = tryDetect(scale, true);
+            if (detectedCode) break;
           }
           
-          if (code) {
+          if (detectedCode) {
+            const { location } = detectedCode;
             // Found a QR code! Let's crop it with some padding
             const { topCP, bottomCP, leftCP, rightCP } = {
-              topCP: Math.min(code.location.topLeftCorner.y, code.location.topRightCorner.y),
-              bottomCP: Math.max(code.location.bottomLeftCorner.y, code.location.bottomRightCorner.y),
-              leftCP: Math.min(code.location.topLeftCorner.x, code.location.bottomLeftCorner.x),
-              rightCP: Math.max(code.location.topRightCorner.x, code.location.bottomRightCorner.x)
+              topCP: Math.min(location.topLeftCorner.y, location.topRightCorner.y),
+              bottomCP: Math.max(location.bottomLeftCorner.y, location.bottomRightCorner.y),
+              leftCP: Math.min(location.topLeftCorner.x, location.bottomLeftCorner.x),
+              rightCP: Math.max(location.topRightCorner.x, location.bottomRightCorner.x)
             };
             
             const width = rightCP - leftCP;
             const height = bottomCP - topCP;
-            const padding = Math.max(width, height) * 0.2;
+            const padding = Math.max(width, height) * 0.3; // Increased padding for better crop
             
             const cropCanvas = document.createElement('canvas');
             const cropCtx = cropCanvas.getContext('2d');
@@ -84,9 +106,15 @@ export default function SubmitPage() {
             cropCanvas.width = width + padding * 2;
             cropCanvas.height = height + padding * 2;
             
+            // We need to re-render the ORIGINAL high-res image for the final crop
+            // but the coordinates detectedCode are based on the scaled canvas.
+            // Let's use the current canvas scale for cropping or just draw from original img
+            // Finding the scale factor for crop
+            const currentScale = canvas.width / img.width;
+            
             cropCtx.drawImage(
               img, 
-              leftCP - padding, topCP - padding, width + padding * 2, height + padding * 2,
+              (leftCP - padding) / currentScale, (topCP - padding) / currentScale, (width + padding * 2) / currentScale, (height + padding * 2) / currentScale,
               0, 0, cropCanvas.width, cropCanvas.height
             );
             
