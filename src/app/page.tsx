@@ -127,7 +127,9 @@ export default function Home() {
       {/* Trust & Verification Banner */}
       <section className="bg-primary/5 py-16 px-4 sm:px-6 lg:px-8 border-t border-b border-primary/10">
         <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-2xl font-bold text-foreground mb-4 font-black uppercase tracking-tight">Kenapa Percaya MasjidFund?</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-4 font-black uppercase tracking-tight">
+            Kenapa <span className="text-green-600">MasjidFund?</span>
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mt-12">
             <div className="flex flex-col items-center group">
               <div className="bg-white w-14 h-14 rounded-2xl flex items-center justify-center mb-5 shadow-sm text-primary text-2xl font-bold border border-primary/10 group-hover:scale-110 transition-transform duration-300">✓</div>
