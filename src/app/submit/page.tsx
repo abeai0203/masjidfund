@@ -187,6 +187,11 @@ export default function SubmitPage() {
       
       // 2. Extract Phone Number
       const phoneMatch = cleanText.match(/01\d-?\d{7,8}/);
+      let detectedPhone = "";
+      if (phoneMatch) {
+        const raw = phoneMatch[0].replace(/[^0-9]/g, '');
+        detectedPhone = raw.startsWith('0') ? `6${raw}` : raw.startsWith('6') ? raw : `60${raw}`;
+      }
       
       // 3. Extract Bank Name
       const banks = ["Maybank", "CIMB", "Bank Islam", "RHB", "Public Bank", "AmBank", "Hong Leong", "BSN", "Alliance Bank", "Affin Bank", "Bank Muamalat", "Bank Rakyat"];
@@ -319,7 +324,7 @@ export default function SubmitPage() {
           (f.elements.namedItem('acc_name') as HTMLInputElement).value = detectedAccName || detectedName || "";
           if (addressMatch) (f.elements.namedItem('address') as HTMLTextAreaElement).value = addressMatch[0];
           (f.elements.namedItem('target_amount') as HTMLInputElement).value = targetAmount;
-          if (phoneMatch) (f.elements.namedItem('contact_phone') as HTMLInputElement).value = phoneMatch[0];
+          if (detectedPhone) (f.elements.namedItem('contact_phone') as HTMLInputElement).value = detectedPhone.replace(/^60/, '');
           
           // AI Stories
           (f.elements.namedItem('title') as HTMLInputElement).value = aiStory.title;
@@ -459,8 +464,10 @@ export default function SubmitPage() {
         detected_bank_name: formData.get('bank_name') as string,
         detected_acc_number: formData.get('acc_number') as string,
         detected_acc_name: formData.get('acc_name') as string,
+        contact_name: formData.get('contact_name') as string,
+        contact_phone: `60${formData.get('contact_phone') as string}`,
         image_url: finalMainImageUrl,
-        notes: `Lokasi: ${formData.get('district')}, ${formData.get('state')}\nAlamat: ${formData.get('address')}\n\nCerita Penuh: ${formData.get('full_desc')}\n\nSasaran: RM${formData.get('target_amount')}\nHubungi: ${formData.get('contact_name')} (${formData.get('contact_phone')})\n\n[Extracted via Magic Scan]`
+        notes: `Lokasi: ${formData.get('district')}, ${formData.get('state')}\nAlamat: ${formData.get('address')}\n\nCerita Penuh: ${formData.get('full_desc')}\n\nSasaran: RM${formData.get('target_amount')}\nHubungi: ${formData.get('contact_name')} (60${formData.get('contact_phone')})\n\n[Extracted via Magic Scan]`
       });
       setIsSubmitting(false);
       setIsSubmitted(true);
@@ -592,8 +599,21 @@ export default function SubmitPage() {
               <input name="contact_name" required type="text" id="contact_name" className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
             </div>
             <div>
-              <label htmlFor="contact_phone" className="block text-sm font-semibold text-foreground/80 mb-2">Nombor Telefon *</label>
-              <input name="contact_phone" required type="tel" id="contact_phone" className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+              <label htmlFor="contact_phone" className="block text-sm font-semibold text-foreground/80 mb-2">Nombor Telefon (WhatsApp) *</label>
+              <div className="flex">
+                <span className="inline-flex items-center px-4 rounded-l-lg border border-r-0 border-border bg-surface-muted text-foreground/60 font-bold text-sm">
+                  +60
+                </span>
+                <input 
+                  name="contact_phone" 
+                  required 
+                  type="tel" 
+                  id="contact_phone" 
+                  className="flex-1 min-w-0 block w-full bg-surface-muted border border-border rounded-none rounded-r-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" 
+                  placeholder="123456789"
+                />
+              </div>
+              <p className="text-[10px] text-foreground/40 mt-1 italic">Sila masukkan nombor tanpa 0 di hadapan (cth: 194817050)</p>
             </div>
             <div className="md:col-span-2">
               <label htmlFor="source_url" className="block text-sm font-semibold text-foreground/80 mb-2">URL Sumber (Pilihan)</label>

@@ -56,6 +56,8 @@ export interface Lead {
   detected_acc_name?: string;
   detected_project_type?: ProjectType;
   image_url?: string;
+  contact_name?: string;
+  contact_phone?: string;
 }
 
 export interface DiscoveryLead extends Partial<Lead> {

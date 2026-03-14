@@ -279,13 +279,13 @@ export async function approveAndConvertToProject(id: string, notes?: string): Pr
     account_name: lead.detected_acc_name || lead.extracted_mosque_name || "Bendahari Masjid",
     account_number: lead.detected_acc_number || lead.detected_account_info?.split(':')[1]?.trim() || "1234567890",
     image_url: lead.image_url || imageUrl,
-    contact_person: lead.notes?.includes("Hubungi:") ? lead.notes.split("Hubungi:")[1].split("(")[0].trim() : 
-                    lead.notes?.includes("PIC:") ? lead.notes.split("PIC:")[1].split("\n")[0].trim() : "Pihak Pengurusan Masjid",
-    contact_phone: (() => {
+    contact_person: lead.contact_name || lead.notes?.includes("Hubungi:") ? lead.notes?.split("Hubungi:")[1].split("(")[0].trim() : 
+                    lead.notes?.includes("PIC:") ? lead.notes?.split("PIC:")[1].split("\n")[0].trim() : "Pihak Pengurusan Masjid",
+    contact_phone: lead.contact_phone || (() => {
       const m = lead.notes?.match(/(?:Tel:|Hubungi:.*?\()([\d-]+)/)?.[1]?.replace(/-/g, '') || 
                 lead.notes?.match(/01\d-?\d{7,8}/)?.[0]?.replace(/-/g, '');
       if (!m) return "60123456789";
-      return m.startsWith('0') ? `6${m}` : m;
+      return m.startsWith('0') ? `6${m}` : m.startsWith('60') ? m : m.startsWith('6') ? m : `6${m}`;
     })(),
     source_url: lead.source_url,
     address: (() => {

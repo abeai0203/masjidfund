@@ -104,6 +104,14 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                 <p className="text-sm font-medium">{lead.state || "T/D"}</p>
               </div>
               <div>
+                 <p className="text-xs font-semibold text-foreground/60 mb-1">PIC (Wakil)</p>
+                <p className="text-sm font-medium">{lead.contact_name || "T/D"}</p>
+              </div>
+              <div>
+                 <p className="text-xs font-semibold text-foreground/60 mb-1">No. Telefon (WhatsApp)</p>
+                <p className="text-sm font-medium">{lead.contact_phone ? `+${lead.contact_phone}` : "T/D"}</p>
+              </div>
+              <div>
                  <p className="text-xs font-semibold text-foreground/60 mb-1">Jenis Projek</p>
                 <p className="text-sm font-medium">{lead.detected_project_type || "T/D"}</p>
               </div>
