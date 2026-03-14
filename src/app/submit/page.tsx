@@ -9,7 +9,7 @@ import Tesseract from 'tesseract.js';
 import jsQR from 'jsqr';
 import ImageEditor from "@/components/public/ImageEditor";
 import DuitNowQR from "@/components/ui/DuitNowQR";
-import ImageZoom from "@/components/ui/ImageZoom";
+import ImagePop from "@/components/ui/ImagePop";
 
 export default function SubmitPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -738,13 +738,13 @@ export default function SubmitPage() {
                   <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest">Visual Projek Dikesan</p>
                   <div className="relative aspect-square bg-white border border-border rounded-2xl flex items-center justify-center overflow-hidden group">
                     {magicScanPreview ? (
-                      <ImageZoom 
+                      <ImagePop 
                         src={magicScanPreview} 
                         alt="Magic Scan Preview" 
                         className="w-full h-full"
                       />
                     ) : files.main_image ? (
-                      <ImageZoom 
+                      <ImagePop 
                         src={URL.createObjectURL(files.main_image)} 
                         alt="Uploaded Image" 
                         className="w-full h-full"
@@ -760,7 +760,7 @@ export default function SubmitPage() {
                     { (magicScanPreview || files.main_image) && (
                       <div className="absolute top-3 right-3 z-10">
                         <span className="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full backdrop-blur-md border border-primary/20">
-                          HOVER TO ZOOM
+                          KLIK UNTUK TEROPONG
                         </span>
                       </div>
                     )}
