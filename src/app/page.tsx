@@ -132,6 +132,71 @@ export default function Home() {
         </div>
       </section>
 
+      {/* RM10 Impact Section - First Time Donor Focus */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-emerald-50/30 border-t border-b border-emerald-100 overflow-hidden relative">
+        <div className="max-w-5xl mx-auto text-center relative z-10">
+          <div className="mb-10">
+            <h2 className="text-3xl sm:text-4xl font-black text-emerald-900 mb-4 tracking-tight">
+              Dengan <span className="text-emerald-600 italic">Hanya RM10</span>
+            </h2>
+            <p className="text-emerald-800/70 text-lg font-medium max-w-2xl mx-auto">
+              Walaupun kecil, sumbangan anda sangat besar nilainya. Menyumbang untuk pembinaan masjid ini seringan:
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4 mb-12">
+            {/* Bricks */}
+            <div className="flex flex-col items-center group">
+              <div className="w-48 h-48 sm:w-56 sm:h-56 relative mb-4 transition-transform duration-500 group-hover:scale-105">
+                <div className="absolute inset-0 bg-emerald-200/20 rounded-full blur-3xl group-hover:bg-emerald-200/40 transition-colors" />
+                <img 
+                  src="/images/impact/bricks.png" 
+                  alt="Menaja batu bata" 
+                  className="w-full h-full object-contain relative z-10"
+                />
+              </div>
+              <h3 className="text-emerald-900 font-black text-lg">Menaja setiap batu bata</h3>
+            </div>
+
+            {/* Prayer Rug */}
+            <div className="flex flex-col items-center group">
+              <div className="w-48 h-48 sm:w-56 sm:h-56 relative mb-4 transition-transform duration-500 group-hover:scale-105">
+                <div className="absolute inset-0 bg-emerald-200/20 rounded-full blur-3xl group-hover:bg-emerald-200/40 transition-colors" />
+                <img 
+                  src="/images/impact/rug.png" 
+                  alt="Membina lantai sujud" 
+                  className="w-full h-full object-contain relative z-10"
+                />
+              </div>
+              <h3 className="text-emerald-900 font-black text-lg">Membina lantai untuk sujud</h3>
+            </div>
+
+            {/* Tap */}
+            <div className="flex flex-col items-center group">
+              <div className="w-48 h-48 sm:w-56 sm:h-56 relative mb-4 transition-transform duration-500 group-hover:scale-105">
+                <div className="absolute inset-0 bg-emerald-200/20 rounded-full blur-3xl group-hover:bg-emerald-200/40 transition-colors" />
+                <img 
+                  src="/images/impact/tap.png" 
+                  alt="Menyiapkan tempat wuduk" 
+                  className="w-full h-full object-contain relative z-10"
+                />
+              </div>
+              <h3 className="text-emerald-900 font-black text-lg">Menyiapkan tempat wuduk</h3>
+            </div>
+          </div>
+
+          <div className="bg-white/60 backdrop-blur-sm border border-emerald-100 p-6 rounded-[2rem] shadow-sm inline-block max-w-2xl">
+            <p className="text-emerald-900 font-bold italic leading-relaxed">
+              “Walaupun kecil, sumbangan ini boleh menjadi <span className="text-emerald-600 underline decoration-emerald-200 underline-offset-4 decoration-4">sedekah jariah yang berterusan</span>.”
+            </p>
+          </div>
+        </div>
+        
+        {/* Background Decorations */}
+        <div className="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-emerald-100/40 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-0 right-0 translate-y-1/2 translate-x-1/2 w-96 h-96 bg-emerald-100/40 rounded-full blur-[100px] pointer-events-none" />
+      </section>
+
       {/* Interactive Map Explorer */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-surface-muted border-t border-border overflow-hidden">
         <div className="max-w-7xl mx-auto">
