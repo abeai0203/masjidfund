@@ -56,6 +56,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
       contact_phone: formData.get('contact_phone') as string,
       address: formData.get('address') as string,
       google_maps_url: formData.get('google_maps_url') as string,
+      source_url: formData.get('source_url') as string,
       publish_status: isPublish ? 'Published' : 'Draft'
     };
 
@@ -185,15 +186,26 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
               />
             </div>
 
-            <div>
-               <label className="block text-sm font-semibold text-foreground/80 mb-2">URL Imej Pengepala</label>
-              <input 
-                name="image_url"
-                type="url" 
-                defaultValue={project.image_url}
-                className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-              />
-            </div>
+             <div>
+                <label className="block text-sm font-semibold text-foreground/80 mb-2">URL Imej Pengepala</label>
+               <input 
+                 name="image_url"
+                 type="url" 
+                 defaultValue={project.image_url}
+                 className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+               />
+             </div>
+
+             <div>
+                <label className="block text-sm font-semibold text-foreground/80 mb-2">Pautan Sumber (Facebook/Post/Web)</label>
+               <input 
+                 name="source_url"
+                 type="url" 
+                 defaultValue={project.source_url}
+                 className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                 placeholder="https://facebook.com/posts/..."
+               />
+             </div>
           </div>
         </div>
 
