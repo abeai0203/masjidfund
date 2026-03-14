@@ -28,27 +28,48 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-full">
       {/* Magic CTA Banner - Primary Focus */}
-      {/* Premium Hero Banner - Emerald Theme */}
-      <section className="bg-emerald-600 pt-20 pb-40 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Premium Hero Banner - Vector Emerald Theme */}
+      <section className="relative bg-emerald-950 pt-20 pb-48 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Background Image Layer */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <img 
+            src="/images/mosque-banner-vector.png" 
+            alt="Mosque Illustration" 
+            className="w-full h-full object-cover opacity-30 md:opacity-50"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-emerald-600 via-emerald-600/60 to-transparent"></div>
+        </div>
+
         {/* Large Aesthetic Wave/Hill Bottom */}
-        <div className="absolute bottom-0 left-0 w-full h-32 bg-surface pointer-events-none" style={{ borderRadius: '100% 100% 0 0 / 100% 100% 0 0', transform: 'scaleX(1.5)', marginBottom: '-1px' }}></div>
+        <div className="absolute bottom-0 left-0 w-full h-32 bg-surface z-10 pointer-events-none" style={{ borderRadius: '100% 100% 0 0 / 100% 100% 0 0', transform: 'scaleX(1.5)', marginBottom: '-1px' }}></div>
         
-        <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+        <div className="max-w-7xl mx-auto relative z-20 flex flex-col md:flex-row items-center justify-between gap-12">
           <div className="text-center md:text-left flex-1 max-w-2xl px-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-2xl mb-8 backdrop-blur-md border border-white/30 shadow-2xl">
-              <span className="text-4xl">🕌</span>
-            </div>
             <h2 className="text-4xl sm:text-6xl font-black text-white mb-6 tracking-tighter leading-tight">
-              Satu Derma, <br />
-              <span className="underline decoration-white decoration-8 underline-offset-12">Pelbagai Masjid.</span>
+              Rebut <span className="text-yellow-400">Pahala</span> <br />
+              <span className="underline decoration-white decoration-8 underline-offset-12">Tanpa Henti.</span>
             </h2>
-            <p className="text-white/90 text-xl mb-0 leading-relaxed font-medium max-w-lg">
-              Alat agihan automatik kami membolehkan anda menyokong berbilang masjid yang disahkan dalam sekali transaksi. Lebih mudah, lebih banyak pahala.
+            <h3 className="text-xl sm:text-2xl font-bold text-white mb-6">
+              Bina Masjid di Dunia, Dirikan Rumah di Syurga
+            </h3>
+            <p className="text-white/90 text-lg mb-12 leading-relaxed font-medium max-w-lg">
+              Gandakan pahala anda dengan menyumbang kepada pembinaan masjid. Setiap kali jemaah solat, Al-Quran dibaca, atau ilmu diajar, pahala anda terus mengalir berkekalan. <span className="text-xs opacity-70">Sabda Rasulullah ﷺ</span>
             </p>
+
+            {/* Hadith Quote Box - Glassmorphism */}
+            <div className="hidden md:flex items-start gap-4 bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-[28px] max-w-xl shadow-2xl">
+              <div className="text-4xl text-emerald-300 opacity-50 font-serif leading-none mt-1">“</div>
+              <div>
+                <p className="text-white text-base font-bold leading-relaxed">
+                  “Sesiapa yang <span className="text-emerald-300">membina masjid kerana Allah</span>, Allah akan bina untuknya <span className="text-emerald-300">rumah di syurga</span>.”
+                </p>
+                <p className="text-white/50 text-[10px] uppercase font-black tracking-widest mt-2">(Riwayat Bukhari & Muslim)</p>
+              </div>
+            </div>
           </div>
           
           <div className="flex-1 flex justify-center md:justify-end w-full">
-            <div className="w-full max-w-sm bg-white/10 p-4 rounded-[40px] backdrop-blur-2xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
+            <div className="w-full max-w-sm bg-white/10 p-4 rounded-[40px] backdrop-blur-2xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
               <div className="bg-white p-10 rounded-[32px] shadow-xl text-center space-y-6">
                 <Link
                   href="/donate"
@@ -60,12 +81,12 @@ export default function Home() {
                   Mula Agih Derma
                 </Link>
                 <div className="flex items-center justify-center gap-6 text-[11px] font-black uppercase tracking-widest text-emerald-600/60">
-                  <span className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-emerald-500 rounded-full"></span> 
+                  <span className="flex items-center gap-2 text-emerald-600">
+                    <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> 
                     100% Terus
                   </span>
-                  <span className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-emerald-500 rounded-full"></span> 
+                  <span className="flex items-center gap-2 text-emerald-600">
+                    <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> 
                     Patuh Syariah
                   </span>
                 </div>
