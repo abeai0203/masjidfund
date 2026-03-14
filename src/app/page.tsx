@@ -29,7 +29,7 @@ export default function Home() {
     <div className="flex flex-col min-h-full">
       {/* Magic CTA Banner - Primary Focus */}
       {/* Premium Hero Banner - Vector Emerald Theme */}
-      <section className="relative bg-emerald-950 pt-20 pb-48 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative bg-emerald-950 pt-16 pb-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Background Image Layer */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <img 
@@ -41,7 +41,7 @@ export default function Home() {
         </div>
 
         {/* Large Aesthetic Wave/Hill Bottom */}
-        <div className="absolute bottom-0 left-0 w-full h-32 bg-surface z-10 pointer-events-none" style={{ borderRadius: '100% 100% 0 0 / 100% 100% 0 0', transform: 'scaleX(1.5)', marginBottom: '-1px' }}></div>
+        <div className="absolute bottom-0 left-0 w-full h-24 bg-surface z-10 pointer-events-none" style={{ borderRadius: '100% 100% 0 0 / 100% 100% 0 0', transform: 'scaleX(1.5)', marginBottom: '-1px' }}></div>
         
         <div className="max-w-7xl mx-auto relative z-20 flex flex-col md:flex-row items-center justify-between gap-12">
           <div className="text-center md:text-left flex-1 max-w-2xl px-4">
@@ -52,7 +52,7 @@ export default function Home() {
             <h3 className="text-xl sm:text-2xl font-bold text-white mb-6">
               Bina Masjid di Dunia, Dirikan Rumah di Syurga
             </h3>
-            <p className="text-white text-lg mb-12 leading-relaxed font-medium max-w-lg">
+            <p className="text-white text-lg mb-8 leading-relaxed font-medium max-w-lg">
               Gandakan pahala anda dengan menyumbang kepada pembinaan masjid. Setiap kali jemaah solat, Al-Quran dibaca, atau ilmu diajar, pahala anda terus mengalir berkekalan. <br />
               <span className="text-sm font-bold text-yellow-400/90 mt-2 inline-block">Sabda Rasulullah ﷺ</span>
             </p>
@@ -79,16 +79,16 @@ export default function Home() {
                   <svg className="w-6 h-6 fill-emerald-600 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                   </svg>
-                  Mula Agih Derma
+                  Derma Sekarang
                 </Link>
-                <div className="flex items-center justify-center gap-6 text-[11px] font-black uppercase tracking-widest text-emerald-600/60">
+                <div className="flex items-center justify-center gap-6 text-[11px] font-black uppercase tracking-widest text-emerald-600/60 text-center">
                   <span className="flex items-center gap-2 text-emerald-600">
                     <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> 
-                    100% Terus
+                    100% KE MASJID
                   </span>
                   <span className="flex items-center gap-2 text-emerald-600">
                     <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> 
-                    Patuh Syariah
+                    TIADA KOMISEN
                   </span>
                 </div>
               </div>
