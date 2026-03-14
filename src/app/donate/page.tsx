@@ -186,7 +186,7 @@ export default function DonatePage() {
                <div className="flex justify-between items-center bg-surface-muted p-8 rounded-3xl border border-border">
                   <button 
                     onClick={() => setNumMosques(prev => Math.max(1, prev - 1))}
-                    className="w-16 h-16 rounded-2xl bg-white border border-border text-2xl font-bold hover:bg-primary hover:text-white transition-colors shadow-sm"
+                    className="w-16 h-16 rounded-2xl bg-white border border-border text-2xl font-bold hover:bg-primary hover:text-white transition-colors shadow-sm text-slate-800"
                   >-</button>
                   <div className="text-center">
                     <span className="text-6xl font-black text-primary block">{numMosques}</span>
@@ -194,7 +194,7 @@ export default function DonatePage() {
                   </div>
                   <button 
                     onClick={() => setNumMosques(prev => Math.min(6, prev + 1))}
-                    className="w-16 h-16 rounded-2xl bg-white border border-border text-2xl font-bold hover:bg-primary hover:text-white transition-colors shadow-sm"
+                    className="w-16 h-16 rounded-2xl bg-white border border-border text-2xl font-bold hover:bg-primary hover:text-white transition-colors shadow-sm text-slate-800"
                   >+</button>
                </div>
                

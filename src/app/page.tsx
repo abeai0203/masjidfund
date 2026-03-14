@@ -147,7 +147,7 @@ export default function Home() {
               <Link 
                 key={state} 
                 href={`/states/${state.toLowerCase()}`}
-                className="bg-white border border-border hover:border-primary hover:text-primary px-5 py-2 rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow-md"
+                className="bg-white border border-border hover:border-primary hover:text-primary px-5 py-2 rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow-md text-slate-800"
               >
                 {state}
               </Link>
