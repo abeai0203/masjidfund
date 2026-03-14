@@ -9,6 +9,7 @@ import Tesseract from 'tesseract.js';
 import jsQR from 'jsqr';
 import ImageEditor from "@/components/public/ImageEditor";
 import DuitNowQR from "@/components/ui/DuitNowQR";
+import ImageZoom from "@/components/ui/ImageZoom";
 
 export default function SubmitPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -735,15 +736,33 @@ export default function SubmitPage() {
                 {/* Perspective Image Extraction */}
                 <div className="space-y-3">
                   <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest">Visual Projek Dikesan</p>
-                  <div className="relative aspect-square bg-white border-2 border-dashed border-border rounded-2xl flex items-center justify-center overflow-hidden group">
-                    {extractedType === 'hazelton' ? (
-                      <img src="/images/hazelton-render.png" className="w-full h-full object-cover" alt="Hazelton Render" />
-                    ) : extractedType === 'lestari' ? (
-                      <img src="/images/masjid-lestari-putra.png" className="w-full h-full object-cover" alt="Lestari Render" />
+                  <div className="relative aspect-square bg-white border border-border rounded-2xl flex items-center justify-center overflow-hidden group">
+                    {magicScanPreview ? (
+                      <ImageZoom 
+                        src={magicScanPreview} 
+                        alt="Magic Scan Preview" 
+                        className="w-full h-full"
+                      />
                     ) : files.main_image ? (
-                      <img src={URL.createObjectURL(files.main_image)} className="w-full h-full object-cover" alt="Uploaded Image" />
+                      <ImageZoom 
+                        src={URL.createObjectURL(files.main_image)} 
+                        alt="Uploaded Image" 
+                        className="w-full h-full"
+                      />
                     ) : (
-                       <svg className="w-12 h-12 text-foreground/10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                      <div className="text-center p-6">
+                        <svg className="w-12 h-12 text-foreground/10 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p className="text-xs text-foreground/30 font-medium italic">Tiada visual dikesan</p>
+                      </div>
+                    )}
+                    { (magicScanPreview || files.main_image) && (
+                      <div className="absolute top-3 right-3 z-10">
+                        <span className="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full backdrop-blur-md border border-primary/20">
+                          HOVER TO ZOOM
+                        </span>
+                      </div>
                     )}
                     {files.magic_scan && <span className="absolute top-3 right-3 bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg animate-pulse">EXTRACTED</span>}
                   </div>
