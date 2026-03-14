@@ -58,10 +58,10 @@ export default function Home() {
             </p>
 
             {/* Hadith Quote Box - Glassmorphism */}
-            <div className="hidden md:flex items-start gap-4 bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-[28px] max-w-xl shadow-2xl">
-              <div className="text-4xl text-emerald-300 opacity-50 font-serif leading-none mt-1">“</div>
+            <div className="flex items-start gap-4 bg-white/10 backdrop-blur-xl border border-white/20 p-5 sm:p-6 rounded-[24px] sm:rounded-[28px] max-w-xl shadow-2xl mt-8 sm:mt-0">
+              <div className="text-3xl sm:text-4xl text-emerald-300 opacity-50 font-serif leading-none mt-1">“</div>
               <div>
-                <p className="text-white text-base font-bold leading-relaxed">
+                <p className="text-white text-sm sm:text-base font-bold leading-relaxed">
                   “Sesiapa yang <span className="text-emerald-300">membina masjid kerana Allah</span>, Allah akan bina untuknya <span className="text-emerald-300">rumah di syurga</span>.”
                 </p>
                 <p className="text-white/50 text-[10px] uppercase font-black tracking-widest mt-2">(Riwayat Bukhari & Muslim)</p>
