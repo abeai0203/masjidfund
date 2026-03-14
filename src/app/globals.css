@@ -4,13 +4,33 @@
 :root {
   --background: #fdfbf7;
   --foreground: #111827;
+  --surface: #ffffff;
+  --surface-muted: #f9fafb;
+  --border: #e5e7eb;
+  --border-subtle: #f3f4f6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f172a;
+    --foreground: #f1f5f9;
+    --surface: #1e293b;
+    --surface-muted: #1e293b; /* Slightly lighter or same */
+    --border: #334155;
+    --border-subtle: #1e293b;
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  
   --font-sans: var(--font-inter);
-  --font-mono: var(--font-inter); /* Can be overridden if needed */
+  --font-mono: var(--font-inter);
 
   /* Custom Theme Palette */
   --color-primary: #059669; /* Emerald 600 */
@@ -18,18 +38,6 @@
   --color-primary-light: #d1fae5; /* Emerald 100 */
   --color-secondary: #0ea5e9; /* Sky 500 */
   --color-accent: #d97706; /* Amber 600 - for urgencies */
-  
-  --color-surface: #ffffff;
-  --color-surface-muted: #f9fafb; /* Gray 50 */
-  --color-border: #e5e7eb; /* Gray 200 */
-  --color-border-subtle: #f3f4f6; /* Gray 100 */
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f172a; /* Slate 900 for a calm dark mode */
-    --foreground: #f8fafc; /* Slate 50 */
-  }
 }
 
 body {

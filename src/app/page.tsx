@@ -52,8 +52,9 @@ export default function Home() {
             <h3 className="text-xl sm:text-2xl font-bold text-white mb-6">
               Bina Masjid di Dunia, Dirikan Rumah di Syurga
             </h3>
-            <p className="text-white/90 text-lg mb-12 leading-relaxed font-medium max-w-lg">
-              Gandakan pahala anda dengan menyumbang kepada pembinaan masjid. Setiap kali jemaah solat, Al-Quran dibaca, atau ilmu diajar, pahala anda terus mengalir berkekalan. <span className="text-xs opacity-70">Sabda Rasulullah ﷺ</span>
+            <p className="text-white text-lg mb-12 leading-relaxed font-medium max-w-lg">
+              Gandakan pahala anda dengan menyumbang kepada pembinaan masjid. Setiap kali jemaah solat, Al-Quran dibaca, atau ilmu diajar, pahala anda terus mengalir berkekalan. <br />
+              <span className="text-sm font-bold text-yellow-400/90 mt-2 inline-block">Sabda Rasulullah ﷺ</span>
             </p>
 
             {/* Hadith Quote Box - Glassmorphism */}

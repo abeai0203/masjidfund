@@ -91,8 +91,8 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
           {/* Full Description & Story */}
           <section className="bg-surface rounded-2xl p-6 sm:p-8 border border-border shadow-sm">
             <h2 className="text-xl font-bold text-foreground mb-4">Mengenai Kempen Ini</h2>
-            <div className="prose prose-sm sm:prose-base max-w-none prose-p:text-foreground/80 prose-p:leading-relaxed">
-              <p>{project.full_description}</p>
+            <div className="prose prose-sm sm:prose-base max-w-none prose-p:text-foreground prose-p:leading-relaxed">
+              <p className="whitespace-pre-wrap">{project.full_description}</p>
             </div>
             
             {/* Trust Info */}
@@ -124,11 +124,11 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
               </h2>
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs font-bold text-foreground/40 uppercase tracking-widest block mb-1">Orang Bertanggungjawab</label>
+                  <label className="text-xs font-black text-foreground/60 uppercase tracking-widest block mb-1">Orang Bertanggungjawab</label>
                   <p className="font-bold text-foreground">{project.contact_person || "Pihak Pengurusan Masjid"}</p>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-foreground/40 uppercase tracking-widest block mb-1">No. Telefon</label>
+                  <label className="text-xs font-black text-foreground/60 uppercase tracking-widest block mb-1">No. Telefon</label>
                   <div className="flex items-center gap-3">
                     <p className="font-bold text-foreground">{project.contact_phone || "-"}</p>
                     {project.contact_phone && (
@@ -146,8 +146,8 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                   </div>
                 </div>
                 {project.source_url && (
-                  <div className="pt-4 border-t border-border mt-4">
-                    <label className="text-xs font-bold text-foreground/40 uppercase tracking-widest block mb-1">Pautan Sumber</label>
+                  <div>
+                    <label className="text-xs font-black text-foreground/60 uppercase tracking-widest block mb-1">Pautan Sumber</label>
                     <Link 
                       href={project.source_url} 
                       target="_blank"
@@ -174,7 +174,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
               </h2>
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs font-bold text-foreground/40 uppercase tracking-widest block mb-1">Alamat Penuh</label>
+                  <label className="text-xs font-black text-foreground/60 uppercase tracking-widest block mb-1">Alamat Penuh</label>
                   <p className="font-bold text-foreground">{project.address || `${project.mosque_name}, ${project.district}, ${project.state}`}</p>
                 </div>
                 {project.google_maps_url && (

@@ -104,7 +104,7 @@ export default function DonationModal({
         aria-label="Close modal"
       ></div>
       
-      <div className={`relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] transition-all duration-500 ${step === "alhamdulillah" ? "scale-105" : "scale-100"}`}>
+      <div className={`relative w-full max-w-md bg-surface rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] transition-all duration-500 ${step === "alhamdulillah" ? "scale-105" : "scale-100"}`}>
         
         {/* Step Header */}
         {step !== "alhamdulillah" && (
@@ -118,7 +118,7 @@ export default function DonationModal({
             {step !== "summary" && (
               <button 
                 onClick={onClose}
-                className="text-foreground/50 hover:text-foreground bg-white border border-border rounded-full w-8 h-8 flex items-center justify-center transition-colors shadow-sm"
+                className="text-foreground/50 hover:text-foreground bg-surface border border-border rounded-full w-8 h-8 flex items-center justify-center transition-colors shadow-sm"
               >
                 &times;
               </button>
@@ -136,7 +136,7 @@ export default function DonationModal({
                 <div className="flex bg-surface-muted p-1 rounded-lg mb-6 border border-border">
                   <button
                     className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
-                      activeTab === "qr" ? "bg-white shadow-sm text-primary" : "text-foreground/70 hover:text-foreground"
+                      activeTab === "qr" ? "bg-surface shadow-sm text-primary" : "text-foreground/70 hover:text-foreground"
                     }`}
                     onClick={() => setActiveTab("qr")}
                   >
@@ -144,7 +144,7 @@ export default function DonationModal({
                   </button>
                   <button
                     className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
-                      activeTab === "bank" ? "bg-white shadow-sm text-primary" : "text-foreground/70 hover:text-foreground"
+                      activeTab === "bank" ? "bg-surface shadow-sm text-primary" : "text-foreground/70 hover:text-foreground"
                     }`}
                     onClick={() => setActiveTab("bank")}
                   >
@@ -174,7 +174,7 @@ export default function DonationModal({
                       </div>
                       <div>
                         <p className="text-[10px] text-foreground/50 font-bold uppercase tracking-widest mb-1">Nombor Akaun</p>
-                        <div className="flex justify-between items-center bg-white border border-border rounded-lg p-3 mt-1 shadow-sm">
+                        <div className="flex justify-between items-center bg-surface border border-border rounded-lg p-3 mt-1 shadow-sm">
                           <p className="font-mono text-lg font-bold text-primary tracking-tighter">{project.account_number || "---"}</p>
                           <button 
                             className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
@@ -232,7 +232,7 @@ export default function DonationModal({
                 <button 
                   onClick={() => setStep("method")}
                   disabled={isProcessing}
-                  className="w-full bg-white hover:bg-surface-muted text-foreground/60 font-semibold py-3 rounded-xl transition-all border border-border"
+                  className="w-full bg-surface hover:bg-surface-muted text-foreground/60 font-semibold py-3 rounded-xl transition-all border border-border"
                 >
                   Kembali
                 </button>
@@ -278,7 +278,7 @@ export default function DonationModal({
                     RM {updatedProject.collected_amount.toLocaleString('ms-MY')} / RM {project.target_amount.toLocaleString('ms-MY')}
                   </span>
                 </div>
-                <div className="w-full bg-white h-2 rounded-full mt-2 overflow-hidden border border-border">
+                <div className="w-full bg-surface h-2 rounded-full mt-2 overflow-hidden border border-border">
                   <div 
                     className="bg-primary h-full rounded-full transition-all duration-1000"
                     style={{ width: `${updatedProject.completion_percent}%` }}
@@ -300,7 +300,7 @@ export default function DonationModal({
               <div className="flex flex-col gap-3 no-print">
                 <button 
                   onClick={() => window.print()}
-                  className="w-full bg-white hover:bg-surface-muted text-foreground font-bold py-3.5 rounded-xl transition-all border-2 border-border shadow-sm flex items-center justify-center gap-2"
+                  className="w-full bg-surface hover:bg-surface-muted text-foreground font-bold py-3.5 rounded-xl transition-all border-2 border-border shadow-sm flex items-center justify-center gap-2"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

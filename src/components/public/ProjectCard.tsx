@@ -23,19 +23,19 @@ export default function ProjectCard({ project }: { project: Project }) {
           
           {/* Mockup Badges */}
           <div className="absolute top-4 left-4 flex gap-2">
-            <div className="bg-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest text-foreground shadow-xl">
+            <div className="bg-surface px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest text-foreground shadow-xl border border-border">
               {project.state}
             </div>
           </div>
           <div className="absolute top-4 right-4 flex gap-2">
-            <div className="bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest text-emerald-600 shadow-xl border border-emerald-100/20">
+            <div className="bg-surface px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest text-emerald-600 shadow-xl border border-border">
               {project.project_type}
             </div>
           </div>
           
           {project.collected_amount >= project.target_amount && (
             <div className="absolute inset-0 bg-emerald-600/20 backdrop-blur-[2px] flex items-center justify-center p-4">
-               <div className="bg-white text-emerald-600 px-6 py-2 rounded-full text-xs font-black shadow-2xl border-2 border-emerald-100 animate-pulse">
+               <div className="bg-surface text-emerald-600 px-6 py-2 rounded-full text-xs font-black shadow-2xl border-2 border-primary/20 animate-pulse">
                  DANA MENCUKUPI
                </div>
             </div>
