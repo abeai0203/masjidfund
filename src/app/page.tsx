@@ -127,22 +127,22 @@ export default function Home() {
       {/* Trust & Verification Banner */}
       <section className="bg-primary/5 py-16 px-4 sm:px-6 lg:px-8 border-t border-b border-primary/10">
         <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-2xl font-bold text-foreground mb-4">Kenapa Percaya MasjidFund?</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-4 font-black uppercase tracking-tight">Kenapa Percaya MasjidFund?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mt-12">
-            <div className="flex flex-col items-center">
-              <div className="bg-white w-14 h-14 rounded-full flex items-center justify-center mb-5 shadow-sm text-primary text-2xl font-bold border border-primary/10">✓</div>
-              <h3 className="font-semibold text-lg mb-2">Jawatankuasa Sah</h3>
-              <p className="text-sm text-foreground/70 leading-relaxed">Kami memastikan hubungan terus dijalankan dengan wakil jawatankuasa rasmi masjid sebelum disenaraikan.</p>
+            <div className="flex flex-col items-center group">
+              <div className="bg-white w-14 h-14 rounded-2xl flex items-center justify-center mb-5 shadow-sm text-primary text-2xl font-bold border border-primary/10 group-hover:scale-110 transition-transform duration-300">✓</div>
+              <h3 className="font-bold text-lg mb-2">Disahkan Oleh Jawatankuasa Masjid</h3>
+              <p className="text-sm text-foreground/70 leading-relaxed font-medium">Setiap kempen disemak sebelum dipaparkan.</p>
             </div>
-            <div className="flex flex-col items-center">
-              <div className="bg-white w-14 h-14 rounded-full flex items-center justify-center mb-5 shadow-sm text-primary text-2xl font-bold border border-primary/10">🔒</div>
-              <h3 className="font-semibold text-lg mb-2">Derma Terus</h3>
-              <p className="text-sm text-foreground/70 leading-relaxed">Derma disalurkan terus ke akaun bank rasmi. Kami tidak memegang dana anda atau mengambil sebarang komisen.</p>
+            <div className="flex flex-col items-center group">
+              <div className="bg-white w-14 h-14 rounded-2xl flex items-center justify-center mb-5 shadow-sm text-primary text-2xl font-bold border border-primary/10 group-hover:scale-110 transition-transform duration-300">🇲🇾</div>
+              <h3 className="font-bold text-lg mb-2">100% Derma Terus ke Akaun Masjid</h3>
+              <p className="text-sm text-foreground/70 leading-relaxed font-medium">Kami tidak mengambil komisen daripada sumbangan.</p>
             </div>
-            <div className="flex flex-col items-center">
-              <div className="bg-white w-14 h-14 rounded-full flex items-center justify-center mb-5 shadow-sm text-primary text-2xl font-bold border border-primary/10">👁</div>
-              <h3 className="font-semibold text-lg mb-2">Status Telus</h3>
-              <p className="text-sm text-foreground/70 leading-relaxed">Penunjuk lencana yang jelas menunjukkan tahap pengesahan yang telah dilengkapkan untuk setiap projek.</p>
+            <div className="flex flex-col items-center group">
+              <div className="bg-white w-14 h-14 rounded-2xl flex items-center justify-center mb-5 shadow-sm text-primary text-2xl font-bold border border-primary/10 group-hover:scale-110 transition-transform duration-300">🏗️</div>
+              <h3 className="font-bold text-lg mb-2">Status Pembinaan Dikemaskini</h3>
+              <p className="text-sm text-foreground/70 leading-relaxed font-medium">Perkembangan projek dikongsikan secara berkala.</p>
             </div>
           </div>
         </div>
