@@ -79,7 +79,19 @@ export default function AdminProjectsPage() {
                 filteredProjects.map((project) => (
                   <tr key={project.slug} className="hover:bg-surface-muted/50 transition-colors">
                     <td className="px-6 py-4">
-                      <div className="font-semibold text-foreground line-clamp-1">{project.title}</div>
+                      <div className="font-semibold text-foreground line-clamp-1">
+                        {project.publish_status === 'Published' ? (
+                          <Link 
+                            href={`/projects/${project.slug}`} 
+                            target="_blank" 
+                            className="hover:text-primary transition-colors cursor-pointer"
+                          >
+                            {project.title}
+                          </Link>
+                        ) : (
+                          project.title
+                        )}
+                      </div>
                       <div className="text-xs text-foreground/60 mt-1">
                         {project.mosque_name}
                       </div>
