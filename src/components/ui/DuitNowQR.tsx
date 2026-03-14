@@ -6,10 +6,11 @@ import jsQR from "jsqr";
 
 interface DuitNowQRProps {
   qrUrl: string;
+  mosqueName?: string;
   className?: string;
 }
 
-export default function DuitNowQR({ qrUrl, className = "" }: DuitNowQRProps) {
+export default function DuitNowQR({ qrUrl, mosqueName, className = "" }: DuitNowQRProps) {
   const [qrValue, setQrValue] = useState<string | null>(null);
   const [isDecoding, setIsDecoding] = useState(false);
 
@@ -53,9 +54,9 @@ export default function DuitNowQR({ qrUrl, className = "" }: DuitNowQRProps) {
   }, [qrUrl]);
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`flex flex-col items-center pt-6 pb-2 ${className}`}>
       {/* Pink Brand Frame */}
-      <div className="bg-[#eb2a68] p-4 rounded-[2.5rem] relative shadow-2xl overflow-visible">
+      <div className="bg-[#eb2a68] p-4 rounded-[2.5rem] relative shadow-2xl overflow-visible w-full max-w-[240px]">
         
         {/* Logo Cut-out at Top */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-full p-1.5 shadow-md z-10">
@@ -78,6 +79,7 @@ export default function DuitNowQR({ qrUrl, className = "" }: DuitNowQRProps) {
                 level="H"
                 includeMargin={false}
                 className="w-full h-full"
+                fgColor="#eb2a68"
               />
             </div>
           ) : isDecoding ? (
@@ -94,8 +96,15 @@ export default function DuitNowQR({ qrUrl, className = "" }: DuitNowQRProps) {
         </div>
       </div>
       
+      {/* Mosque Name Display */}
+      {mosqueName && (
+        <div className="mt-6 text-center">
+          <p className="text-slate-800 font-bold text-sm tracking-tight">{mosqueName}</p>
+        </div>
+      )}
+      
       {/* Subtle Bottom Accent for Depth */}
-      <div className="h-2 w-4/5 bg-black/10 blur-xl absolute -bottom-4 left-1/2 -translate-x-1/2 rounded-full -z-10"></div>
+      <div className="h-2 w-1/2 bg-black/10 blur-xl absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full -z-10"></div>
     </div>
   );
 }

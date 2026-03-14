@@ -158,7 +158,10 @@ export default function DonationModal({
                   <div className="text-center w-full">
                     <p className="text-sm font-medium text-foreground mb-4 italic">Imbas menggunakan aplikasi perbankan anda</p>
                     <div className="max-w-[240px] w-full mx-auto mb-6">
-                      <DuitNowQR qrUrl={project.duitnow_qr_url} />
+                      <DuitNowQR 
+                        qrUrl={project.duitnow_qr_url} 
+                        mosqueName={project.mosque_name}
+                      />
                     </div>
                   </div>
                 ) : (

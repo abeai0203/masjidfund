@@ -407,6 +407,7 @@ export default function DonatePage() {
                                <div className="w-64 max-w-full mx-auto">
                                   <DuitNowQR 
                                     qrUrl={recommendations[currentPaymentIdx].duitnow_qr_url} 
+                                    mosqueName={recommendations[currentPaymentIdx].mosque_name}
                                   />
                                </div>
                                <p className="text-xs font-bold text-foreground/50 mt-4 text-center px-4">Imbas guna aplikasi bank anda untuk bayaran terus ke akaun masjid.</p>
