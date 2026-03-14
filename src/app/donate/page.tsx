@@ -5,6 +5,7 @@ import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { getPublicProjects, updateProject } from "@/lib/api";
+import DuitNowQR from "@/components/ui/DuitNowQR";
 
 type ScopeType = "All" | "Best" | "State";
 
@@ -403,12 +404,9 @@ export default function DonatePage() {
                          {recommendations[currentPaymentIdx].donation_method_type !== "Bank Transfer" && (
                             <div className="bg-surface-muted rounded-2xl p-6 border-2 border-primary/10 flex flex-col items-center">
                                <p className="text-xs font-black text-foreground/40 uppercase tracking-widest mb-4">Imbas DuitNow QR</p>
-                               <div className="w-48 h-48 bg-white border-4 border-white rounded-3xl shadow-lg relative p-2 group overflow-hidden">
-                                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img 
-                                    src={recommendations[currentPaymentIdx].duitnow_qr_url} 
-                                    alt="QR Payment" 
-                                    className="w-full h-full object-contain"
+                               <div className="w-64 max-w-full mx-auto">
+                                  <DuitNowQR 
+                                    qrUrl={recommendations[currentPaymentIdx].duitnow_qr_url} 
                                   />
                                </div>
                                <p className="text-xs font-bold text-foreground/50 mt-4 text-center px-4">Imbas guna aplikasi bank anda untuk bayaran terus ke akaun masjid.</p>

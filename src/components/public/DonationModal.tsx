@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Project } from "@/lib/types";
 import { updateProject } from "@/lib/api";
 import Link from "next/link";
+import DuitNowQR from "@/components/ui/DuitNowQR";
 
 const HADITHS = [
   {
@@ -156,8 +157,8 @@ export default function DonationModal({
                 {activeTab === "qr" && project.duitnow_qr_url ? (
                   <div className="text-center w-full">
                     <p className="text-sm font-medium text-foreground mb-4 italic">Imbas menggunakan aplikasi perbankan anda</p>
-                    <div className="bg-white border-2 border-primary/20 p-4 rounded-xl inline-block max-w-[220px] w-full aspect-square flex items-center justify-center mx-auto mb-6 shadow-inner">
-                      <img src={project.duitnow_qr_url} alt="DuitNow QR" className="w-full h-auto rounded-lg object-contain" />
+                    <div className="max-w-[240px] w-full mx-auto mb-6">
+                      <DuitNowQR qrUrl={project.duitnow_qr_url} />
                     </div>
                   </div>
                 ) : (
