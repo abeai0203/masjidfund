@@ -133,7 +133,10 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                     <p className="font-bold text-foreground">{project.contact_phone || "-"}</p>
                     {project.contact_phone && (
                       <Link 
-                        href={`https://wa.me/${project.contact_phone.replace(/[^0-9]/g, '')}`} 
+                        href={`https://wa.me/${(() => {
+                          const cleaned = project.contact_phone.replace(/[^0-9]/g, '');
+                          return cleaned.startsWith('01') ? `6${cleaned}` : cleaned.startsWith('60') ? cleaned : cleaned.startsWith('6') ? cleaned : `60${cleaned}`;
+                        })()}`} 
                         target="_blank"
                         className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-lg transition-all flex items-center gap-2 text-xs font-bold shadow-sm"
                       >
