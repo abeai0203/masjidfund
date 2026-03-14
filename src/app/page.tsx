@@ -28,38 +28,48 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-full">
       {/* Magic CTA Banner - Primary Focus */}
-      <section className="bg-primary py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-             <path d="M0 100 C 20 0, 50 0, 100 100 Z" fill="white" />
-          </svg>
-        </div>
-        <div className="max-w-7xl mx-auto text-center relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
-          <div className="text-center md:text-left flex-1">
-            <div className="inline-flex items-center justify-center w-14 h-14 bg-white/10 rounded-2xl mb-6 backdrop-blur-sm border border-white/20">
-              <span className="text-3xl animate-bounce">🕌</span>
+      {/* Premium Hero Banner - Emerald Theme */}
+      <section className="bg-emerald-600 pt-20 pb-40 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        {/* Large Aesthetic Wave/Hill Bottom */}
+        <div className="absolute bottom-0 left-0 w-full h-32 bg-surface pointer-events-none" style={{ borderRadius: '100% 100% 0 0 / 100% 100% 0 0', transform: 'scaleX(1.5)', marginBottom: '-1px' }}></div>
+        
+        <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+          <div className="text-center md:text-left flex-1 max-w-2xl px-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-2xl mb-8 backdrop-blur-md border border-white/30 shadow-2xl">
+              <span className="text-4xl">🕌</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-white mb-4 tracking-tight">
-              Satu Derma, <span className="underline decoration-white/30 underline-offset-8">Pelbagai Masjid.</span>
+            <h2 className="text-4xl sm:text-6xl font-black text-white mb-6 tracking-tighter leading-tight">
+              Satu Derma, <br />
+              <span className="underline decoration-white decoration-8 underline-offset-12">Pelbagai Masjid.</span>
             </h2>
-            <p className="text-white/90 text-lg mb-0 leading-relaxed max-w-xl font-medium">
+            <p className="text-white/90 text-xl mb-0 leading-relaxed font-medium max-w-lg">
               Alat agihan automatik kami membolehkan anda menyokong berbilang masjid yang disahkan dalam sekali transaksi. Lebih mudah, lebih banyak pahala.
             </p>
           </div>
           
-          <div className="flex flex-col items-center gap-4 bg-white/5 p-8 rounded-3xl backdrop-blur-md border border-white/10 shadow-2xl">
-            <Link
-              href="/donate"
-              className="group inline-flex items-center gap-4 bg-white text-primary hover:bg-surface-muted font-black text-xl px-12 py-5 rounded-2xl shadow-xl transition-all hover:-translate-y-1.5 hover:shadow-2xl active:scale-95"
-            >
-              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+          <div className="flex-1 flex justify-center md:justify-end w-full">
+            <div className="w-full max-w-sm bg-white/10 p-4 rounded-[40px] backdrop-blur-2xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
+              <div className="bg-white p-10 rounded-[32px] shadow-xl text-center space-y-6">
+                <Link
+                  href="/donate"
+                  className="group flex items-center justify-center gap-3 bg-white border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50 font-black text-2xl px-6 py-5 rounded-2xl transition-all hover:scale-105 active:scale-95 shadow-lg"
+                >
+                  <svg className="w-6 h-6 fill-emerald-600 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                  </svg>
+                  Mula Agih Derma
+                </Link>
+                <div className="flex items-center justify-center gap-6 text-[11px] font-black uppercase tracking-widest text-emerald-600/60">
+                  <span className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-emerald-500 rounded-full"></span> 
+                    100% Terus
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-emerald-500 rounded-full"></span> 
+                    Patuh Syariah
+                  </span>
+                </div>
               </div>
-              Mula Agih Derma
-            </Link>
-            <div className="flex items-center gap-4 text-white/70 text-[10px] font-bold uppercase tracking-widest mt-2">
-              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span> 100% Terus</span>
-              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span> Patuh Syariah</span>
             </div>
           </div>
         </div>
@@ -73,7 +83,7 @@ export default function Home() {
               <h2 className="text-3xl font-bold text-foreground mb-2">Projek Pilihan</h2>
               <p className="text-foreground/70">Sokong keperluan segera masjid-masjid ini hari ini.</p>
             </div>
-            <Link href="/projects" className="hidden sm:inline-flex items-center text-primary font-medium hover:text-primary-hover">
+            <Link href="/projects" className="hidden sm:inline-flex items-center text-emerald-600 font-black hover:text-emerald-700 transition-colors">
               Lihat semua &rarr;
             </Link>
           </div>
@@ -93,7 +103,7 @@ export default function Home() {
           )}
           
           <div className="mt-10 sm:hidden flex justify-center">
-            <Link href="/projects" className="inline-flex items-center text-primary font-medium hover:text-primary-hover">
+            <Link href="/projects" className="inline-flex items-center text-emerald-600 font-black hover:text-emerald-700">
               Lihat semua projek &rarr;
             </Link>
           </div>

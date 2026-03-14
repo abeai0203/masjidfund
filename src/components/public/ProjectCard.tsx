@@ -7,28 +7,35 @@ export default function ProjectCard({ project }: { project: Project }) {
   return (
     <Link href={`/projects/${project.slug}`} className="group block h-full">
       <div className="bg-surface border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col hover:border-primary/50">
-        <div className="relative h-48 w-full bg-surface-muted border-b border-border">
+        <div className="relative h-56 w-full bg-surface-muted overflow-hidden">
           {project.image_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img 
               src={project.image_url} 
               alt={project.mosque_name} 
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-primary/5">
-              <span className="text-primary/40 font-medium whitespace-nowrap px-4 font-xs break-all">{project.mosque_name}</span>
+            <div className="w-full h-full flex items-center justify-center bg-emerald-50">
+              <span className="text-emerald-700/40 font-black text-xl px-8 text-center">{project.mosque_name}</span>
             </div>
           )}
-          <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-md text-xs font-semibold text-foreground shadow-sm">
-            {project.state}
+          
+          {/* Mockup Badges */}
+          <div className="absolute top-4 left-4 flex gap-2">
+            <div className="bg-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest text-foreground shadow-xl">
+              {project.state}
+            </div>
           </div>
-          <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-md text-xs font-semibold text-primary shadow-sm">
-            {project.project_type}
+          <div className="absolute top-4 right-4 flex gap-2">
+            <div className="bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest text-emerald-600 shadow-xl border border-emerald-100/20">
+              {project.project_type}
+            </div>
           </div>
+          
           {project.collected_amount >= project.target_amount && (
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center p-4">
-               <div className="bg-green-500 text-white px-4 py-1.5 rounded-full text-sm font-black shadow-lg border-2 border-white/20 animate-pulse">
+            <div className="absolute inset-0 bg-emerald-600/20 backdrop-blur-[2px] flex items-center justify-center p-4">
+               <div className="bg-white text-emerald-600 px-6 py-2 rounded-full text-xs font-black shadow-2xl border-2 border-emerald-100 animate-pulse">
                  DANA MENCUKUPI
                </div>
             </div>
