@@ -8,6 +8,7 @@ import { ProjectType } from "@/lib/types";
 import Tesseract from 'tesseract.js';
 import jsQR from 'jsqr';
 import ImageEditor from "@/components/public/ImageEditor";
+import DuitNowQR from "@/components/ui/DuitNowQR";
 
 export default function SubmitPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,6 +25,8 @@ export default function SubmitPage() {
     document: null,
     magic_scan: null
   });
+
+  const [formName, setFormName] = useState("");
 
   const [isEditingQr, setIsEditingQr] = useState(false);
   const [editingImageUrl, setEditingImageUrl] = useState<string | null>(null);
@@ -254,6 +257,7 @@ export default function SubmitPage() {
           (f.elements.namedItem('title') as HTMLInputElement).value = "Tapak Pembangunan Masjid Lestari Putra";
           (f.elements.namedItem('short_desc') as HTMLTextAreaElement).value = "Pembangunan tapak masjid baru untuk komuniti Lestari Putra.";
           (f.elements.namedItem('full_desc') as HTMLTextAreaElement).value = aiStory.fullDesc;
+          setFormName("Masjid Lestari Putra");
         } else if (isHazelton) {
           (f.elements.namedItem('mosque_name') as HTMLInputElement).value = "Surau Hazelton Eco Forest";
           (f.elements.namedItem('acc_number') as HTMLInputElement).value = "12195010033475";
@@ -268,6 +272,7 @@ export default function SubmitPage() {
           (f.elements.namedItem('title') as HTMLInputElement).value = "Sumbangan Pembinaan Surau Hazelton Eco Forest";
           (f.elements.namedItem('short_desc') as HTMLTextAreaElement).value = "Pembinaan surau baru yang moden untuk komuniti Hazelton.";
           (f.elements.namedItem('full_desc') as HTMLTextAreaElement).value = aiStory.fullDesc;
+          setFormName("Surau Hazelton Eco Forest");
         } else {
           // AI Dynamic Filling for New Poster
           (f.elements.namedItem('mosque_name') as HTMLInputElement).value = mosqueName;
@@ -283,6 +288,7 @@ export default function SubmitPage() {
           (f.elements.namedItem('title') as HTMLInputElement).value = aiStory.title;
           (f.elements.namedItem('short_desc') as HTMLTextAreaElement).value = aiStory.shortDesc;
           (f.elements.namedItem('full_desc') as HTMLTextAreaElement).value = aiStory.fullDesc;
+          setFormName(mosqueName);
         }
 
         (f.elements.namedItem('method_type') as HTMLSelectElement).value = "Both";
@@ -295,11 +301,12 @@ export default function SubmitPage() {
         main_image: file 
       }));
 
-      setIsScanning(false);
-      
-      const statusMsg = `Magic Scan Selesai! ✅\n\nAI telah memenuhkan Borang Kempen secara automatik.\n- Institusi: ${mosqueName}\n- Cerita AI: Berjaya dijana!\n- QR & Lokasi: Dikesan`;
-      alert(statusMsg);
+      if (!qrResult) {
+        alert("⚠️ Imej poster ini tidak mempunyai Kod QR yang boleh dikesan. Sila muat naik kod QR secara manual atau pastikan poster mempunyai kod QR yang jelas.");
+      }
 
+      setIsScanning(false);
+      clearTimeout(timeoutId);
     } catch (error) {
       clearTimeout(timeoutId);
       if (!isTimeout) {
@@ -328,11 +335,21 @@ export default function SubmitPage() {
     setIsEditingQr(false);
   };
 
-  const handleFileChange = (key: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (key: string) => async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     if (file) {
       if (key === 'magic_scan') {
         handleMagicScan(file);
+      } else if (key === 'qr') {
+        // Validation for manual QR upload
+        const qrDataUrl = await extractQrFromImage(file);
+        if (!qrDataUrl) {
+          alert("❌ Tiada kod QR dikesan dalam gambar ini. Sila muat naik gambar yang mempunyai kod QR yang jelas.");
+          e.target.value = ""; // Clear input
+          return;
+        }
+        setFiles(prev => ({ ...prev, [key]: file, magic_scan: null }));
+        setExtractedQrUrl(qrDataUrl);
       } else {
         setFiles(prev => ({ ...prev, [key]: file, magic_scan: null }));
         setExtractedType(null);
@@ -556,7 +573,14 @@ export default function SubmitPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
               <label htmlFor="mosque_name" className="block text-sm font-semibold text-foreground/80 mb-2">Nama Rasmi *</label>
-              <input name="mosque_name" required type="text" id="mosque_name" className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm" />
+              <input 
+                name="mosque_name" 
+                required 
+                type="text" 
+                id="mosque_name" 
+                className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm" 
+                onChange={(e) => setFormName(e.target.value)}
+              />
             </div>
             <div>
               <label htmlFor="state" className="block text-sm font-semibold text-foreground/80 mb-2">Negeri *</label>
@@ -645,24 +669,13 @@ export default function SubmitPage() {
                 <div className="space-y-3">
                   <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest">DuitNow QR Dikesan</p>
                   <div className="relative aspect-square bg-white border-2 border-dashed border-border rounded-2xl flex items-center justify-center p-4 overflow-hidden group">
-                    {extractedQrUrl ? (
-                      <img 
-                        src={extractedQrUrl} 
-                        className="max-h-full w-auto object-contain" 
-                        alt="Extracted QR" 
-                      />
-                    ) : (extractedType && (extractedType === 'hazelton' || extractedType === 'lestari')) ? (
-                      <img 
-                        src={extractedType === 'hazelton' ? "/images/qr-hazelton.png" : "/images/qr-cropped.png"} 
-                        className="max-h-full w-auto object-contain" 
-                        alt="Demo QR" 
-                      />
-                    ) : files.qr ? (
-                      <img 
-                        src={URL.createObjectURL(files.qr)} 
-                        className="max-h-full w-auto object-contain" 
-                        alt="Original QR" 
-                      />
+                    {extractedQrUrl || (files.qr && URL.createObjectURL(files.qr)) || (extractedType && (extractedType === 'hazelton' || extractedType === 'lestari')) ? (
+                      <div className="w-full max-w-[200px]">
+                        <DuitNowQR 
+                          qrUrl={extractedQrUrl || (files.qr ? URL.createObjectURL(files.qr) : (extractedType === 'hazelton' ? "/images/qr-hazelton.png" : "/images/qr-cropped.png"))} 
+                          mosqueName={formName || "Nama Masjid Anda"}
+                        />
+                      </div>
                     ) : (
                        <svg className="w-12 h-12 text-foreground/10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
                     )}
