@@ -16,7 +16,7 @@ export default function Badge({ status }: BadgeProps) {
     case "Verified":
       colorStyles = "bg-primary-light text-primary-hover border-primary/20 hover:bg-primary/20";
       displayStatus = "Disahkan";
-      level = 3;
+      level = 2;
       break;
     case "Basic Checked":
       colorStyles = "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200";
