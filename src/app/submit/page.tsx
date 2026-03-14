@@ -47,20 +47,33 @@ export default function SubmitPage() {
           const ctx = canvas.getContext('2d');
           if (!ctx) return resolve(null);
           
-          const tryDetect = (scale: number, useGrayscale = false): { data: string, location: any } | null => {
+          const tryDetect = (scale: number, mode: 'normal' | 'grayscale' | 'green' | 'blue'): { data: string, location: any, scale: number } | null => {
             canvas.width = img.width * scale;
             canvas.height = img.height * scale;
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             
             let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            
-            if (useGrayscale) {
-              const data = imageData.data;
+            const data = imageData.data;
+
+            if (mode === 'grayscale') {
               for (let i = 0; i < data.length; i += 4) {
-                const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                data[i] = avg;     // red
-                data[i + 1] = avg; // green
-                data[i + 2] = avg; // blue
+                const avg = (data[i] * 0.3 + data[i + 1] * 0.59 + data[i + 2] * 0.11);
+                data[i] = data[i + 1] = data[i + 2] = avg;
+              }
+              ctx.putImageData(imageData, 0, 0);
+            } else if (mode === 'green') {
+              // Vital for Pink/Red QR codes: The green channel provides the highest contrast
+              // Pink = High Red, Low Green, High/Mid Blue. Against White (High RGB), 
+              // the Green channel will show the pink pixels as dark and white as light.
+              for (let i = 0; i < data.length; i += 4) {
+                const g = data[i + 1];
+                data[i] = data[i + 1] = data[i + 2] = g;
+              }
+              ctx.putImageData(imageData, 0, 0);
+            } else if (mode === 'blue') {
+              for (let i = 0; i < data.length; i += 4) {
+                const b = data[i + 2];
+                data[i] = data[i + 1] = data[i + 2] = b;
               }
               ctx.putImageData(imageData, 0, 0);
             }
@@ -68,26 +81,26 @@ export default function SubmitPage() {
             const code = jsQR(imageData.data, imageData.width, imageData.height, {
               inversionAttempts: "attemptBoth",
             });
-            return code ? { data: code.data, location: code.location } : null;
+            return code ? { data: code.data, location: code.location, scale } : null;
           };
 
-          // Try multiple strategies
-          const scales = [1.0, 0.75, 0.5, 1.5]; // Try original, smaller, and slightly larger
+          // Ultra-Robust Multi-pass Strategy
+          const modes: ('normal' | 'grayscale' | 'green' | 'blue')[] = ['green', 'normal', 'grayscale', 'blue'];
+          const scales = [1.0, 0.75, 0.5, 1.2, 1.5]; 
+          
           let detectedCode = null;
 
-          for (const scale of scales) {
-            // Try normal
-            detectedCode = tryDetect(scale, false);
-            if (detectedCode) break;
-            
-            // Try grayscale (helps with colored QR codes like pink)
-            detectedCode = tryDetect(scale, true);
+          // Nested loop to try every combination until success
+          for (const mode of modes) {
+            for (const scale of scales) {
+              detectedCode = tryDetect(scale, mode);
+              if (detectedCode) break;
+            }
             if (detectedCode) break;
           }
           
           if (detectedCode) {
-            const { location } = detectedCode;
-            // Found a QR code! Let's crop it with some padding
+            const { location, scale: finalScale } = detectedCode;
             const { topCP, bottomCP, leftCP, rightCP } = {
               topCP: Math.min(location.topLeftCorner.y, location.topRightCorner.y),
               bottomCP: Math.max(location.bottomLeftCorner.y, location.bottomRightCorner.y),
@@ -97,7 +110,7 @@ export default function SubmitPage() {
             
             const width = rightCP - leftCP;
             const height = bottomCP - topCP;
-            const padding = Math.max(width, height) * 0.3; // Increased padding for better crop
+            const padding = Math.max(width, height) * 0.35; 
             
             const cropCanvas = document.createElement('canvas');
             const cropCtx = cropCanvas.getContext('2d');
@@ -106,15 +119,10 @@ export default function SubmitPage() {
             cropCanvas.width = width + padding * 2;
             cropCanvas.height = height + padding * 2;
             
-            // We need to re-render the ORIGINAL high-res image for the final crop
-            // but the coordinates detectedCode are based on the scaled canvas.
-            // Let's use the current canvas scale for cropping or just draw from original img
-            // Finding the scale factor for crop
-            const currentScale = canvas.width / img.width;
-            
+            // Map back to original image coordinates
             cropCtx.drawImage(
               img, 
-              (leftCP - padding) / currentScale, (topCP - padding) / currentScale, (width + padding * 2) / currentScale, (height + padding * 2) / currentScale,
+              (leftCP - padding) / finalScale, (topCP - padding) / finalScale, (width + padding * 2) / finalScale, (height + padding * 2) / finalScale,
               0, 0, cropCanvas.width, cropCanvas.height
             );
             
