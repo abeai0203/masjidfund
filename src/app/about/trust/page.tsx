@@ -262,76 +262,100 @@ function TrustContent() {
         </div>
       </section>
 
-      <section className="py-20 bg-white relative overflow-hidden">
-        {/* Abstract Background Splashes */}
-        <div className="absolute top-1/2 left-0 -translate-y-1/2 -ml-20 w-80 h-80 bg-emerald-50 rounded-full blur-[100px] opacity-60"></div>
-        <div className="absolute top-1/2 right-0 -translate-y-1/2 -mr-20 w-80 h-80 bg-red-50 rounded-full blur-[100px] opacity-60"></div>
+      <section className="py-24 bg-white relative overflow-hidden">
+        {/* Islamic Geometric Background Pattern */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#059669 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+        <div className="absolute top-0 right-0 -tranislate-y-1/2 w-96 h-96 bg-primary/5 rounded-full blur-[120px]"></div>
 
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-5xl mx-auto">
-            <div className="bg-white rounded-[60px] p-8 md:p-16 shadow-2xl shadow-slate-200/60 border border-slate-100 flex flex-col md:flex-row items-center gap-12 overflow-hidden relative group">
-              
-              {/* Image Side */}
-              <div className="w-full md:w-1/2 relative">
-                <div className="relative z-10 animate-in fade-in zoom-in duration-700">
-                  <img 
-                    src="/images/illustrations/report-shield.png" 
-                    alt="Trust Verification" 
-                    className="w-full h-auto rounded-3xl"
-                  />
-                </div>
-                {/* Secondary Floating Asset */}
-                <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-white rounded-2xl shadow-xl p-3 border border-slate-100 animate-bounce duration-[3000ms] hidden md:block">
-                  <img 
-                    src="/images/illustrations/report-alert.png" 
-                    alt="Alert Icon" 
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              </div>
-
-              {/* Text Side */}
-              <div className="w-full md:w-1/2 space-y-8 text-left">
-                <div className="space-y-4">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-full border border-red-100">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <span className="text-[10px] font-black uppercase tracking-widest">Integriti Platform</span>
+          <div className="max-w-6xl mx-auto">
+            <div className="bg-white rounded-[64px] border border-slate-100 shadow-2xl shadow-slate-200/50 overflow-hidden">
+              <div className="flex flex-col lg:flex-row">
+                
+                {/* Visual Section - Concept 3: Minaret & Scroll */}
+                <div className="lg:w-5/12 bg-slate-50 relative p-12 flex items-center justify-center min-h-[400px]">
+                  <div className="absolute inset-0 opacity-40" style={{ 
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l5.878 18.09h19.022l-15.389 11.18 5.878 18.09-15.389-11.18-15.389 11.18 5.878-18.09-15.389-11.18h19.022z' fill='%23059669' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
+                    backgroundSize: '80px 80px'
+                  }}></div>
+                  
+                  <div className="relative z-10 w-full max-w-sm transform hover:scale-105 transition-transform duration-700">
+                    {/* Placeholder for Concept 3 Illustration */}
+                    <img 
+                      src="/images/illustrations/report-mosque.png" 
+                      alt="Islamic Trust Illustration" 
+                      className="w-full h-auto drop-shadow-2xl animate-in fade-in zoom-in duration-1000"
+                    />
+                    
+                    {/* Floating Islamic Geometric Token */}
+                    <div className="absolute -top-6 -left-6 w-20 h-20 bg-primary rounded-2xl flex items-center justify-center text-white shadow-xl rotate-12">
+                      <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                    </div>
                   </div>
-                  <h2 className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight leading-tight">
-                    Nampak Sesuatu Yang <span className="text-red-500 italic">Meragukan?</span>
-                  </h2>
-                  <p className="text-lg text-slate-500 font-medium leading-relaxed">
-                    Keselamatan penderma adalah keutamaan kami. Jika anda mendapati sebarang maklumat projek yang tidak tepat atau mencurigakan, sila laporkan segera.
-                  </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Link 
-                    href="/feedback" 
-                    className="flex-1 px-8 py-5 bg-slate-900 hover:bg-black text-white font-black rounded-3xl transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-3 group"
-                  >
-                    <span>Hubungi Unit Aduan</span>
-                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </Link>
-                  <button className="flex-1 px-8 py-5 bg-white border-2 border-slate-100 hover:border-slate-200 text-slate-600 font-black rounded-3xl transition-all flex items-center justify-center gap-2">
-                    Garis Panduan Keselamatan
-                  </button>
-                </div>
-
-                <div className="pt-4 border-t border-slate-100 flex items-center gap-4 text-slate-400">
-                  <div className="flex -space-x-2">
-                    {[1,2,3].map(i => (
-                      <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-100"></div>
-                    ))}
+                {/* Content Section */}
+                <div className="lg:w-7/12 p-12 md:p-20 space-y-10">
+                  <div className="space-y-6">
+                    <div className="inline-flex items-center gap-2 px-5 py-2 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-100">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em]">Sistem Amanah MasjidFund</span>
+                    </div>
+                    
+                    <h2 className="text-4xl md:text-5xl font-black text-slate-800 leading-[1.15] tracking-tight">
+                      Laporkan Maklumat <br />
+                      <span className="text-primary italic">Yang Meragukan</span>
+                    </h2>
+                    
+                    <p className="text-lg text-slate-500 font-medium leading-relaxed max-w-xl">
+                      Integriti adalah tunggak utama kami. Jika anda mendapati sebarang maklumat projek yang tidak tepat, sila maklumkan kepada kami untuk tindakan segera demi menjaga amanah penderma.
+                    </p>
                   </div>
-                  <p className="text-xs font-bold leading-none">Pasukan kami menyemak setiap aduan dalam tempoh 24 jam.</p>
-                </div>
-              </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Link 
+                      href="/feedback" 
+                      className="group bg-slate-900 border-2 border-slate-900 hover:bg-black p-6 rounded-[32px] text-white transition-all shadow-xl shadow-slate-200 flex flex-col justify-between h-48"
+                    >
+                      <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="text-lg font-black">Hubungi Kami</div>
+                        <div className="text-sm text-slate-400 font-medium">Buka tiket aduan segera</div>
+                      </div>
+                    </Link>
+
+                    <div className="bg-white border-2 border-slate-100 hover:border-primary/20 p-6 rounded-[32px] text-slate-800 transition-all flex flex-col justify-between h-48 group">
+                      <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary group-hover:rotate-12 transition-transform">
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="text-lg font-black tracking-tight">Polisi Keselamatan</div>
+                        <div className="text-sm text-slate-500 font-medium">Lihat bagaimana kami menapis projek</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50 rounded-2xl p-4 flex items-center gap-4 border border-slate-100">
+                    <div className="flex -space-x-3">
+                      {[1,2,3,4].map(i => (
+                        <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200"></div>
+                      ))}
+                    </div>
+                    <p className="text-xs font-bold text-slate-500 underline decoration-primary/30 decoration-2 underline-offset-4">
+                      Sertai 1,200+ pengguna yang membantu menjaga integriti platform kami.
+                    </p>
+                  </div>
+                </div>
+
+              </div>
             </div>
           </div>
         </div>
