@@ -237,6 +237,15 @@ export default function SubmitPage() {
           break;
         }
       }
+
+      // 5b. BIN/BINTI Specific Extraction (Very Aggressive for Malaysian Names)
+      if (!detectedContactName) {
+        const binRegex = /([A-Z][A-Z\s]{2,}\s(?:BIN|BINTI)\s[A-Z][A-Z\s]{2,})/i;
+        const binMatch = cleanText.match(binRegex);
+        if (binMatch) {
+          detectedContactName = binMatch[1].trim().toUpperCase();
+        }
+      }
       
       // 6. Extract Address (Look for keywords like Jalan, No, Persiaran, Taman or Postcodes)
       const addressRegex = /(?:Jalan|No|Persiaran|Taman|Lot|Kg|Kampung)\s+([A-Z0-9][-A-Za-z0-9\s,.]{5,60})/i;
