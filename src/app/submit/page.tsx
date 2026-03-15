@@ -299,6 +299,30 @@ export default function SubmitPage() {
           }
         }
       }
+
+      // 5c. Honorific Specific Extraction (TUAN, EN, PUAN, ENCIK)
+      if (!detectedContactName) {
+        const honorifics = ["TUAN", "PUAN", "ENCIK", "EN", "PN"];
+        const words = cleanText.split(/\s+/);
+        const hIdx = words.findIndex(w => {
+          const u = w.toUpperCase().replace(/[^\w]/g, '');
+          return honorifics.includes(u);
+        });
+
+        if (hIdx !== -1) {
+          // Take the honorific + up to 3 words after
+          const start = hIdx;
+          const end = Math.min(words.length, hIdx + 4);
+          const nameCandidate = words.slice(start, end).join(' ')
+            .replace(/[^\w\s]/g, '')
+            .trim()
+            .toUpperCase();
+
+          if (nameCandidate.length > 5) {
+            detectedContactName = nameCandidate;
+          }
+        }
+      }
       
       console.log("Final Detected Contact Name:", detectedContactName);
       
