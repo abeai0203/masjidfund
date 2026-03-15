@@ -29,7 +29,7 @@ export default function Home() {
     <div className="flex flex-col min-h-full">
       {/* Magic CTA Banner - Primary Focus */}
       {/* Premium Hero Banner - Vector Emerald Theme */}
-      <section className="relative bg-emerald-950 pt-8 pb-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative bg-emerald-950 pt-8 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Background Image Layer */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <img 
@@ -41,7 +41,7 @@ export default function Home() {
         </div>
 
         {/* Large Aesthetic Wave/Hill Bottom */}
-        <div className="absolute bottom-0 left-0 w-full h-24 bg-surface z-10 pointer-events-none" style={{ borderRadius: '100% 100% 0 0 / 100% 100% 0 0', transform: 'scaleX(1.5)', marginBottom: '-1px' }}></div>
+        <div className="absolute bottom-0 left-0 w-full h-16 bg-surface z-10 pointer-events-none" style={{ borderRadius: '100% 100% 0 0 / 100% 100% 0 0', transform: 'scaleX(2)', marginBottom: '-1px' }}></div>
         
         <div className="max-w-7xl mx-auto relative z-20 flex flex-col md:flex-row items-center justify-between gap-12">
           <div className="text-center md:text-left flex-1 max-w-2xl px-4">
@@ -98,7 +98,7 @@ export default function Home() {
       </section>
 
       {/* Featured Projects Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-surface">
+      <section className="pt-8 pb-20 px-4 sm:px-6 lg:px-8 bg-surface">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-end mb-10">
             <div>
