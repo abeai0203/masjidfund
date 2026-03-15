@@ -16,7 +16,7 @@ export default function DuitNowLogo({ className = "", size = 24 }: DuitNowLogoPr
       style={{ width: size, height: size }}
     >
       <img 
-        src="/images/branding/duitnow-official.png" 
+        src="/images/branding/duitnow-logo-v2.png" 
         alt="DuitNow Official" 
         className="w-full h-full object-contain"
       />
