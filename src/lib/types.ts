@@ -75,5 +75,6 @@ export interface Feedback {
   message: string;
   contact_name?: string;
   contact_phone?: string;
+  attachment_url?: string;
   status: "Unread" | "Read" | "Resolved";
 }

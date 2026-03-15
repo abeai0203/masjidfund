@@ -100,6 +100,27 @@ export default function AdminFeedbackPage() {
                       </div>
                     )}
                   </div>
+
+                  {fb.attachment_url && (
+                    <div className="pt-4 mt-2 border-t border-slate-50">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Lampiran Gambar</p>
+                      <a 
+                        href={fb.attachment_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="inline-block relative group ml-1"
+                      >
+                        <img 
+                          src={fb.attachment_url} 
+                          alt="Attachment" 
+                          className="max-h-32 md:max-h-48 rounded-xl border border-slate-100 shadow-sm group-hover:opacity-90 transition-opacity"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-xl">
+                          <span className="bg-white/90 text-slate-800 text-[9px] font-black py-1 px-3 rounded-full uppercase tracking-tighter shadow-sm">Lihat Penuh</span>
+                        </div>
+                      </a>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0 md:self-start">

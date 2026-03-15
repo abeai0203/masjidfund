@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { submitFeedback } from "@/lib/api";
+import { submitFeedback, uploadImage } from "@/lib/api";
 
 function FeedbackForm() {
   const searchParams = useSearchParams();
@@ -16,25 +16,57 @@ function FeedbackForm() {
     contact_phone: "",
     message: "",
   });
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [attachmentPreview, setAttachmentPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Saiz fail terlalu besar (Max 5MB)");
+        return;
+      }
+      setAttachment(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAttachmentPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
 
+    let attachmentUrl = undefined;
+    if (attachment) {
+      const { url, error: uploadError } = await uploadImage(attachment, 'feedback-attachments');
+      if (uploadError) {
+        setError(`Gagal memuat naik gambar: ${uploadError}`);
+        setIsSubmitting(false);
+        return;
+      }
+      attachmentUrl = url || undefined;
+    }
+
     const result = await submitFeedback({
       ...formData,
       project_id: projectId || undefined,
       project_name: projectName || undefined,
+      attachment_url: attachmentUrl,
       status: "Unread",
     });
 
     if (result) {
       setIsSuccess(true);
       setFormData({ contact_name: "", contact_phone: "", message: "" });
+      setAttachment(null);
+      setAttachmentPreview(null);
     } else {
       setError("Gagal menghantar maklumbalas. Sila cuba lagi.");
     }
@@ -102,6 +134,43 @@ function FeedbackForm() {
             placeholder="Contoh: 0123456789"
           />
           <p className="text-[10px] text-slate-400 mt-1.5 px-1 font-medium italic">Kami akan menghubungi anda jika maklumat lanjut diperlukan.</p>
+        </div>
+
+        <div>
+          <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 px-1">Lampiran Gambar (Opsional)</label>
+          <div className="space-y-4">
+            <input 
+              type="file" 
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden" 
+              id="file-upload"
+            />
+            <label 
+              htmlFor="file-upload"
+              className="flex items-center justify-center gap-2 w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl px-4 py-8 cursor-pointer hover:bg-slate-100 transition-all text-slate-500 group"
+            >
+              <svg className="w-6 h-6 group-hover:-translate-y-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span className="font-bold text-sm">Klik untuk muat naik gambar</span>
+            </label>
+
+            {attachmentPreview && (
+              <div className="relative w-full h-48 rounded-xl overflow-hidden border border-slate-100 shadow-sm">
+                <img src={attachmentPreview} alt="Preview" className="w-full h-full object-cover" />
+                <button 
+                  type="button"
+                  onClick={() => { setAttachment(null); setAttachmentPreview(null); }}
+                  className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full shadow-lg hover:bg-red-600 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div>
