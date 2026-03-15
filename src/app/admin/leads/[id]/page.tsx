@@ -7,6 +7,7 @@ import { notFound, useRouter } from "next/navigation";
 import { getLeadById, updateLeadStatus, approveAndConvertToProject } from "@/lib/api";
 import { Lead } from "@/lib/types";
 import StatusPill from "@/components/admin/StatusPill";
+import DuitNowQR from "@/components/ui/DuitNowQR";
 
 export default function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -130,7 +131,9 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
               {lead.detected_qr && (
                 <div className="sm:col-span-1 mt-4 p-4 border border-border rounded-lg bg-surface-muted/50">
                    <p className="text-xs font-semibold text-foreground/60 mb-3 uppercase tracking-wider">QR Dikesan</p>
-                   <img src={lead.detected_qr} alt="Detected QR" className="w-full h-auto max-w-[128px] rounded-lg shadow-sm border border-border bg-white" />
+                   <div className="w-full max-w-[160px]">
+                    <DuitNowQR qrUrl={lead.detected_qr} mosqueName={lead.extracted_mosque_name} />
+                   </div>
                 </div>
               )}
               {lead.image_url && (

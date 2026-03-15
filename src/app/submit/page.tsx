@@ -18,6 +18,7 @@ export default function SubmitPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [extractedType, setExtractedType] = useState<'lestari' | 'hazelton' | null>(null);
   const [magicScanPreview, setMagicScanPreview] = useState<string | null>(null);
+  const [extractedValue, setExtractedValue] = useState<string | null>(null);
   const [extractedQrUrl, setExtractedQrUrl] = useState<string | null>(null);
   
   const [files, setFiles] = useState<Record<string, File | null>>({
@@ -38,7 +39,7 @@ export default function SubmitPage() {
     getAllStates().then(setStates);
   }, []);
 
-  const extractQrFromImage = (file: File): Promise<string | null> => {
+  const extractQrFromImage = (file: File): Promise<{ url: string, value: string } | null> => {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -101,7 +102,7 @@ export default function SubmitPage() {
           }
           
           if (detectedCode) {
-            const { location, scale: finalScale } = detectedCode;
+            const { data, location, scale: finalScale } = detectedCode;
             const { topCP, bottomCP, leftCP, rightCP } = {
               topCP: Math.min(location.topLeftCorner.y, location.topRightCorner.y),
               bottomCP: Math.max(location.bottomLeftCorner.y, location.bottomRightCorner.y),
@@ -127,7 +128,7 @@ export default function SubmitPage() {
               0, 0, cropCanvas.width, cropCanvas.height
             );
             
-            resolve(cropCanvas.toDataURL());
+            resolve({ url: cropCanvas.toDataURL(), value: data });
           } else {
             resolve(null);
           }
@@ -177,7 +178,8 @@ export default function SubmitPage() {
       console.log("OCR Result:", text);
       console.log("QR Extraction Successful:", !!qrResult);
 
-      setExtractedQrUrl(qrResult);
+      setExtractedQrUrl(qrResult?.url || null);
+      setExtractedValue(qrResult?.value || null);
 
       // Clean text for better matching
       const cleanText = text.replace(/\n/g, ' ').replace(/\s+/g, ' ');
@@ -384,14 +386,15 @@ export default function SubmitPage() {
         handleMagicScan(file);
       } else if (key === 'qr') {
         // Validation for manual QR upload
-        const qrDataUrl = await extractQrFromImage(file);
-        if (!qrDataUrl) {
+        const qrResult = await extractQrFromImage(file);
+        if (!qrResult) {
           alert("❌ Tiada kod QR dikesan dalam gambar ini. Sila muat naik gambar yang mempunyai kod QR yang jelas.");
           e.target.value = ""; // Clear input
           return;
         }
         setFiles(prev => ({ ...prev, [key]: file, magic_scan: null }));
-        setExtractedQrUrl(qrDataUrl);
+        setExtractedQrUrl(qrResult.url);
+        setExtractedValue(qrResult.value);
       } else {
         setFiles(prev => ({ ...prev, [key]: file, magic_scan: null }));
         setExtractedType(null);
@@ -446,7 +449,12 @@ export default function SubmitPage() {
       }
 
       // Handle template QR fallback if none uploaded
-      const detectedQr = finalQrUrl || (files.magic_scan ? (extractedType === 'hazelton' ? "/images/qr-hazelton.png" : extractedType === 'lestari' ? "/images/qr-cropped.png" : undefined) : undefined);
+      let detectedQr = finalQrUrl || (files.magic_scan ? (extractedType === 'hazelton' ? "/images/qr-hazelton.png" : extractedType === 'lestari' ? "/images/qr-cropped.png" : undefined) : undefined);
+      
+      // CRITICAL FIX: If we have the actual decoded string, prefer it for better reliability and vectorized display
+      if (extractedValue) {
+        detectedQr = extractedValue;
+      }
 
       console.log("Submitting lead with images:", { main: finalMainImageUrl, qr: detectedQr });
       // 2. Submit Lead with permanent URLs
@@ -467,7 +475,7 @@ export default function SubmitPage() {
         contact_name: formData.get('contact_name') as string,
         contact_phone: `60${formData.get('contact_phone') as string}`,
         image_url: finalMainImageUrl,
-        notes: `Lokasi: ${formData.get('district')}, ${formData.get('state')}\nAlamat: ${formData.get('address')}\n\nCerita Penuh: ${formData.get('full_desc')}\n\nSasaran: RM${formData.get('target_amount')}\nHubungi: ${formData.get('contact_name')} (60${formData.get('contact_phone')})\n\n[Extracted via Magic Scan]`
+        notes: `Lokasi: ${formData.get('district')}, ${formData.get('state')}\nAlamat: ${formData.get('address')}\n\nCerita Penuh: ${formData.get('full_desc')}\n\nSasaran: RM${formData.get('target_amount')}\nHubungi: ${formData.get('contact_name')} (60${formData.get('contact_phone')})\n\n[Extracted via Magic Scan]${extractedValue ? `\n[Verified QR Data: ${extractedValue}]` : ''}${finalQrUrl ? `\n[QR Image Ref: ${finalQrUrl}]` : ''}`
       });
       setIsSubmitting(false);
       setIsSubmitted(true);
@@ -731,6 +739,7 @@ export default function SubmitPage() {
                         <DuitNowQR 
                           qrUrl={extractedQrUrl || (files.qr ? URL.createObjectURL(files.qr) : (extractedType === 'hazelton' ? "/images/qr-hazelton.png" : "/images/qr-cropped.png"))} 
                           mosqueName={formName || "Nama Masjid Anda"}
+                          initialValue={extractedValue || undefined}
                         />
                       </div>
                     ) : (

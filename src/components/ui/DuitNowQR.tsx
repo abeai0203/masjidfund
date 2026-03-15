@@ -7,11 +7,12 @@ interface DuitNowQRProps {
   qrUrl: string;
   mosqueName?: string;
   amount?: number;
+  initialValue?: string;
   className?: string;
 }
 
-export default function DuitNowQR({ qrUrl, mosqueName, amount, className = "" }: DuitNowQRProps) {
-  const [baseQrValue, setBaseQrValue] = useState<string | null>(null);
+export default function DuitNowQR({ qrUrl, mosqueName, amount, initialValue, className = "" }: DuitNowQRProps) {
+  const [baseQrValue, setBaseQrValue] = useState<string | null>(initialValue || null);
   const [displayValue, setDisplayValue] = useState<string | null>(null);
   const [isDecoding, setIsDecoding] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
@@ -19,6 +20,11 @@ export default function DuitNowQR({ qrUrl, mosqueName, amount, className = "" }:
 
   // Initial Decode
   useEffect(() => {
+    if (initialValue) {
+      setBaseQrValue(initialValue);
+      return;
+    }
+    
     if (!qrUrl) return;
 
     if (qrUrl.startsWith("000201")) {
@@ -36,15 +42,47 @@ export default function DuitNowQR({ qrUrl, mosqueName, amount, className = "" }:
       const context = canvas.getContext("2d");
       if (!context) return;
 
-      canvas.width = img.width;
-      canvas.height = img.height;
-      context.drawImage(img, 0, 0);
+      const tryDecode = (scale: number, mode: 'normal' | 'grayscale' | 'green'): string | null => {
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        context.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        if (mode === 'grayscale') {
+          for (let i = 0; i < data.length; i += 4) {
+            const avg = (data[i] * 0.3 + data[i + 1] * 0.59 + data[i + 2] * 0.11);
+            data[i] = data[i + 1] = data[i + 2] = avg;
+          }
+        } else if (mode === 'green') {
+          for (let i = 0; i < data.length; i += 4) {
+            const g = data[i + 1];
+            data[i] = data[i + 1] = data[i + 2] = g;
+          }
+        }
+        
+        const code = jsQR(data, imageData.width, imageData.height, {
+          inversionAttempts: "attemptBoth",
+        });
+        return code ? code.data : null;
+      };
+
+      // Multi-pass strategy for robustness
+      let detectedData = null;
+      const modes: ('normal' | 'grayscale' | 'green')[] = ['green', 'normal', 'grayscale'];
+      const scales = [1.0, 1.5, 0.75];
+
+      for (const mode of modes) {
+        for (const scale of scales) {
+          detectedData = tryDecode(scale, mode);
+          if (detectedData) break;
+        }
+        if (detectedData) break;
+      }
       
-      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-      const code = jsQR(imageData.data, imageData.width, imageData.height);
-      
-      if (code) {
-        setBaseQrValue(code.data);
+      if (detectedData) {
+        setBaseQrValue(detectedData);
       }
       setIsDecoding(false);
     };
@@ -53,7 +91,7 @@ export default function DuitNowQR({ qrUrl, mosqueName, amount, className = "" }:
       setIsDecoding(false);
       console.error("Failed to load QR image for decoding:", qrUrl);
     };
-  }, [qrUrl]);
+  }, [qrUrl, initialValue]);
 
   // Handle Amount Changes (Dynamic QR Generation)
   useEffect(() => {
@@ -73,11 +111,18 @@ export default function DuitNowQR({ qrUrl, mosqueName, amount, className = "" }:
   }, [baseQrValue, amount]);
 
   const handleDownload = () => {
-    if (!displayValue) return;
-    
     const svg = qrRef.current?.querySelector("svg");
-    if (!svg) return;
-
+    if (!svg) {
+      // Fallback: If no vectorized QR, download the image source
+      const link = document.createElement("a");
+      link.href = qrUrl;
+      link.download = `QR-${mosqueName?.replace(/\s+/g, "-") || "Donation"}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
+    
     const svgData = new XMLSerializer().serializeToString(svg);
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
@@ -99,7 +144,7 @@ export default function DuitNowQR({ qrUrl, mosqueName, amount, className = "" }:
       downloadLink.click();
       document.body.removeChild(downloadLink);
     };
-    img.src = "data:image/svg+xml;base64," + btoa(svgData);
+    img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
   };
 
   const handleShare = async () => {
@@ -127,12 +172,13 @@ export default function DuitNowQR({ qrUrl, mosqueName, amount, className = "" }:
           
           {/* Logo Cut-out at Top */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-full p-1.5 shadow-md z-10">
-            <div className="bg-[#eb2a68] w-12 h-12 rounded-full flex flex-col items-center justify-center text-white">
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v10h-2V7z" />
+            <div className="bg-[#eb2a68] w-12 h-12 rounded-full flex flex-col items-center justify-center text-white p-2">
+              <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <rect x="7" y="7" width="3" height="3" />
+                <rect x="14" y="7" width="3" height="3" />
+                <rect x="7" y="14" width="3" height="3" />
               </svg>
-              <span className="text-[6px] font-black leading-none uppercase tracking-tighter -mt-1">DuitNow</span>
-              <span className="text-[6px] font-black leading-none uppercase tracking-tighter">QR</span>
             </div>
           </div>
 
