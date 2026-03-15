@@ -357,7 +357,8 @@ export async function submitLead(lead: Partial<Lead>): Promise<Lead | null> {
       .single();
       
     if (error) {
-      console.warn("Supabase lead submission fail, falling back to local simulation:", error.message);
+      console.error("Supabase lead submission failed:", error);
+      console.warn("Falling back to local simulation due to:", error.message);
       const simLeads = getStoredData('leads', MOCK_LEADS);
       const newLead = { id: `sim-${Date.now()}`, created_at: new Date().toISOString(), ...lead } as Lead;
       simLeads.push(newLead);
@@ -366,6 +367,7 @@ export async function submitLead(lead: Partial<Lead>): Promise<Lead | null> {
     }
     return data as Lead;
   } catch (e) {
+    console.error("Unexpected error in submitLead:", e);
     return null;
   }
 }

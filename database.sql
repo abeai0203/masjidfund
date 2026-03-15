@@ -34,6 +34,10 @@ CREATE TABLE public.projects (
     account_number TEXT,
     image_url TEXT,
     source_url TEXT,
+    contact_person TEXT,
+    contact_phone TEXT,
+    address TEXT,
+    google_maps_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -58,6 +62,8 @@ CREATE TABLE public.leads (
     detected_acc_name TEXT,
     image_url TEXT,
     detected_project_type TEXT,
+    contact_name TEXT,
+    contact_phone TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -156,3 +162,18 @@ CREATE POLICY "Anyone can update feedback."
 ON public.feedback FOR UPDATE 
 USING (true)
 WITH CHECK (true);
+
+-- ==========================================
+-- 6. DISMISSED LEADS TABLE
+-- ==========================================
+CREATE TABLE public.dismissed_leads (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    discovery_id TEXT UNIQUE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.dismissed_leads ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can manage dismissals." 
+ON public.dismissed_leads FOR ALL 
+USING (true);
