@@ -1,29 +1,29 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import jsQR from "jsqr";
+import { generateDynamicQR } from "@/lib/duitnow";
 
 interface DuitNowQRProps {
   qrUrl: string;
   mosqueName?: string;
+  amount?: number;
   className?: string;
 }
 
-export default function DuitNowQR({ qrUrl, mosqueName, className = "" }: DuitNowQRProps) {
-  const [qrValue, setQrValue] = useState<string | null>(null);
+export default function DuitNowQR({ qrUrl, mosqueName, amount, className = "" }: DuitNowQRProps) {
+  const [baseQrValue, setBaseQrValue] = useState<string | null>(null);
+  const [displayValue, setDisplayValue] = useState<string | null>(null);
   const [isDecoding, setIsDecoding] = useState(false);
 
+  // Initial Decode
   useEffect(() => {
     if (!qrUrl) return;
 
-    // If it's already a DuitNow string (starts with 000201), use it directly
     if (qrUrl.startsWith("000201")) {
-      setQrValue(qrUrl);
+      setBaseQrValue(qrUrl);
       return;
     }
 
-    // Otherwise, try to decode the image to get the vectorizable data
     setIsDecoding(true);
     const img = new Image();
     img.crossOrigin = "anonymous";
@@ -42,7 +42,7 @@ export default function DuitNowQR({ qrUrl, mosqueName, className = "" }: DuitNow
       const code = jsQR(imageData.data, imageData.width, imageData.height);
       
       if (code) {
-        setQrValue(code.data);
+        setBaseQrValue(code.data);
       }
       setIsDecoding(false);
     };
@@ -52,6 +52,23 @@ export default function DuitNowQR({ qrUrl, mosqueName, className = "" }: DuitNow
       console.error("Failed to load QR image for decoding:", qrUrl);
     };
   }, [qrUrl]);
+
+  // Handle Amount Changes (Dynamic QR Generation)
+  useEffect(() => {
+    if (!baseQrValue) return;
+
+    if (amount && amount > 0) {
+      try {
+        const dynamic = generateDynamicQR(baseQrValue, amount);
+        setDisplayValue(dynamic);
+      } catch (e) {
+        console.error("Failed to generate dynamic QR:", e);
+        setDisplayValue(baseQrValue);
+      }
+    } else {
+      setDisplayValue(baseQrValue);
+    }
+  }, [baseQrValue, amount]);
 
   return (
     <div className={`flex flex-col items-center pt-6 pb-2 ${className}`}>
@@ -71,10 +88,10 @@ export default function DuitNowQR({ qrUrl, mosqueName, className = "" }: DuitNow
 
         {/* Inner White Plate */}
         <div className="bg-white rounded-3xl p-4 flex items-center justify-center aspect-square shadow-inner overflow-hidden">
-          {qrValue ? (
+          {displayValue ? (
             <div className="w-full h-full p-2 animate-in fade-in duration-500">
               <QRCodeSVG 
-                value={qrValue} 
+                value={displayValue} 
                 size={256}
                 level="H"
                 includeMargin={false}
@@ -96,15 +113,18 @@ export default function DuitNowQR({ qrUrl, mosqueName, className = "" }: DuitNow
         </div>
       </div>
       
-      {/* Mosque Name Display */}
-      {mosqueName && (
-        <div className="mt-6 text-center">
+      {/* Mosque Name & Dynamic Badge */}
+      <div className="mt-6 text-center space-y-1">
+        {mosqueName && (
           <p className="text-slate-800 font-bold text-sm tracking-tight">{mosqueName}</p>
-        </div>
-      )}
-      
-      {/* Subtle Bottom Accent for Depth */}
-      <div className="h-2 w-1/2 bg-black/10 blur-xl absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full -z-10"></div>
+        )}
+        {amount && amount > 0 && (
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-[10px] font-bold uppercase tracking-wider border border-green-100 shadow-sm animate-pulse">
+            <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+            RM {amount.toFixed(2)} Dikunci
+          </div>
+        )}
+      </div>
     </div>
   );
 }

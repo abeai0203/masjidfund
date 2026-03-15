@@ -34,10 +34,8 @@ export default function DonationModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const [step, setStep] = useState<"method" | "amount" | "alhamdulillah" | "summary">("method");
-  const [activeTab, setActiveTab] = useState<"qr" | "bank">(
-    project.donation_method_type === "Bank Transfer" ? "bank" : "qr"
-  );
+  const [step, setStep] = useState<"amount" | "method" | "details" | "alhamdulillah" | "summary">("amount");
+  const [paymentMethod, setPaymentMethod] = useState<"qr" | "bank" | "billplz">("qr");
   const [donationAmount, setDonationAmount] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -46,11 +44,16 @@ export default function DonationModal({
 
   useEffect(() => {
     if (isOpen) {
-      setStep("method");
+      setStep("amount");
       setDonationAmount("");
       setIsProcessing(false);
       setRandomHadith(HADITHS[Math.floor(Math.random() * HADITHS.length)]);
       setUpdatedProject(project);
+      
+      // Default method logic
+      if (project.donation_method_type === "DuitNow QR") setPaymentMethod("qr");
+      else if (project.donation_method_type === "Bank Transfer") setPaymentMethod("bank");
+      else setPaymentMethod("billplz");
     }
   }, [isOpen, project]);
 
@@ -62,14 +65,48 @@ export default function DonationModal({
     }
   };
 
-  const handleCompleteDonation = async () => {
+  const handleProceedToMethod = () => {
     const amountNum = parseFloat(donationAmount);
     if (isNaN(amountNum) || amountNum <= 0) {
       alert("Sila masukkan jumlah derma yang sah.");
       return;
     }
+    setStep("method");
+  };
 
+  const handleSelectMethod = (method: "qr" | "bank" | "billplz") => {
+    setPaymentMethod(method);
+    if (method === "billplz") {
+       handleCompleteDonation("billplz");
+    } else {
+       setStep("details");
+    }
+  };
+
+  const handleCompleteDonation = async (methodOverride?: string) => {
+    const method = methodOverride || paymentMethod;
+    const amountNum = parseFloat(donationAmount);
+    
     setIsProcessing(true);
+
+    if (method === "billplz") {
+      // Simulation: Redirecting to Billplz
+      setTimeout(async () => {
+        setStep("alhamdulillah");
+        
+        // Update project collected amount even for simulation to show progress
+        const newCollected = (project.collected_amount || 0) + amountNum;
+        const result = await updateProject(project.slug, {
+            collected_amount: newCollected
+        });
+        if (result) setUpdatedProject(result);
+
+        setTimeout(() => setStep("summary"), 2000);
+        setIsProcessing(false);
+      }, 1500);
+      return;
+    }
+
     setStep("alhamdulillah");
 
     try {
@@ -90,7 +127,7 @@ export default function DonationModal({
       console.error("Donation update failed:", error);
       alert("Gagal mengemaskini maklumat derma. Sila hubungi urusetia.");
       setIsProcessing(false);
-      setStep("method");
+      setStep("amount");
     }
   };
 
@@ -111,7 +148,7 @@ export default function DonationModal({
           <div className="p-6 border-b border-border bg-surface-muted flex justify-between items-start no-print">
             <div>
               <h2 className="text-xl font-bold text-foreground">
-                {step === "method" ? "Sokong Projek Ini" : step === "amount" ? "Sahkan Derma" : "Ringkasan Derma"}
+                {step === "amount" ? "Masukkan Jumlah" : step === "method" ? "Pilih Kaedah" : "Sahkan Derma"}
               </h2>
               <p className="text-sm text-foreground/70 mt-1">{project.mosque_name}</p>
             </div>
@@ -129,48 +166,171 @@ export default function DonationModal({
         {/* Modal Content */}
         <div className="p-6 overflow-y-auto">
           
-          {/* STEP 1: Method Selection */}
-          {step === "method" && (
+          {/* STEP 1: Amount Input */}
+          {step === "amount" && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-              {project.donation_method_type === "Both" && (
-                <div className="flex bg-surface-muted p-1 rounded-lg mb-6 border border-border">
-                  <button
-                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
-                      activeTab === "qr" ? "bg-surface shadow-sm text-primary" : "text-foreground/70 hover:text-foreground"
-                    }`}
-                    onClick={() => setActiveTab("qr")}
-                  >
-                    DuitNow QR
-                  </button>
-                  <button
-                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
-                      activeTab === "bank" ? "bg-surface shadow-sm text-primary" : "text-foreground/70 hover:text-foreground"
-                    }`}
-                    onClick={() => setActiveTab("bank")}
-                  >
-                    Pindahan Bank
-                  </button>
+               <div className="mb-8 text-center pt-4">
+                <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-primary">
+                   <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                   </svg>
                 </div>
-              )}
+                <p className="text-sm text-foreground/60 mb-4 font-medium italic">"Sedekah itu tidak akan mengurangkan harta."</p>
+                <div className="relative max-w-[220px] mx-auto">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-2xl text-primary">RM</span>
+                  <input
+                    autoFocus
+                    type="number"
+                    value={donationAmount}
+                    onChange={(e) => setDonationAmount(e.target.value)}
+                    placeholder="0.00"
+                    className="w-full bg-surface-muted border-2 border-primary/20 rounded-2xl pl-16 pr-6 py-4 text-3xl font-extrabold text-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-center placeholder:text-foreground/20"
+                  />
+                </div>
+              </div>
 
-              <div className="flex flex-col items-center">
-                {activeTab === "qr" && project.duitnow_qr_url ? (
-                  <div className="text-center w-full">
-                    <p className="text-sm font-medium text-foreground mb-4 italic">Imbas menggunakan aplikasi perbankan anda</p>
-                    <div className="max-w-[240px] w-full mx-auto mb-6">
+               <div className="grid grid-cols-3 gap-3 mb-8">
+                 {[10, 50, 100].map((val) => (
+                   <button 
+                    key={val}
+                    onClick={() => setDonationAmount(val.toString())}
+                    className="py-2.5 bg-surface border border-border rounded-xl text-sm font-bold text-foreground/70 hover:border-primary hover:text-primary transition-all shadow-sm"
+                   >
+                     +RM{val}
+                   </button>
+                 ))}
+               </div>
+
+              <button 
+                onClick={handleProceedToMethod}
+                className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-4 rounded-xl transition-all shadow-lg flex items-center justify-center space-x-2"
+              >
+                <span>Teruskan</span>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </button>
+            </div>
+          )}
+
+          {/* STEP 2: Method Selection */}
+          {step === "method" && (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-4">
+              <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest mb-2 text-center">Pilih Kaedah Sumbangan</p>
+              
+              <button 
+                onClick={() => handleSelectMethod("billplz")}
+                className="w-full p-4 rounded-2xl bg-white border-2 border-primary/5 hover:border-primary shadow-sm hover:shadow-md transition-all group relative overflow-hidden"
+              >
+                <div className="flex items-center space-x-4 relative z-10">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                  </div>
+                  <div className="text-left">
+                    <p className="font-bold text-foreground">Online Banking (FPX)</p>
+                    <p className="text-xs text-foreground/50">Mudah & Automatik via Billplz</p>
+                  </div>
+                </div>
+                <div className="absolute top-2 right-2 px-2 py-0.5 bg-primary/10 text-primary text-[8px] font-black rounded uppercase tracking-tighter">Caj RM1.50</div>
+              </button>
+
+              <button 
+                onClick={() => handleSelectMethod("qr")}
+                className="w-full p-4 rounded-2xl bg-white border-2 border-primary/5 hover:border-primary shadow-sm hover:shadow-md transition-all group"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                    </svg>
+                  </div>
+                  <div className="text-left">
+                    <p className="font-bold text-foreground">DuitNow QR</p>
+                    <p className="text-xs text-foreground/50">Jumlah Terisi Automatik (Locked)</p>
+                  </div>
+                </div>
+              </button>
+
+              <button 
+                onClick={() => handleSelectMethod("bank")}
+                className="w-full p-4 rounded-2xl bg-white border-2 border-primary/5 hover:border-primary shadow-sm hover:shadow-md transition-all group"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-slate-600 group-hover:scale-110 transition-transform">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg>
+                  </div>
+                  <div className="text-left">
+                    <p className="font-bold text-foreground">Pindahan Bank</p>
+                    <p className="text-xs text-foreground/50">Salin No. Akaun Secara Manual</p>
+                  </div>
+                </div>
+              </button>
+
+              <button 
+                onClick={() => setStep("amount")}
+                className="w-full text-sm text-foreground/40 font-bold uppercase tracking-widest pt-4"
+              >
+                Tukar Jumlah
+              </button>
+            </div>
+          )}
+
+          {/* STEP 3: Details (QR or Bank) */}
+          {step === "details" && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+               {paymentMethod === "qr" ? (
+                 <div className="text-center w-full">
+                    <div className="mb-6">
                       <DuitNowQR 
-                        qrUrl={project.duitnow_qr_url} 
+                        qrUrl={project.duitnow_qr_url || ""} 
                         mosqueName={project.mosque_name}
+                        amount={parseFloat(donationAmount)}
                       />
                     </div>
-                  </div>
-                ) : (
-                  <div className="w-full">
-                    <p className="text-sm font-medium text-foreground mb-4 text-center italic">Salin maklumat akaun rasmi untuk pindahan</p>
+                    
+                    <div className="bg-primary/5 rounded-2xl p-4 border border-primary/10 mb-6 text-left flex items-start space-x-3">
+                      <div className="w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold mt-0.5">!</div>
+                      <p className="text-xs text-foreground/70 leading-relaxed font-medium">
+                        <strong>Langkah Mobile:</strong> Simpan gambar QR, buka app bank, pilih "Scan & Pay" dan muat naik gambar dari galeri.
+                      </p>
+                    </div>
+
+                    <div className="flex gap-3">
+                       <button 
+                        className="flex-1 bg-surface border border-border text-foreground font-bold py-3 rounded-xl shadow-sm flex items-center justify-center gap-2 text-sm"
+                        onClick={() => {
+                           const canvas = document.querySelector('canvas');
+                           if (canvas) {
+                              const link = document.createElement('a');
+                              link.download = `QR-${project.slug}.png`;
+                              link.href = canvas.toDataURL();
+                              link.click();
+                           }
+                        }}
+                       >
+                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                         </svg>
+                         Simpan QR
+                       </button>
+                       <button 
+                         onClick={() => handleCompleteDonation()}
+                         className="flex-[2] bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-md text-sm"
+                       >
+                         Saya Sudah Derma
+                       </button>
+                    </div>
+                 </div>
+               ) : (
+                 <div className="w-full">
                     <div className="bg-surface-muted border border-border rounded-xl p-5 mb-6 space-y-4 shadow-inner">
                       <div>
                         <p className="text-[10px] text-foreground/50 font-bold uppercase tracking-widest mb-1">Nama Bank</p>
-                        <p className="font-bold text-foreground">{project.bank_name || "N/A"}</p>
+                        <p className="font-bold text-foreground font-serif">{project.bank_name || "N/A"}</p>
                       </div>
                       <div>
                         <p className="text-[10px] text-foreground/50 font-bold uppercase tracking-widest mb-1">Nombor Akaun</p>
@@ -186,61 +346,31 @@ export default function DonationModal({
                           </button>
                         </div>
                       </div>
+                      <div>
+                        <p className="text-[10px] text-foreground/50 font-bold uppercase tracking-widest mb-1">Penerima</p>
+                        <p className="font-bold text-foreground text-sm uppercase">{project.mosque_name}</p>
+                      </div>
                     </div>
-                  </div>
-                )}
-                
-                <button 
-                  onClick={() => setStep("amount")}
-                  className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-4 rounded-xl transition-all shadow-md mt-2 flex items-center justify-center space-x-2"
-                >
-                  <span>Seterusnya</span>
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          )}
+                    
+                    <button 
+                      onClick={() => handleCompleteDonation()}
+                      className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-4 rounded-xl shadow-lg"
+                    >
+                      Saya Sudah Derma
+                    </button>
+                 </div>
+               )}
 
-          {/* STEP 2: Amount Input */}
-          {step === "amount" && (
-            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="mb-8 text-center">
-                <p className="text-sm text-foreground/70 mb-2 font-medium">Berapa jumlah yang anda dermakan?</p>
-                <div className="relative max-w-[200px] mx-auto">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-2xl text-primary">RM</span>
-                  <input
-                    autoFocus
-                    type="number"
-                    value={donationAmount}
-                    onChange={(e) => setDonationAmount(e.target.value)}
-                    placeholder="0.00"
-                    className="w-full bg-surface-muted border-2 border-primary/20 rounded-2xl pl-16 pr-6 py-4 text-3xl font-extrabold text-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-center placeholder:text-foreground/20"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <button 
-                  onClick={handleCompleteDonation}
-                  disabled={isProcessing}
-                  className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-4 rounded-xl transition-all shadow-lg flex items-center justify-center"
-                >
-                  {isProcessing ? "Menyimpan..." : "Selesai derma"}
-                </button>
-                <button 
+               <button 
                   onClick={() => setStep("method")}
-                  disabled={isProcessing}
-                  className="w-full bg-surface hover:bg-surface-muted text-foreground/60 font-semibold py-3 rounded-xl transition-all border border-border"
+                  className="w-full text-xs text-foreground/40 font-bold uppercase tracking-widest mt-6"
                 >
-                  Kembali
+                  Tukar Kaedah
                 </button>
-              </div>
             </div>
           )}
 
-          {/* STEP 3: Alhamdulillah Success Modal */}
+          {/* STEP 4: Alhamdulillah Progress */}
           {step === "alhamdulillah" && (
             <div className="flex flex-col items-center justify-center py-12 animate-in zoom-in duration-500">
               <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mb-8 relative">
@@ -250,12 +380,12 @@ export default function DonationModal({
                 </svg>
               </div>
               <h1 className="text-4xl font-extrabold text-primary mb-4 font-serif italic text-center">Alhamdulillah</h1>
-              <p className="text-lg text-foreground/70 text-center font-medium">Sumbangan anda telah direkodkan.</p>
+              <p className="text-lg text-foreground/70 text-center font-medium">Sumbangan anda {paymentMethod === 'billplz' ? 'sedang diproses.' : 'telah direkodkan.'}</p>
               <p className="text-sm text-foreground/40 mt-8 animate-pulse text-center">Menyiapkan resit digital anda...</p>
             </div>
           )}
 
-          {/* STEP 4: Summary & Hadith */}
+          {/* STEP 5: Summary */}
           {step === "summary" && (
             <div id="donation-summary" className="animate-in fade-in duration-1000">
               <div className="text-center mb-8">
@@ -271,6 +401,12 @@ export default function DonationModal({
                   <span className="text-sm font-medium text-foreground/60">Jumlah Derma</span>
                   <span className="text-2xl font-black text-primary">RM {parseFloat(donationAmount).toLocaleString('ms-MY', { minimumFractionDigits: 2 })}</span>
                 </div>
+                {paymentMethod === 'billplz' && (
+                  <div className="flex justify-between items-center mb-4 text-[10px] text-foreground/40 italic">
+                    <span>* Termasuk caj gerbang pembayaran</span>
+                    <span>RM { (parseFloat(donationAmount) + 1.50).toFixed(2) } total</span>
+                  </div>
+                )}
                 <div className="h-px bg-border mb-4"></div>
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-medium text-foreground/60">Status Projek Terkini</span>
@@ -325,7 +461,7 @@ export default function DonationModal({
           )}
         </div>
 
-        {step !== "alhamdulillah" && (
+        {step !== "alhamdulillah" && step !== "summary" && (
           <div className="p-4 border-t border-border bg-surface-muted text-center no-print">
             <p className="text-[10px] text-foreground/50 font-medium uppercase tracking-widest">
               Platform Tanpa Komisen • 100% Derma Anda Disalurkan Terus
