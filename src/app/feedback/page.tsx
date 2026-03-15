@@ -38,10 +38,26 @@ function FeedbackForm() {
     }
   };
 
+  const formatPhoneNumber = (phone: string) => {
+    let cleaned = phone.replace(/\D/g, '');
+    if (cleaned.startsWith('0')) {
+      return '+60' + cleaned.substring(1);
+    }
+    if (cleaned.startsWith('60') && cleaned.length > 2) {
+      return '+' + cleaned;
+    }
+    if (!cleaned.startsWith('60') && cleaned.length > 0) {
+      return '+60' + cleaned;
+    }
+    return phone;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
+
+    const formattedPhone = formatPhoneNumber(formData.contact_phone);
 
     let attachmentUrl = undefined;
     if (attachment) {
@@ -56,6 +72,7 @@ function FeedbackForm() {
 
     const result = await submitFeedback({
       ...formData,
+      contact_phone: formattedPhone,
       project_id: projectId || undefined,
       project_name: projectName || undefined,
       attachment_url: attachmentUrl,
