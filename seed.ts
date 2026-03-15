@@ -17,6 +17,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const MOCK_PROJECTS = [
   {
+    id: "seed-p1",
     mosque_name: "Masjid Jamek An-Nur",
     slug: "masjid-jamek-an-nur-selangor",
     state: "Selangor",
@@ -38,6 +39,7 @@ const MOCK_PROJECTS = [
     image_url: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?q=80&w=2938&auto=format&fit=crop",
   },
   {
+    id: "seed-p2",
     mosque_name: "Surau Al-Ikhlas",
     slug: "surau-al-ikhlas-construction-johor",
     state: "Johor",

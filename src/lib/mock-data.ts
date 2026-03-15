@@ -37,6 +37,7 @@ export const MOCK_LEADS: Lead[] = [
 
 export const MOCK_PROJECTS: Project[] = [
   {
+    id: "p1",
     slug: "masjid-lestari-putra-construction",
     mosque_name: "Masjid Lestari Putra",
     state: "Selangor",
@@ -64,6 +65,7 @@ export const MOCK_PROJECTS: Project[] = [
     source_url: "https://www.facebook.com/masjidalhasanahbbb"
   },
   {
+    id: "p2",
     slug: "masjid-al-hidayah-shah-alam-pembinaan",
     mosque_name: "Masjid Al-Hidayah",
     state: "Selangor",
@@ -90,6 +92,7 @@ export const MOCK_PROJECTS: Project[] = [
     google_maps_url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15936.438415785002!2d101.488667!3d3.073333!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31cc52e18585ea15%3A0xc6a80436d6a2f44!2sMasjid%20Al-Hidayah!5e0!3m2!1sen!2smy!4v1710321234567!5m2!1sen!2smy"
   },
   {
+    id: "p3",
     slug: "surau-at-taqwa-ipoh-renovasi",
     mosque_name: "Surau At-Taqwa",
     state: "Perak",
@@ -116,6 +119,7 @@ export const MOCK_PROJECTS: Project[] = [
     google_maps_url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3976.920245648873!2d101.075!3d4.59!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sSurau%20At-Taqwa!5e0!3m2!1sen!2smy!4v1710321234568!5m2!1sen!2smy"
   },
   {
+    id: "p4",
     slug: "masjid-jamek-kuala-lumpur-maintenance",
     mosque_name: "Masjid Jamek Sultan Abdul Samad",
     state: "Kuala Lumpur",
@@ -142,6 +146,7 @@ export const MOCK_PROJECTS: Project[] = [
     google_maps_url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3983.824245648873!2d101.696!3d3.149!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31cc482705096a6f%3A0x7d6c5d18585ea15!2sMasjid%20Jamek%20Sultan%20Abdul%20Samad!5e0!3m2!1sen!2smy!4v1710321234569!5m2!1sen!2smy"
   },
   {
+    id: "p5",
     slug: "masjid-an-nur-johor-bahru-emergency",
     mosque_name: "Masjid An-Nur",
     state: "Johor",
@@ -161,6 +166,7 @@ export const MOCK_PROJECTS: Project[] = [
     image_url: "https://images.unsplash.com/photo-1579613832107-4ba9f02e7ba7?auto=format&fit=crop&q=80&w=800"
   },
   {
+    id: "p6",
     slug: "masjid-nurul-iman-penang-construction",
     mosque_name: "Masjid Nurul Iman",
     state: "Pulau Pinang",
@@ -183,6 +189,7 @@ export const MOCK_PROJECTS: Project[] = [
     image_url: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=800"
   },
   {
+    id: "p7",
     slug: "surau-al-ikhlas-kuching-maintenance",
     mosque_name: "Surau Al-Ikhlas",
     state: "Sarawak",
