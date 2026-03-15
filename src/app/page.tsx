@@ -29,7 +29,7 @@ export default function Home() {
     <div className="flex flex-col min-h-full">
       {/* Magic CTA Banner - Primary Focus */}
       {/* Premium Hero Banner - Vector Emerald Theme */}
-      <section className="relative bg-emerald-950 pt-10 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative bg-emerald-950 pt-8 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Background Image Layer */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <img 
@@ -45,26 +45,26 @@ export default function Home() {
         
         <div className="max-w-7xl mx-auto relative z-20 flex flex-col md:flex-row items-center justify-between gap-12">
           <div className="text-center md:text-left flex-1 max-w-2xl px-4">
-            <h2 className="text-3xl sm:text-5xl font-black text-white mb-4 tracking-tighter leading-tight">
+            <h2 className="text-2xl sm:text-4xl font-black text-white mb-3 tracking-tighter leading-tight">
               Rebut <span className="text-yellow-400">Pahala</span> <br />
-              <span className="underline decoration-white decoration-4 sm:decoration-8 underline-offset-8 sm:underline-offset-12">Tanpa Henti.</span>
+              <span className="underline decoration-white decoration-4 sm:decoration-6 underline-offset-4 sm:underline-offset-8">Tanpa Henti.</span>
             </h2>
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-4">
+            <h3 className="text-base sm:text-lg font-bold text-white mb-3">
               Bina Masjid di Dunia, Dirikan Rumah di Syurga
             </h3>
-            <p className="text-white text-sm sm:text-base mb-8 leading-relaxed font-medium max-w-lg">
+            <p className="text-white text-xs sm:text-sm mb-6 leading-relaxed font-medium max-w-lg">
               Gandakan pahala anda dengan menyumbang kepada pembinaan masjid. Setiap kali jemaah solat, Al-Quran dibaca, atau ilmu diajar, pahala anda terus mengalir berkekalan. <br />
-              <span className="text-xs font-bold text-yellow-400/90 mt-2 inline-block">Sabda Rasulullah ﷺ</span>
+              <span className="text-[10px] font-bold text-yellow-400/90 mt-1 inline-block">Sabda Rasulullah ﷺ</span>
             </p>
 
             {/* Hadith Quote Box - Glassmorphism */}
-            <div className="flex items-start gap-4 bg-white/10 backdrop-blur-xl border border-white/20 p-4 sm:p-5 rounded-[24px] max-w-xl shadow-2xl mt-6 sm:mt-0">
-              <div className="text-2xl sm:text-3xl text-emerald-300 opacity-50 font-serif leading-none mt-1">“</div>
+            <div className="flex items-start gap-3 bg-white/10 backdrop-blur-xl border border-white/20 p-3 sm:p-4 rounded-[20px] max-w-xl shadow-2xl mt-4 sm:mt-0">
+              <div className="text-xl sm:text-2xl text-emerald-300 opacity-50 font-serif leading-none mt-1">“</div>
               <div>
-                <p className="text-white text-xs sm:text-sm font-bold leading-relaxed">
+                <p className="text-white text-[11px] sm:text-xs font-bold leading-relaxed">
                   “Sesiapa yang <span className="text-emerald-300">membina masjid kerana Allah</span>, Allah akan bina untuknya <span className="text-emerald-300">rumah di syurga</span>.”
                 </p>
-                <p className="text-white/50 text-[9px] uppercase font-black tracking-widest mt-1">(Bukhari & Muslim)</p>
+                <p className="text-white/50 text-[8px] uppercase font-black tracking-widest mt-1">(Bukhari & Muslim)</p>
               </div>
             </div>
           </div>

@@ -258,7 +258,7 @@ export default function DuitNowQR({ qrUrl, mosqueName, amount, initialValue, cla
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
             </div>
-            <span className="text-[10px] font-bold text-foreground/40 group-hover:text-primary uppercase tracking-widest transition-colors">Simpan</span>
+            <span className="text-[10px] font-bold text-foreground/40 group-hover:text-primary uppercase tracking-widest transition-colors">Muat Turun</span>
           </button>
 
           <button 
