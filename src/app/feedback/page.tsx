@@ -13,7 +13,7 @@ function FeedbackForm() {
 
   const [formData, setFormData] = useState({
     contact_name: "",
-    contact_phone: "",
+    contact_phone: "+60",
     message: "",
   });
   const [attachment, setAttachment] = useState<File | null>(null);
@@ -142,13 +142,14 @@ function FeedbackForm() {
         </div>
 
         <div>
-          <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 px-1">No. Telefon (Opsional)</label>
+          <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 px-1">No. Telefon (Wajib)</label>
           <input 
             type="text" 
+            required
             value={formData.contact_phone}
             onChange={(e) => setFormData({...formData, contact_phone: e.target.value})}
             className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
-            placeholder="Contoh: 0123456789"
+            placeholder="Contoh: +60123456789"
           />
           <p className="text-[10px] text-slate-400 mt-1.5 px-1 font-medium italic">Kami akan menghubungi anda jika maklumat lanjut diperlukan.</p>
         </div>
@@ -211,7 +212,7 @@ function FeedbackForm() {
             <span className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
           ) : (
             <>
-              Hantar Maklumbalas
+              Hubungi Kami
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
