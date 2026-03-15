@@ -253,23 +253,28 @@ export default function DonationModal({
                 </div>
               </button>
 
-              <button 
-                onClick={() => handleSelectMethod("toyyibpay")}
-                className="w-full p-4 rounded-2xl bg-surface border-2 border-primary/5 hover:border-primary shadow-sm hover:shadow-md transition-all group relative overflow-hidden"
-              >
-                <div className="flex items-center space-x-4 relative z-10">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V8a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
+              <div className="relative group">
+                <button 
+                  disabled
+                  className="w-full p-4 rounded-2xl bg-surface border-2 border-border/50 opacity-50 cursor-not-allowed transition-all relative overflow-hidden"
+                >
+                  <div className="flex items-center space-x-4 relative z-10">
+                    <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400">
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V8a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <div className="text-left">
+                      <p className="font-bold text-foreground/50">Online Banking (FPX)</p>
+                      <p className="text-xs text-foreground/30">Automasi via ToyyibPay</p>
+                    </div>
                   </div>
-                  <div className="text-left">
-                    <p className="font-bold text-foreground">Online Banking (FPX)</p>
-                    <p className="text-xs text-foreground/50">Mudah & Automatik via ToyyibPay</p>
-                  </div>
+                  <div className="absolute top-2 right-2 px-2 py-0.5 bg-slate-50 text-slate-400 text-[8px] font-black rounded uppercase tracking-tighter">Caj RM1.00</div>
+                </button>
+                <div className="text-center mt-2">
+                  <span className="text-[10px] font-black text-primary/40 uppercase tracking-widest px-3 py-1 bg-primary/5 rounded-full border border-primary/10">Akan Datang</span>
                 </div>
-                <div className="absolute top-2 right-2 px-2 py-0.5 bg-primary/10 text-primary text-[8px] font-black rounded uppercase tracking-tighter">Caj RM1.00</div>
-              </button>
+              </div>
 
               <button 
                 onClick={() => setStep("amount")}
