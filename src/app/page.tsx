@@ -4,20 +4,24 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import ProjectCard from "@/components/public/ProjectCard";
 import InteractiveMap from "@/components/public/InteractiveMap";
-import { getPublicProjects, getAllStates } from "@/lib/api";
+import { getPublicProjects, getAllStates, getHomeStats } from "@/lib/api";
+import StatsSection from "@/components/public/StatsSection";
 import { Project } from "@/lib/types";
 
 export default function Home() {
   const [publicProjects, setPublicProjects] = useState<Project[]>([]);
   const [states, setStates] = useState<string[]>([]);
+  const [stats, setStats] = useState({ totalMosques: 0, totalCollected: 0, todayDonors: 0, activeConstruction: 0 });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
       const projects = await getPublicProjects();
       const st = await getAllStates();
+      const s = await getHomeStats();
       setPublicProjects(projects);
       setStates(st);
+      setStats(s);
       setIsLoading(false);
     }
     loadData();
@@ -96,6 +100,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <StatsSection stats={stats} />
 
       {/* Featured Projects Section */}
       <section className="pt-8 pb-20 px-4 sm:px-6 lg:px-8 bg-surface">
