@@ -13,7 +13,7 @@ function FeedbackForm() {
 
   const [formData, setFormData] = useState({
     contact_name: "",
-    contact_phone: "+60",
+    contact_phone: "",
     message: "",
   });
   const [attachment, setAttachment] = useState<File | null>(null);
@@ -142,16 +142,21 @@ function FeedbackForm() {
         </div>
 
         <div>
-          <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 px-1">No. Telefon (Wajib)</label>
-          <input 
-            type="text" 
-            required
-            value={formData.contact_phone}
-            onChange={(e) => setFormData({...formData, contact_phone: e.target.value})}
-            className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
-            placeholder="Contoh: +60123456789"
-          />
-          <p className="text-[10px] text-slate-400 mt-1.5 px-1 font-medium italic">Kami akan menghubungi anda jika maklumat lanjut diperlukan.</p>
+          <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 px-1">Nombor Telefon (WhatsApp) *</label>
+          <div className="flex">
+            <span className="inline-flex items-center px-4 rounded-l-xl border border-r-0 border-slate-100 bg-slate-50 text-slate-500 font-bold text-sm">
+              +60
+            </span>
+            <input 
+              type="tel" 
+              required
+              value={formData.contact_phone}
+              onChange={(e) => setFormData({...formData, contact_phone: e.target.value.replace(/\D/g, '')})}
+              className="flex-1 min-w-0 block w-full bg-slate-50 border border-slate-100 rounded-none rounded-r-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+              placeholder="123456789"
+            />
+          </div>
+          <p className="text-[10px] text-slate-400 mt-1.5 px-1 font-medium italic">Sila masukkan nombor tanpa 0 di hadapan (cth: 194817050)</p>
         </div>
 
         <div>
