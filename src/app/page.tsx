@@ -133,14 +133,15 @@ export default function Home() {
       </section>
 
       {/* RM10 Impact Section - First Time Donor Focus */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-emerald-50/30 border-t border-b border-emerald-100 overflow-hidden relative">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-white border-t border-b border-emerald-100 overflow-hidden relative">
         <div className="max-w-5xl mx-auto text-center relative z-10">
-          <div className="mb-10">
-            <h2 className="text-3xl sm:text-4xl font-black text-emerald-900 mb-4 tracking-tight">
-              Dengan <span className="text-emerald-600 italic">Hanya RM10</span>
+          <div className="mb-12">
+            <h2 className="text-3xl sm:text-5xl font-black text-emerald-950 mb-4 tracking-tight">
+              Dengan <span className="text-emerald-600">Hanya RM10</span>
             </h2>
-            <p className="text-emerald-800/70 text-lg font-medium max-w-2xl mx-auto">
-              Walaupun kecil, sumbangan anda sangat besar nilainya. Menyumbang untuk pembinaan masjid ini seringan:
+            <p className="text-slate-600 text-base sm:text-xl font-medium max-w-2xl mx-auto leading-relaxed">
+              Walaupun kecil, sumbangan anda sangat besar nilainya. <br className="hidden sm:block" />
+              Menyumbang untuk pembinaan masjid ini seringan:
             </p>
           </div>
 
