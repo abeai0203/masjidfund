@@ -21,14 +21,23 @@ export default function DuitNowQR({ qrUrl, mosqueName, amount, initialValue, cla
   // Initial Decode
   useEffect(() => {
     if (initialValue) {
-      setBaseQrValue(initialValue);
+      try {
+        setBaseQrValue(decodeURIComponent(initialValue));
+      } catch {
+        setBaseQrValue(initialValue);
+      }
       return;
     }
     
     if (!qrUrl) return;
 
-    if (qrUrl.startsWith("000201")) {
-      setBaseQrValue(qrUrl);
+    // Detect raw EMVCo/DuitNow strings (starts with 0002...)
+    if (/^0002\d{2}/.test(qrUrl)) {
+      try {
+        setBaseQrValue(decodeURIComponent(qrUrl));
+      } catch {
+        setBaseQrValue(qrUrl);
+      }
       return;
     }
 
