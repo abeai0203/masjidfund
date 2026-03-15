@@ -29,7 +29,7 @@ export default function Home() {
     <div className="flex flex-col min-h-full">
       {/* Magic CTA Banner - Primary Focus */}
       {/* Premium Hero Banner - Vector Emerald Theme */}
-      <section className="relative bg-emerald-950 pt-8 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative bg-emerald-950 pt-8 pb-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Background Image Layer */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <img 

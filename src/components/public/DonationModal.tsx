@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { Project } from "@/lib/types";
 import { updateProject } from "@/lib/api";
 import Link from "next/link";
-import DuitNowQR from "@/components/ui/DuitNowQR";
+import DuitNowQR, { DuitNowQRHandle } from "@/components/ui/DuitNowQR";
+import { useRef } from "react";
 
 const HADITHS = [
   {
@@ -41,6 +42,7 @@ export default function DonationModal({
   const [copied, setCopied] = useState(false);
   const [randomHadith, setRandomHadith] = useState(HADITHS[0]);
   const [updatedProject, setUpdatedProject] = useState<Project>(project);
+  const qrRef = useRef<DuitNowQRHandle>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -290,8 +292,9 @@ export default function DonationModal({
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
                {paymentMethod === "qr" ? (
                  <div className="text-center w-full">
-                    <div className="mb-6">
+                     <div className="mb-6">
                       <DuitNowQR 
+                        ref={qrRef}
                         qrUrl={project.duitnow_qr_url || ""} 
                         mosqueName={project.mosque_name}
                         amount={parseFloat(donationAmount)}
@@ -309,19 +312,13 @@ export default function DonationModal({
                        <button 
                         className="flex-1 bg-surface border border-border text-foreground font-bold py-3 rounded-xl shadow-sm flex items-center justify-center gap-2 text-sm"
                         onClick={() => {
-                           const canvas = document.querySelector('canvas');
-                           if (canvas) {
-                              const link = document.createElement('a');
-                              link.download = `QR-${project.slug}.png`;
-                              link.href = canvas.toDataURL();
-                              link.click();
-                           }
+                           qrRef.current?.download();
                         }}
                        >
                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                          </svg>
-                          Muat turun QR
+                         Muat turun QR
                        </button>
                        <button 
                          onClick={() => handleCompleteDonation()}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import jsQR from "jsqr";
 import { generateDynamicQR } from "@/lib/duitnow";
@@ -11,12 +11,22 @@ interface DuitNowQRProps {
   className?: string;
 }
 
-export default function DuitNowQR({ qrUrl, mosqueName, amount, initialValue, className = "" }: DuitNowQRProps) {
+export interface DuitNowQRHandle {
+  download: () => void;
+}
+
+const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueName, amount, initialValue, className = "" }, ref) => {
   const [baseQrValue, setBaseQrValue] = useState<string | null>(initialValue || null);
   const [displayValue, setDisplayValue] = useState<string | null>(null);
   const [isDecoding, setIsDecoding] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
+
+  useImperativeHandle(ref, () => ({
+    download: () => {
+      handleDownload();
+    }
+  }));
 
   // Initial Decode
   useEffect(() => {
@@ -349,4 +359,6 @@ export default function DuitNowQR({ qrUrl, mosqueName, amount, initialValue, cla
       )}
     </>
   );
-}
+});
+
+export default DuitNowQR;
