@@ -68,7 +68,7 @@ const CountUp = ({ end, duration = 2000, prefix = "", suffix = "", decimals = 0 
 
 interface StatsData {
   totalMosques: number;
-  totalCollected: number;
+  todayCollection: number;
   todayDonors: number;
   activeConstruction: number;
 }
@@ -86,8 +86,8 @@ export default function StatsSection({ stats }: { stats: StatsData }) {
       )
     },
     {
-      label: "Jumlah Infaq Terkumpul",
-      value: stats.totalCollected,
+      label: "Jumlah Infaq Hari Ini",
+      value: stats.todayCollection,
       prefix: "RM",
       suffix: "",
       icon: (

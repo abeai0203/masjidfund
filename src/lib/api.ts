@@ -146,32 +146,47 @@ export async function getHomeStats() {
     activeProjects = (dbData as any[]).filter(p => p.publish_status === 'Published');
   }
 
-  // Handle Today's Donors
+  // Handle Today's Stats (Donors & Collection)
   let todayDonors = 0;
+  let todayCollection = 0;
+  
   if (!IS_SERVER) {
     const storedDonors = localStorage.getItem('sim_today_donors');
+    const storedCollection = localStorage.getItem('sim_today_collection');
+    
     if (storedDonors) {
       todayDonors = parseInt(storedDonors);
     } else {
       todayDonors = (activeProjects.length * 3) + 7;
       localStorage.setItem('sim_today_donors', todayDonors.toString());
     }
+
+    if (storedCollection) {
+      todayCollection = parseFloat(storedCollection);
+    } else {
+      todayCollection = todayDonors * 15.5; // Simulated seed data
+      localStorage.setItem('sim_today_collection', todayCollection.toString());
+    }
   } else {
     todayDonors = (activeProjects.length * 3) + 7;
+    todayCollection = todayDonors * 15.5;
   }
   
   return {
     totalMosques: activeProjects.length,
-    totalCollected: activeProjects.reduce((acc, curr) => acc + (Number(curr.collected_amount) || 0), 0),
+    todayCollection: todayCollection,
     todayDonors: todayDonors,
     activeConstruction: activeProjects.filter(p => p.project_type === 'Construction').length
   };
 }
 
-export function incrementSimulatedDonors() {
+export function incrementSimulatedStats(amount: number) {
   if (IS_SERVER) return;
-  const current = parseInt(localStorage.getItem('sim_today_donors') || "0");
-  localStorage.setItem('sim_today_donors', (current + 1).toString());
+  const currentDonors = parseInt(localStorage.getItem('sim_today_donors') || "0");
+  const currentCollection = parseFloat(localStorage.getItem('sim_today_collection') || "0");
+  
+  localStorage.setItem('sim_today_donors', (currentDonors + 1).toString());
+  localStorage.setItem('sim_today_collection', (currentCollection + amount).toString());
 }
 
 export async function getAdminProjects(): Promise<Project[]> {

@@ -11,7 +11,7 @@ import { Project } from "@/lib/types";
 export default function Home() {
   const [publicProjects, setPublicProjects] = useState<Project[]>([]);
   const [states, setStates] = useState<string[]>([]);
-  const [stats, setStats] = useState({ totalMosques: 0, totalCollected: 0, todayDonors: 0, activeConstruction: 0 });
+  const [stats, setStats] = useState({ totalMosques: 0, todayCollection: 0, todayDonors: 0, activeConstruction: 0 });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

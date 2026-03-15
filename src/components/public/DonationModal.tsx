@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Project } from "@/lib/types";
-import { updateProject, incrementSimulatedDonors } from "@/lib/api";
+import { updateProject, incrementSimulatedStats } from "@/lib/api";
 import Link from "next/link";
 import DuitNowQR, { DuitNowQRHandle } from "@/components/ui/DuitNowQR";
 import { useRef } from "react";
@@ -121,7 +121,7 @@ export default function DonationModal({
       
       if (result) {
         setUpdatedProject(result);
-        incrementSimulatedDonors();
+        incrementSimulatedStats(amountNum);
       }
 
       setTimeout(() => {
