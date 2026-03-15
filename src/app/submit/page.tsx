@@ -49,7 +49,7 @@ export default function SubmitPage() {
           const ctx = canvas.getContext('2d');
           if (!ctx) return resolve(null);
           
-          const tryDetect = (scale: number, mode: 'normal' | 'grayscale' | 'green' | 'blue' | 'contrast'): { data: string, location: any, scale: number } | null => {
+          const tryDetect = (scale: number, mode: 'normal' | 'grayscale' | 'green' | 'blue' | 'contrast' | 'sharpen'): { data: string, location: any, scale: number } | null => {
             canvas.width = img.width * scale;
             canvas.height = img.height * scale;
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -85,6 +85,40 @@ export default function SubmitPage() {
                 data[i] = data[i + 1] = data[i + 2] = val;
               }
               ctx.putImageData(imageData, 0, 0);
+            } else if (mode === 'sharpen') {
+              const weights = [0, -1, 0, -1, 5, -1, 0, -1, 0];
+              const side = 3;
+              const halfSide = 1;
+              const output = ctx.createImageData(imageData.width, imageData.height);
+              const dst = output.data;
+              const src = data;
+              const w = imageData.width;
+              const h = imageData.height;
+              for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                  const dstOff = (y * w + x) * 4;
+                  let r = 0, g = 0, b = 0;
+                  for (let cy = 0; cy < side; cy++) {
+                    for (let cx = 0; cx < side; cx++) {
+                      const scy = y + cy - halfSide;
+                      const scx = x + cx - halfSide;
+                      if (scy >= 0 && scy < h && scx >= 0 && scx < w) {
+                        const srcOff = (scy * w + scx) * 4;
+                        const wt = weights[cy * side + cx];
+                        r += src[srcOff] * wt;
+                        g += src[srcOff + 1] * wt;
+                        b += src[srcOff + 2] * wt;
+                      }
+                    }
+                  }
+                  dst[dstOff] = r;
+                  dst[dstOff + 1] = g;
+                  dst[dstOff + 2] = b;
+                  dst[dstOff + 3] = src[dstOff + 3];
+                }
+              }
+              ctx.putImageData(output, 0, 0);
+              imageData = output;
             }
             
             const code = jsQR(imageData.data, imageData.width, imageData.height, {
@@ -94,7 +128,7 @@ export default function SubmitPage() {
           };
 
           // Ultra-Robust Multi-pass Strategy
-          const modes: ('normal' | 'grayscale' | 'green' | 'blue' | 'contrast')[] = ['green', 'normal', 'grayscale', 'blue', 'contrast'];
+          const modes: ('normal' | 'grayscale' | 'green' | 'blue' | 'contrast' | 'sharpen')[] = ['green', 'normal', 'grayscale', 'blue', 'contrast', 'sharpen'];
           const scales = [1.0, 1.2, 1.5, 0.75, 0.5, 2.0, 0.3]; 
           
           let detectedCode = null;
@@ -102,6 +136,7 @@ export default function SubmitPage() {
           // Nested loop to try every combination until success
           for (const mode of modes) {
             for (const scale of scales) {
+              console.log(`Trying QR detection: mode=${mode}, scale=${scale}`);
               detectedCode = tryDetect(scale, mode);
               if (detectedCode) break;
             }
@@ -109,6 +144,7 @@ export default function SubmitPage() {
           }
           
           if (detectedCode) {
+            console.log("QR Detected Successfully:", detectedCode.data);
             const { data, location, scale: finalScale } = detectedCode;
             const { topCP, bottomCP, leftCP, rightCP } = {
               topCP: Math.min(location.topLeftCorner.y, location.topRightCorner.y),
@@ -190,6 +226,7 @@ export default function SubmitPage() {
 
       // Clean text for better matching
       const cleanText = text.replace(/\n/g, ' ').replace(/\s+/g, ' ');
+      console.log("Cleaned Text for Matching:", cleanText);
 
       // 1. Extract Account Number
       const accMatch = cleanText.replace(/[-\s]/g, '').match(/\d{9,16}/);
@@ -240,12 +277,30 @@ export default function SubmitPage() {
 
       // 5b. BIN/BINTI Specific Extraction (Very Aggressive for Malaysian Names)
       if (!detectedContactName) {
-        const binRegex = /([A-Z][A-Z\s]{2,}\s(?:BIN|BINTI)\s[A-Z][A-Z\s]{2,})/i;
-        const binMatch = cleanText.match(binRegex);
-        if (binMatch) {
-          detectedContactName = binMatch[1].trim().toUpperCase();
+        // Look for common patterns around BIN/BINTI
+        const words = cleanText.split(/\s+/);
+        const binIdx = words.findIndex(w => {
+          const u = w.toUpperCase().replace(/[^\w]/g, '');
+          return u === 'BIN' || u === 'BINTI' || u === 'BN';
+        });
+
+        if (binIdx !== -1) {
+          // Take up to 2 words before and 2 words after
+          const start = Math.max(0, binIdx - 2);
+          const end = Math.min(words.length, binIdx + 3);
+          const nameCandidate = words.slice(start, end).join(' ')
+            .replace(/[^\w\s]/g, '') // Remove punctuation
+            .trim()
+            .toUpperCase();
+          
+          // Verify it's likely a name (not just numbers or too short)
+          if (nameCandidate.length > 5 && !/^\d+$/.test(nameCandidate)) {
+            detectedContactName = nameCandidate;
+          }
         }
       }
+      
+      console.log("Final Detected Contact Name:", detectedContactName);
       
       // 6. Extract Address (Look for keywords like Jalan, No, Persiaran, Taman or Postcodes)
       const addressRegex = /(?:Jalan|No|Persiaran|Taman|Lot|Kg|Kampung)\s+([A-Z0-9][-A-Za-z0-9\s,.]{5,60})/i;
