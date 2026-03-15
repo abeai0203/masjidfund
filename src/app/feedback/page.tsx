@@ -61,7 +61,7 @@ function FeedbackForm() {
 
     let attachmentUrl = undefined;
     if (attachment) {
-      const { url, error: uploadError } = await uploadImage(attachment, 'feedback-attachments');
+      const { url, error: uploadError } = await uploadImage(attachment, 'images');
       if (uploadError) {
         setError(`Gagal memuat naik gambar: ${uploadError}`);
         setIsSubmitting(false);

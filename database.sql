@@ -138,6 +138,7 @@ CREATE TABLE public.feedback (
     message TEXT NOT NULL,
     contact_name TEXT,
     contact_phone TEXT,
+    attachment_url TEXT,
     status TEXT NOT NULL DEFAULT 'Unread' -- 'Unread', 'Read', 'Resolved'
 );
 
