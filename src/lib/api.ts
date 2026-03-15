@@ -132,27 +132,46 @@ export async function getProjectsByState(state: string): Promise<Project[]> {
 }
 
 export async function getHomeStats() {
-  const { data, error } = await supabase
+  const { data: dbData, error } = await supabase
     .from('projects')
     .select('collected_amount, project_type, publish_status');
     
-  if (error || !data) {
-    return {
-      totalMosques: 12,
-      totalCollected: 125400,
-      todayDonors: 48,
-      activeConstruction: 5
-    };
+  let activeProjects: Project[] = [];
+  let isSimulated = false;
+
+  if (error || !dbData || dbData.length === 0) {
+    activeProjects = getStoredData('projects', MOCK_PROJECTS).filter(p => p.publish_status === 'Published');
+    isSimulated = true;
+  } else {
+    activeProjects = (dbData as any[]).filter(p => p.publish_status === 'Published');
   }
 
-  const published = data.filter(p => p.publish_status === 'Published');
+  // Handle Today's Donors
+  let todayDonors = 0;
+  if (!IS_SERVER) {
+    const storedDonors = localStorage.getItem('sim_today_donors');
+    if (storedDonors) {
+      todayDonors = parseInt(storedDonors);
+    } else {
+      todayDonors = (activeProjects.length * 3) + 7;
+      localStorage.setItem('sim_today_donors', todayDonors.toString());
+    }
+  } else {
+    todayDonors = (activeProjects.length * 3) + 7;
+  }
   
   return {
-    totalMosques: published.length,
-    totalCollected: published.reduce((acc, curr) => acc + (Number(curr.collected_amount) || 0), 0),
-    todayDonors: (published.length * 3) + 7, // Simulated dynamic donors
-    activeConstruction: published.filter(p => p.project_type === 'Construction').length
+    totalMosques: activeProjects.length,
+    totalCollected: activeProjects.reduce((acc, curr) => acc + (Number(curr.collected_amount) || 0), 0),
+    todayDonors: todayDonors,
+    activeConstruction: activeProjects.filter(p => p.project_type === 'Construction').length
   };
+}
+
+export function incrementSimulatedDonors() {
+  if (IS_SERVER) return;
+  const current = parseInt(localStorage.getItem('sim_today_donors') || "0");
+  localStorage.setItem('sim_today_donors', (current + 1).toString());
 }
 
 export async function getAdminProjects(): Promise<Project[]> {
