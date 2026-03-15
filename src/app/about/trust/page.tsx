@@ -262,35 +262,76 @@ function TrustContent() {
         </div>
       </section>
 
-      {/* Reporting & Final CTA */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto bg-slate-50 rounded-[48px] p-10 md:p-20 text-center space-y-8 border border-slate-100 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-10 opacity-[0.03]">
-              <svg className="w-40 h-40" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-11v6h2v-6h-2zm0-4v2h2V7h-2z" />
-              </svg>
-            </div>
-            
-            <div className="w-20 h-20 bg-red-100 text-red-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-black text-slate-800">Laporkan Maklumat Meragukan</h2>
-            <p className="text-slate-600 font-medium max-w-2xl mx-auto">
-              Jika anda menemui maklumat yang meragukan pada mana-mana projek, anda boleh melaporkannya kepada kami. Setiap laporan akan disemak oleh pasukan kami dengan kadar segera.
-            </p>
-            <div className="flex justify-center pt-4">
-              <Link 
-                href="/feedback" 
-                className="w-full sm:w-auto px-12 py-5 bg-primary hover:bg-primary-hover text-white font-black rounded-3xl transition-all shadow-xl shadow-primary/20 hover:-translate-y-1 flex items-center justify-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                </svg>
-                Hubungi Kami
-              </Link>
+      <section className="py-20 bg-white relative overflow-hidden">
+        {/* Abstract Background Splashes */}
+        <div className="absolute top-1/2 left-0 -translate-y-1/2 -ml-20 w-80 h-80 bg-emerald-50 rounded-full blur-[100px] opacity-60"></div>
+        <div className="absolute top-1/2 right-0 -translate-y-1/2 -mr-20 w-80 h-80 bg-red-50 rounded-full blur-[100px] opacity-60"></div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto">
+            <div className="bg-white rounded-[60px] p-8 md:p-16 shadow-2xl shadow-slate-200/60 border border-slate-100 flex flex-col md:flex-row items-center gap-12 overflow-hidden relative group">
+              
+              {/* Image Side */}
+              <div className="w-full md:w-1/2 relative">
+                <div className="relative z-10 animate-in fade-in zoom-in duration-700">
+                  <img 
+                    src="/images/illustrations/report-shield.png" 
+                    alt="Trust Verification" 
+                    className="w-full h-auto rounded-3xl"
+                  />
+                </div>
+                {/* Secondary Floating Asset */}
+                <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-white rounded-2xl shadow-xl p-3 border border-slate-100 animate-bounce duration-[3000ms] hidden md:block">
+                  <img 
+                    src="/images/illustrations/report-alert.png" 
+                    alt="Alert Icon" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              </div>
+
+              {/* Text Side */}
+              <div className="w-full md:w-1/2 space-y-8 text-left">
+                <div className="space-y-4">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-full border border-red-100">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span className="text-[10px] font-black uppercase tracking-widest">Integriti Platform</span>
+                  </div>
+                  <h2 className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight leading-tight">
+                    Nampak Sesuatu Yang <span className="text-red-500 italic">Meragukan?</span>
+                  </h2>
+                  <p className="text-lg text-slate-500 font-medium leading-relaxed">
+                    Keselamatan penderma adalah keutamaan kami. Jika anda mendapati sebarang maklumat projek yang tidak tepat atau mencurigakan, sila laporkan segera.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Link 
+                    href="/feedback" 
+                    className="flex-1 px-8 py-5 bg-slate-900 hover:bg-black text-white font-black rounded-3xl transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-3 group"
+                  >
+                    <span>Hubungi Unit Aduan</span>
+                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </Link>
+                  <button className="flex-1 px-8 py-5 bg-white border-2 border-slate-100 hover:border-slate-200 text-slate-600 font-black rounded-3xl transition-all flex items-center justify-center gap-2">
+                    Garis Panduan Keselamatan
+                  </button>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex items-center gap-4 text-slate-400">
+                  <div className="flex -space-x-2">
+                    {[1,2,3].map(i => (
+                      <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-100"></div>
+                    ))}
+                  </div>
+                  <p className="text-xs font-bold leading-none">Pasukan kami menyemak setiap aduan dalam tempoh 24 jam.</p>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
