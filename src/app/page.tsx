@@ -230,7 +230,7 @@ export default function Home() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mt-12">
             <div className="flex flex-col items-center group">
-              <div className="w-40 h-40 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 overflow-hidden">
+              <div className="bg-white w-40 h-40 rounded-3xl flex items-center justify-center mb-5 shadow-sm border border-primary/10 group-hover:scale-110 transition-transform duration-300 overflow-hidden p-4">
                 <img src="/images/impact/verify.png" alt="Sistem Pengesahan Berkala" className="w-full h-full object-contain" />
               </div>
               <h3 className="font-bold text-lg mb-2 text-foreground">Sistem Pengesahan Berkala.</h3>
