@@ -55,7 +55,7 @@ export default function AllProjectsPage() {
 
       <div>
         <div className="mb-4 flex justify-between items-center text-sm text-foreground/60 font-medium tracking-wide">
-          <span>MENUNJUKKAN {filteredProjects.length} PROJEK</span>
+          <span>Menunjukkan {filteredProjects.length} projek</span>
         </div>
 
         {isLoading ? (

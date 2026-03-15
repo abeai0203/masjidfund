@@ -81,14 +81,14 @@ export default function Home() {
                   </svg>
                   Derma Sekarang
                 </Link>
-                <div className="flex items-center justify-center gap-6 text-[11px] font-black uppercase tracking-widest text-emerald-600/60 text-center">
+                <div className="flex items-center justify-center gap-6 text-[11px] font-bold tracking-wide text-emerald-600/60 text-center">
                   <span className="flex items-center gap-2 text-emerald-600">
                     <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> 
-                    100% KE MASJID
+                    100% Ke Masjid
                   </span>
                   <span className="flex items-center gap-2 text-emerald-600">
                     <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> 
-                    TIADA KOMISEN
+                    Tiada Komisen
                   </span>
                 </div>
               </div>
@@ -215,7 +215,7 @@ export default function Home() {
                 href={`/states/${state.toLowerCase()}`}
                 className="bg-white border border-border hover:border-primary hover:text-primary px-5 py-2 rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow-md text-slate-800"
               >
-                {state}
+                {state.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
               </Link>
             ))}
           </div>
@@ -225,7 +225,7 @@ export default function Home() {
       {/* Trust & Verification Banner */}
       <section className="bg-primary/5 py-16 px-4 sm:px-6 lg:px-8 border-t border-b border-primary/10">
         <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-2xl font-bold text-foreground mb-4 font-black uppercase tracking-tight">
+          <h2 className="text-2xl font-bold text-foreground mb-4 font-black">
             Kenapa <span className="text-green-600">MasjidFund?</span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mt-12">

@@ -724,7 +724,7 @@ export default function SubmitPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* QR Extractions */}
                 <div className="space-y-3">
-                  <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest">DuitNow QR Dikesan</p>
+                  <p className="text-xs font-bold text-foreground/40 tracking-wide">DuitNow QR Dikesan</p>
                   <div className="relative aspect-square bg-white border-2 border-dashed border-border rounded-2xl flex items-center justify-center p-4 overflow-hidden group">
                     {extractedQrUrl || (files.qr && URL.createObjectURL(files.qr)) || (extractedType && (extractedType === 'hazelton' || extractedType === 'lestari')) ? (
                       <div className="w-full max-w-[200px]">
@@ -736,7 +736,7 @@ export default function SubmitPage() {
                     ) : (
                        <svg className="w-12 h-12 text-foreground/10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
                     )}
-                    {(extractedQrUrl || extractedType) && <span className="absolute top-3 right-3 bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg animate-pulse">EXTRACTED</span>}
+                    {(extractedQrUrl || extractedType) && <span className="absolute top-3 right-3 bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg animate-pulse">Dikesan</span>}
                   </div>
                   
                   {(extractedQrUrl || files.qr) && (
@@ -748,14 +748,14 @@ export default function SubmitPage() {
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                       </svg>
-                      SUNting QR (ZOOM/CROP)
+                      Sunting QR (Zoom/Crop)
                     </button>
                   )}
                 </div>
 
                 {/* Perspective Image Extraction */}
                 <div className="space-y-3">
-                  <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest">Visual Projek Dikesan</p>
+                  <p className="text-xs font-bold text-foreground/40 tracking-wide">Visual Projek Dikesan</p>
                   <div className="relative aspect-square bg-white border border-border rounded-2xl flex items-center justify-center overflow-hidden group">
                     {magicScanPreview ? (
                       <ImagePop 
@@ -780,11 +780,11 @@ export default function SubmitPage() {
                     { (magicScanPreview || files.main_image) && (
                       <div className="absolute top-3 right-3 z-10">
                         <span className="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full backdrop-blur-md border border-primary/20">
-                          KLIK UNTUK TEROPONG
+                          Klik untuk Teropong
                         </span>
                       </div>
                     )}
-                    {files.magic_scan && <span className="absolute top-3 right-3 bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg animate-pulse">EXTRACTED</span>}
+                    {files.magic_scan && <span className="absolute top-3 right-3 bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg animate-pulse">Dikesan</span>}
                   </div>
                 </div>
               </div>

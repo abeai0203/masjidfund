@@ -160,7 +160,7 @@ function FeedbackForm() {
         </div>
 
         <div>
-          <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 px-1">Lampiran Gambar (Opsional)</label>
+          <label className="block text-xs font-bold text-slate-500 tracking-wide mb-2 px-1">Lampiran Gambar (Opsional)</label>
           <div className="space-y-4">
             <input 
               type="file" 
