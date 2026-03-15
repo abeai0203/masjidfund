@@ -229,7 +229,7 @@ export default function DonationModal({
                 }`}
               >
                 <div className="flex items-center space-x-4 relative z-10">
-                  <DuitNowLogo size={48} variant="pink" className="group-hover:scale-110 transition-transform" />
+                  <DuitNowLogo size={48} className="group-hover:scale-110 transition-transform" />
                   <div className="text-left">
                     <p className="font-bold text-foreground">DuitNow QR</p>
                     <p className="text-xs text-foreground/50">Imbas & Derma Pantas</p>
