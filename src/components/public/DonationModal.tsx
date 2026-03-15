@@ -219,26 +219,8 @@ export default function DonationModal({
               <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest mb-2 text-center">Pilih Kaedah Sumbangan</p>
               
               <button 
-                onClick={() => handleSelectMethod("billplz")}
-                className="w-full p-4 rounded-2xl bg-white border-2 border-primary/5 hover:border-primary shadow-sm hover:shadow-md transition-all group relative overflow-hidden"
-              >
-                <div className="flex items-center space-x-4 relative z-10">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                    </svg>
-                  </div>
-                  <div className="text-left">
-                    <p className="font-bold text-foreground">Online Banking (FPX)</p>
-                    <p className="text-xs text-foreground/50">Mudah & Automatik via Billplz</p>
-                  </div>
-                </div>
-                <div className="absolute top-2 right-2 px-2 py-0.5 bg-primary/10 text-primary text-[8px] font-black rounded uppercase tracking-tighter">Caj RM1.50</div>
-              </button>
-
-              <button 
                 onClick={() => handleSelectMethod("qr")}
-                className="w-full p-4 rounded-2xl bg-white border-2 border-primary/5 hover:border-primary shadow-sm hover:shadow-md transition-all group"
+                className="w-full p-4 rounded-2xl bg-surface border-2 border-primary/5 hover:border-primary shadow-sm hover:shadow-md transition-all group"
               >
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
@@ -255,7 +237,7 @@ export default function DonationModal({
 
               <button 
                 onClick={() => handleSelectMethod("bank")}
-                className="w-full p-4 rounded-2xl bg-white border-2 border-primary/5 hover:border-primary shadow-sm hover:shadow-md transition-all group"
+                className="w-full p-4 rounded-2xl bg-surface border-2 border-primary/5 hover:border-primary shadow-sm hover:shadow-md transition-all group"
               >
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-slate-600 group-hover:scale-110 transition-transform">
@@ -268,6 +250,24 @@ export default function DonationModal({
                     <p className="text-xs text-foreground/50">Salin No. Akaun Secara Manual</p>
                   </div>
                 </div>
+              </button>
+
+              <button 
+                onClick={() => handleSelectMethod("billplz")}
+                className="w-full p-4 rounded-2xl bg-surface border-2 border-primary/5 hover:border-primary shadow-sm hover:shadow-md transition-all group relative overflow-hidden"
+              >
+                <div className="flex items-center space-x-4 relative z-10">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V8a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div className="text-left">
+                    <p className="font-bold text-foreground">Online Banking (FPX)</p>
+                    <p className="text-xs text-foreground/50">Mudah & Automatik via Billplz</p>
+                  </div>
+                </div>
+                <div className="absolute top-2 right-2 px-2 py-0.5 bg-primary/10 text-primary text-[8px] font-black rounded uppercase tracking-tighter">Caj RM1.50</div>
               </button>
 
               <button 
