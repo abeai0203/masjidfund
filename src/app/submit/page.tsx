@@ -49,7 +49,7 @@ export default function SubmitPage() {
           const ctx = canvas.getContext('2d');
           if (!ctx) return resolve(null);
           
-          const tryDetect = (scale: number, mode: 'normal' | 'grayscale' | 'green' | 'blue'): { data: string, location: any, scale: number } | null => {
+          const tryDetect = (scale: number, mode: 'normal' | 'grayscale' | 'green' | 'blue' | 'contrast'): { data: string, location: any, scale: number } | null => {
             canvas.width = img.width * scale;
             canvas.height = img.height * scale;
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -78,6 +78,13 @@ export default function SubmitPage() {
                 data[i] = data[i + 1] = data[i + 2] = b;
               }
               ctx.putImageData(imageData, 0, 0);
+            } else if (mode === 'contrast') {
+              for (let i = 0; i < data.length; i += 4) {
+                const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                const val = avg > 128 ? 255 : 0;
+                data[i] = data[i + 1] = data[i + 2] = val;
+              }
+              ctx.putImageData(imageData, 0, 0);
             }
             
             const code = jsQR(imageData.data, imageData.width, imageData.height, {
@@ -87,8 +94,8 @@ export default function SubmitPage() {
           };
 
           // Ultra-Robust Multi-pass Strategy
-          const modes: ('normal' | 'grayscale' | 'green' | 'blue')[] = ['green', 'normal', 'grayscale', 'blue'];
-          const scales = [1.0, 0.75, 0.5, 1.2, 1.5]; 
+          const modes: ('normal' | 'grayscale' | 'green' | 'blue' | 'contrast')[] = ['green', 'normal', 'grayscale', 'blue', 'contrast'];
+          const scales = [1.0, 1.2, 1.5, 0.75, 0.5, 2.0, 0.3]; 
           
           let detectedCode = null;
 
@@ -735,18 +742,39 @@ export default function SubmitPage() {
                   <p className="text-xs font-bold text-foreground/40 tracking-wide">DuitNow QR Dikesan</p>
                   <div className="relative aspect-square bg-white border-2 border-dashed border-border rounded-2xl flex items-center justify-center p-4 overflow-hidden group">
                     {extractedQrUrl || (files.qr && URL.createObjectURL(files.qr)) || (extractedType && (extractedType === 'hazelton' || extractedType === 'lestari')) ? (
-                      <div className="w-full max-w-[200px]">
-                        <DuitNowQR 
+                      <div className="w-full max-w-[200px] relative">
+                         <DuitNowQR 
                           qrUrl={extractedQrUrl || (files.qr ? URL.createObjectURL(files.qr) : (extractedType === 'hazelton' ? "/images/qr-hazelton.png" : "/images/qr-cropped.png"))} 
                           mosqueName={formName || "Nama Masjid Anda"}
                           initialValue={extractedValue || undefined}
                         />
+
+                        {/* Status Badges */}
+                        {extractedValue ? (
+                          <div className="absolute -top-2 -right-2 bg-emerald-500 text-white p-1.5 rounded-full shadow-lg z-20 animate-in zoom-in group-hover:scale-110 transition-transform cursor-help" title="QR Berjaya Ditukar (Vectorized)">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        ) : !isScanning ? (
+                          <div className="absolute -top-2 -right-2 bg-amber-500 text-white p-1.5 rounded-full shadow-lg z-20 animate-pulse group-hover:scale-110 transition-transform cursor-help" title="QR Masih Imej (Gagal Convert ke Vector)">
+                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                             </svg>
+                          </div>
+                        ) : null}
                       </div>
                     ) : (
                        <svg className="w-12 h-12 text-foreground/10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
                     )}
                     {(extractedQrUrl || extractedType) && <span className="absolute top-3 right-3 bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg animate-pulse">Dikesan</span>}
                   </div>
+                  
+                  {!extractedValue && !isScanning && (extractedQrUrl || files.qr) && (
+                    <p className="text-[10px] text-amber-600 font-medium leading-tight animate-in fade-in px-1">
+                      ⚠️ Kod teks gagal diekstrak. Bingkai merah jambu tidak akan muncul sehingga kod QR yang lebih jelas dikesan. Sila muat naik gambar yang lebih jelas jika perlu.
+                    </p>
+                  )}
                   
                   {(extractedQrUrl || files.qr) && (
                     <button

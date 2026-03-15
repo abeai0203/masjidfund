@@ -42,36 +42,52 @@ export default function DuitNowQR({ qrUrl, mosqueName, amount, initialValue, cla
       const context = canvas.getContext("2d");
       if (!context) return;
 
-      const tryDecode = (scale: number, mode: 'normal' | 'grayscale' | 'green'): string | null => {
-        canvas.width = img.width * scale;
-        canvas.height = img.height * scale;
-        context.drawImage(img, 0, 0, canvas.width, canvas.height);
-        
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
+      const tryDecode = (scale: number, mode: 'normal' | 'grayscale' | 'green' | 'blue' | 'contrast'): string | null => {
+        try {
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+          context.drawImage(img, 0, 0, canvas.width, canvas.height);
+          
+          const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imageData.data;
 
-        if (mode === 'grayscale') {
-          for (let i = 0; i < data.length; i += 4) {
-            const avg = (data[i] * 0.3 + data[i + 1] * 0.59 + data[i + 2] * 0.11);
-            data[i] = data[i + 1] = data[i + 2] = avg;
+          if (mode === 'grayscale') {
+            for (let i = 0; i < data.length; i += 4) {
+              const avg = (data[i] * 0.3 + data[i + 1] * 0.59 + data[i + 2] * 0.11);
+              data[i] = data[i + 1] = data[i + 2] = avg;
+            }
+          } else if (mode === 'green') {
+            for (let i = 0; i < data.length; i += 4) {
+              const g = data[i + 1];
+              data[i] = data[i + 1] = data[i + 2] = g;
+            }
+          } else if (mode === 'blue') {
+            for (let i = 0; i < data.length; i += 4) {
+              const b = data[i + 2];
+              data[i] = data[i + 1] = data[i + 2] = b;
+            }
+          } else if (mode === 'contrast') {
+            for (let i = 0; i < data.length; i += 4) {
+              const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+              const val = avg > 128 ? 255 : 0;
+              data[i] = data[i + 1] = data[i + 2] = val;
+            }
           }
-        } else if (mode === 'green') {
-          for (let i = 0; i < data.length; i += 4) {
-            const g = data[i + 1];
-            data[i] = data[i + 1] = data[i + 2] = g;
-          }
+          
+          const code = jsQR(data, imageData.width, imageData.height, {
+            inversionAttempts: "attemptBoth",
+          });
+          return code ? code.data : null;
+        } catch (e) {
+          console.error("Decoding pass failed (likely CORS):", e);
+          return null;
         }
-        
-        const code = jsQR(data, imageData.width, imageData.height, {
-          inversionAttempts: "attemptBoth",
-        });
-        return code ? code.data : null;
       };
 
       // Multi-pass strategy for robustness
       let detectedData = null;
-      const modes: ('normal' | 'grayscale' | 'green')[] = ['green', 'normal', 'grayscale'];
-      const scales = [1.0, 1.5, 0.75];
+      const modes: ('normal' | 'grayscale' | 'green' | 'blue' | 'contrast')[] = ['green', 'normal', 'grayscale', 'blue', 'contrast'];
+      const scales = [1.0, 1.2, 1.5, 0.75, 0.5, 2.0];
 
       for (const mode of modes) {
         for (const scale of scales) {
