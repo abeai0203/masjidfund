@@ -11,6 +11,7 @@ import DuitNowQR from "@/components/ui/DuitNowQR";
 import ImageEditor from "@/components/public/ImageEditor";
 import jsQR from "jsqr";
 import Tesseract from 'tesseract.js';
+import DuitNowLogo from "@/components/ui/DuitNowLogo";
 
 export default function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -375,12 +376,10 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
             <div className="space-y-4">
               <button 
                 onClick={() => setIsCroppingQR(true)}
-                className="w-full flex items-center justify-between p-3 rounded-lg border border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 transition-colors"
+                className="w-full flex items-center justify-between p-3 rounded-lg border border-[#ed005d]/20 bg-[#ed005d]/5 text-[#ed005d] hover:bg-[#ed005d]/10 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 17h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                  </svg>
+                  <DuitNowLogo size={24} />
                   <div className="text-left">
                     <p className="text-xs font-bold uppercase tracking-wide">Pilih Kawasan QR</p>
                     <p className="text-[10px] opacity-60">Crop area QR secara manual</p>

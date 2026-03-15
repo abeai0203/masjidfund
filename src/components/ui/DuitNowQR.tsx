@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef } f
 import { QRCodeSVG } from "qrcode.react";
 import jsQR from "jsqr";
 import { generateDynamicQR } from "@/lib/duitnow";
+import DuitNowLogo from "./DuitNowLogo";
 
 interface DuitNowQRProps {
   qrUrl: string;
@@ -203,18 +204,11 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
     <>
       <div className={`flex flex-col items-center pt-6 pb-2 ${className}`}>
         {/* Pink Brand Frame */}
-        <div className="bg-[#eb2a68] p-4 rounded-[2.5rem] relative shadow-2xl overflow-visible w-full max-w-[240px]">
+        <div className="bg-[#ed005d] p-4 rounded-[2.5rem] relative shadow-2xl overflow-visible w-full max-w-[240px]">
           
           {/* Logo Cut-out at Top */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-full p-1.5 shadow-md z-10">
-            <div className="bg-[#eb2a68] w-12 h-12 rounded-full flex flex-col items-center justify-center text-white p-2">
-              <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                <rect x="7" y="7" width="3" height="3" />
-                <rect x="14" y="7" width="3" height="3" />
-                <rect x="7" y="14" width="3" height="3" />
-              </svg>
-            </div>
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-full p-2 shadow-md z-10">
+            <DuitNowLogo size={40} />
           </div>
 
           {/* Inner White Plate */}
@@ -227,7 +221,13 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
                   level="H"
                   includeMargin={false}
                   className="w-full h-full"
-                  fgColor="#eb2a68"
+                  fgColor="#ed005d"
+                  imageSettings={{
+                    src: "/favicon.ico", // Fallback or we can use a data URI
+                    height: 50,
+                    width: 50,
+                    excavate: true,
+                  }}
                 />
               </div>
             ) : isDecoding ? (
@@ -263,12 +263,12 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
             onClick={handleDownload}
             className="flex flex-col items-center gap-1 group"
           >
-            <div className="w-10 h-10 rounded-full bg-surface-muted border border-border flex items-center justify-center text-foreground/70 group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-            </div>
-            <span className="text-[10px] font-bold text-foreground/40 group-hover:text-primary uppercase tracking-widest transition-colors">Muat Turun</span>
+            <div className="w-10 h-10 bg-[#ed005d]/10 text-[#ed005d] rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+              </div>
+              <span className="text-[10px] font-bold text-foreground/40 group-hover:text-[#ed005d] uppercase tracking-widest transition-colors">Muat Turun</span>
           </button>
 
           <button 
@@ -316,13 +316,11 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
             </button>
             
             <div className="flex flex-col items-center">
-              <div className="bg-[#eb2a68] w-14 h-14 rounded-full flex flex-col items-center justify-center text-white mb-6">
-                <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v10h-2V7z" />
-                </svg>
-                <span className="text-[7px] font-black leading-none uppercase tracking-tighter -mt-1">DuitNow</span>
-                <span className="text-[7px] font-black leading-none uppercase tracking-tighter">QR</span>
-              </div>
+              <DuitNowLogo size={56} className="mb-6" />
+              <div className="flex items-center justify-center gap-2">
+            <div className="w-2 h-2 bg-[#ed005d] rounded-full animate-pulse"></div>
+            <span className="text-[10px] font-black text-[#ed005d] uppercase tracking-widest">DuitNow QR Terjamin</span>
+          </div>
               
               <div className="w-full aspect-square p-2 bg-white rounded-2xl">
                 {displayValue && (

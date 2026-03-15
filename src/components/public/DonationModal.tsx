@@ -6,6 +6,7 @@ import { updateProject } from "@/lib/api";
 import Link from "next/link";
 import DuitNowQR, { DuitNowQRHandle } from "@/components/ui/DuitNowQR";
 import { useRef } from "react";
+import DuitNowLogo from "@/components/ui/DuitNowLogo";
 
 const HADITHS = [
   {
@@ -223,19 +224,24 @@ export default function DonationModal({
               
               <button 
                 onClick={() => handleSelectMethod("qr")}
-                className="w-full p-4 rounded-2xl bg-surface border-2 border-primary/5 hover:border-primary shadow-sm hover:shadow-md transition-all group"
+                className={`w-full p-4 rounded-2xl bg-surface border-2 transition-all group overflow-hidden relative ${
+                  paymentMethod === "qr" ? "border-[#ed005d] shadow-md" : "border-primary/5 hover:border-[#ed005d] shadow-sm"
+                }`}
               >
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                    </svg>
-                  </div>
+                <div className="flex items-center space-x-4 relative z-10">
+                  <DuitNowLogo size={48} variant="pink" className="group-hover:scale-110 transition-transform" />
                   <div className="text-left">
                     <p className="font-bold text-foreground">DuitNow QR</p>
-                    <p className="text-xs text-foreground/50">Jumlah Terisi Automatik (Locked)</p>
+                    <p className="text-xs text-foreground/50">Imbas & Derma Pantas</p>
                   </div>
                 </div>
+                {paymentMethod === "qr" && (
+                  <div className="absolute top-0 right-0 w-8 h-8 bg-[#ed005d] text-white flex items-center justify-center rounded-bl-xl">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                )}
               </button>
 
               <button 
@@ -301,10 +307,10 @@ export default function DonationModal({
                       />
                     </div>
                     
-                    <div className="bg-primary/5 rounded-2xl p-4 border border-primary/10 mb-6 text-left flex items-start space-x-3">
-                      <div className="w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold mt-0.5">!</div>
+                    <div className="bg-[#ed005d]/5 rounded-2xl p-4 border border-[#ed005d]/10 mb-6 text-left flex items-start space-x-3">
+                      <div className="w-5 h-5 bg-[#ed005d] text-white rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold mt-0.5">!</div>
                       <p className="text-xs text-foreground/70 leading-relaxed font-medium">
-                        <strong>Langkah Mobile:</strong> Simpan gambar QR, buka app bank, pilih "Scan & Pay" dan muat naik gambar dari galeri.
+                        <strong>Langkah Mobile:</strong> <span className="text-[#ed005d] font-bold">Muat turun QR</span>, buka app bank, pilih "Scan & Pay" dan muat naik gambar dari galeri.
                       </p>
                     </div>
 
