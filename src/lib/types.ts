@@ -6,6 +6,7 @@ export type ProjectType = "Construction" | "Renovation" | "Maintenance" | "Emerg
 export type DonationMethodType = "DuitNow QR" | "Bank Transfer" | "Both";
 
 export interface Project {
+  id: string;
   slug: string;
   mosque_name: string;
   state: string;
@@ -64,4 +65,15 @@ export interface DiscoveryLead extends Partial<Lead> {
   confidence: number;
   source_platform: string;
   discovery_id: string;
+}
+
+export interface Feedback {
+  id: string;
+  created_at: string;
+  project_id?: string;
+  project_name?: string;
+  message: string;
+  contact_name?: string;
+  contact_phone?: string;
+  status: "Unread" | "Read" | "Resolved";
 }

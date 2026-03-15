@@ -1,0 +1,154 @@
+"use client";
+
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { submitFeedback } from "@/lib/api";
+
+function FeedbackForm() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const projectId = searchParams.get("project_id");
+  const projectName = searchParams.get("project_name");
+
+  const [formData, setFormData] = useState({
+    contact_name: "",
+    contact_phone: "",
+    message: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    const result = await submitFeedback({
+      ...formData,
+      project_id: projectId || undefined,
+      project_name: projectName || undefined,
+      status: "Unread",
+    });
+
+    if (result) {
+      setIsSuccess(true);
+      setFormData({ contact_name: "", contact_phone: "", message: "" });
+    } else {
+      setError("Gagal menghantar maklumbalas. Sila cuba lagi.");
+    }
+    setIsSubmitting(false);
+  };
+
+  if (isSuccess) {
+    return (
+      <div className="max-w-2xl mx-auto py-20 px-4 text-center">
+        <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h1 className="text-3xl font-black text-slate-800 mb-4">Terima Kasih!</h1>
+        <p className="text-slate-600 font-medium mb-10">
+          Maklumbalas anda telah diterima dan akan disemak oleh pasukan kami dengan kadar segera.
+        </p>
+        <Link 
+          href="/" 
+          className="inline-flex items-center px-8 py-4 bg-primary text-white font-black rounded-2xl shadow-lg shadow-primary/20 transition-all hover:-translate-y-1"
+        >
+          Kembali ke Laman Utama
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-2xl mx-auto py-12 px-4 sm:px-6">
+      <div className="mb-10 text-center">
+        <h1 className="text-3xl font-black text-slate-800 mb-4 tracking-tight">Hantar Maklumbalas</h1>
+        <p className="text-slate-500 font-medium">
+          {projectName 
+            ? `Berikan maklumbalas atau laporkan keraguan untuk kempen: ${projectName}`
+            : "Bantu kami meningkatkan amanah platform dengan melaporkan sebarang maklumat yang meragukan."}
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/50 space-y-6">
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm font-bold">
+            {error}
+          </div>
+        )}
+
+        <div>
+          <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 px-1">Nama (Opsional)</label>
+          <input 
+            type="text" 
+            value={formData.contact_name}
+            onChange={(e) => setFormData({...formData, contact_name: e.target.value})}
+            className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+            placeholder="Contoh: Ahmad Ali"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 px-1">No. Telefon (Opsional)</label>
+          <input 
+            type="text" 
+            value={formData.contact_phone}
+            onChange={(e) => setFormData({...formData, contact_phone: e.target.value})}
+            className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+            placeholder="Contoh: 0123456789"
+          />
+          <p className="text-[10px] text-slate-400 mt-1.5 px-1 font-medium italic">Kami akan menghubungi anda jika maklumat lanjut diperlukan.</p>
+        </div>
+
+        <div>
+          <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2 px-1">Maklumbalas / Laporan *</label>
+          <textarea 
+            required
+            rows={5}
+            value={formData.message}
+            onChange={(e) => setFormData({...formData, message: e.target.value})}
+            className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800 resize-none"
+            placeholder="Terangkan khilaf atau keraguan yang anda temui..."
+          ></textarea>
+        </div>
+
+        <button 
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-primary hover:bg-primary-hover disabled:bg-slate-300 text-white font-black py-4 rounded-xl transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+        >
+          {isSubmitting ? (
+            <span className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+          ) : (
+            <>
+              Hantar Maklumbalas
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </>
+          )}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+export default function FeedbackPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Memuatkan...</div>}>
+      <FeedbackPageContent />
+    </Suspense>
+  );
+}
+
+function FeedbackPageContent() {
+  return (
+    <div className="min-h-screen bg-slate-50 pt-10">
+      <FeedbackForm />
+    </div>
+  );
+}

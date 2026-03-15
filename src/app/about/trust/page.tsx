@@ -281,18 +281,15 @@ function TrustContent() {
             <p className="text-slate-600 font-medium max-w-2xl mx-auto">
               Jika anda menemui maklumat yang meragukan pada mana-mana projek, anda boleh melaporkannya kepada kami. Setiap laporan akan disemak oleh pasukan kami dengan kadar segera.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            <div className="flex justify-center pt-4">
               <Link 
-                href="/projects" 
-                className="w-full sm:w-auto px-10 py-5 bg-primary hover:bg-primary-hover text-white font-black rounded-3xl transition-all shadow-xl shadow-primary/20 hover:-translate-y-1"
+                href="/feedback" 
+                className="w-full sm:w-auto px-12 py-5 bg-primary hover:bg-primary-hover text-white font-black rounded-3xl transition-all shadow-xl shadow-primary/20 hover:-translate-y-1 flex items-center justify-center gap-2"
               >
-                Lihat Projek Terkini
-              </Link>
-              <Link 
-                href="mailto:safety@masjidfund.pages.dev" 
-                className="w-full sm:w-auto px-10 py-5 bg-white hover:bg-slate-50 text-slate-800 font-black rounded-3xl transition-all border border-slate-200"
-              >
-                Hubungi Pasukan Safety
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                </svg>
+                hubungi kami
               </Link>
             </div>
           </div>

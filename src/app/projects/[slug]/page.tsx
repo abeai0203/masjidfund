@@ -103,8 +103,8 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                 </svg>
                 Amanah & Pengesahan
               </h3>
-              <p className="text-sm text-foreground/70 mb-3">
-                Kempen ini telah disemak oleh platform. Butiran jawatankuasa telah disahkan berbanding daftar majlis tempatan rasmi di mana yang berkenaan.
+              <p className="text-sm text-foreground/70 mb-3 leading-relaxed">
+                Kempen ini telah disemak oleh platform. Butiran projek telah disahkan sama dengan paparan iklan berkenaan. Jika ada sebarang khilaf/keraguan boleh <Link href={`/feedback?project_id=${project.id}&project_name=${encodeURIComponent(project.title)}`} className="text-primary hover:underline font-bold">hantarkan maklumbalas</Link> kepada kami.
               </p>
               <Link href="/about/trust" className="text-sm text-primary hover:text-primary-hover font-medium">
                 Ketahui lebih lanjut tentang proses pengesahan kami &rarr;

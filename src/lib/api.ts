@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { Project, Lead, DiscoveryLead } from './types';
+import { Project, Lead, DiscoveryLead, Feedback } from './types';
 import { MOCK_PROJECTS, MOCK_LEADS } from './mock-data';
 
 // --- Simulation Persistence Helpers ---
@@ -613,4 +613,59 @@ export async function dismissLeadPermanently(discoveryId: string) {
     .insert([{ discovery_id: discoveryId }]);
 
   return { success: !error, error };
+}
+
+// --- Feedback System ---
+
+export async function submitFeedback(feedback: Partial<Feedback>): Promise<Feedback | null> {
+  try {
+    const { data, error } = await supabase
+      .from('feedback')
+      .insert([feedback])
+      .select()
+      .single();
+      
+    if (error) {
+      console.error("Supabase feedback submission error:", error);
+      return null;
+    }
+    return data as Feedback;
+  } catch (e) {
+    console.error("Unexpected error submitting feedback:", e);
+    return null;
+  }
+}
+
+export async function getFeedbacks(): Promise<Feedback[]> {
+  try {
+    const { data, error } = await supabase
+      .from('feedback')
+      .select('*')
+      .order('created_at', { ascending: false });
+      
+    if (error) {
+      console.error("Supabase error fetching feedbacks:", error);
+      return [];
+    }
+    return (data as Feedback[]) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function markFeedbackAsRead(id: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('feedback')
+      .update({ status: 'Read' })
+      .eq('id', id);
+      
+    if (error) {
+      console.error("Supabase error updating feedback status:", error);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
 }

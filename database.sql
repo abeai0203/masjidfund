@@ -126,3 +126,32 @@ CREATE TRIGGER update_leads_modtime
     BEFORE UPDATE ON public.leads
     FOR EACH ROW
     EXECUTE FUNCTION update_modified_column();
+
+-- ==========================================
+-- 5. FEEDBACK TABLE
+-- ==========================================
+CREATE TABLE public.feedback (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    project_id UUID REFERENCES public.projects(id) ON DELETE SET NULL,
+    project_name TEXT,
+    message TEXT NOT NULL,
+    contact_name TEXT,
+    contact_phone TEXT,
+    status TEXT NOT NULL DEFAULT 'Unread' -- 'Unread', 'Read', 'Resolved'
+);
+
+ALTER TABLE public.feedback ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can submit feedback." 
+ON public.feedback FOR INSERT 
+WITH CHECK (true);
+
+CREATE POLICY "Anyone can view feedback." 
+ON public.feedback FOR SELECT 
+USING (true);
+
+CREATE POLICY "Anyone can update feedback." 
+ON public.feedback FOR UPDATE 
+USING (true)
+WITH CHECK (true);

@@ -2,24 +2,27 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getAllLeads } from "@/lib/api";
+import { getAllLeads, getFeedbacks } from "@/lib/api";
+import { Lead, Feedback } from "@/lib/types";
 
 export default function AdminSidebar() {
   const [pendingCount, setPendingCount] = useState<number>(0);
+  const [unreadFeedbackCount, setUnreadFeedbackCount] = useState<number>(0);
 
   useEffect(() => {
-    // Initial fetch
-    getAllLeads().then(leads => {
-      setPendingCount(leads.filter(l => l.status === 'Pending').length);
-    });
+    const fetchData = async () => {
+      const [leads, feedbacks] = await Promise.all([
+        getAllLeads(),
+        getFeedbacks()
+      ]);
+      setPendingCount(leads.filter((l: Lead) => l.status === 'Pending').length);
+      setUnreadFeedbackCount(feedbacks.filter((f: Feedback) => f.status === 'Unread').length);
+    };
 
-    // Poll for new leads every 30 seconds
-    const interval = setInterval(() => {
-      getAllLeads().then(leads => {
-        setPendingCount(leads.filter(l => l.status === 'Pending').length);
-      });
-    }, 30000);
+    fetchData();
 
+    // Poll every 30 seconds
+    const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -35,6 +38,14 @@ export default function AdminSidebar() {
           {pendingCount > 0 && (
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-black text-white shadow-sm animate-pulse">
               {pendingCount}
+            </span>
+          )}
+        </Link>
+        <Link href="/admin/feedback" className="flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium hover:bg-surface-muted hover:text-primary transition-colors text-foreground group">
+          <span>Maklumbalas</span>
+          {unreadFeedbackCount > 0 && (
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-black text-white shadow-sm animate-pulse">
+              {unreadFeedbackCount}
             </span>
           )}
         </Link>
