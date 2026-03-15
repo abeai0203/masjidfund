@@ -202,6 +202,32 @@ export async function deleteProject(slug: string): Promise<boolean> {
   }
 }
 
+export async function updateLead(id: string, updates: Partial<Lead>): Promise<Lead | null> {
+  try {
+    const { data, error } = await supabase
+      .from('leads')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+      
+    if (error) {
+      console.warn("Supabase update fail, falling back to local simulation:", error.message);
+      const simLeads = getStoredData('leads', MOCK_LEADS);
+      const index = simLeads.findIndex(l => l.id === id);
+      if (index !== -1) {
+        simLeads[index] = { ...simLeads[index], ...updates };
+        setStoredData('leads', simLeads);
+        return simLeads[index];
+      }
+      return null;
+    }
+    return data as Lead;
+  } catch (e) {
+    return null;
+  }
+}
+
 export async function updateLeadStatus(id: string, status: string, notes?: string): Promise<boolean> {
   try {
     const { error } = await supabase

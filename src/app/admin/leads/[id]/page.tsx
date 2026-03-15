@@ -4,7 +4,7 @@ export const runtime = 'edge';
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
-import { getLeadById, updateLeadStatus, approveAndConvertToProject } from "@/lib/api";
+import { getLeadById, updateLead, updateLeadStatus, approveAndConvertToProject } from "@/lib/api";
 import { Lead } from "@/lib/types";
 import StatusPill from "@/components/admin/StatusPill";
 import DuitNowQR from "@/components/ui/DuitNowQR";
@@ -15,12 +15,28 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   const [isLoading, setIsLoading] = useState(true);
   const [notes, setNotes] = useState("");
   const [isActing, setIsActing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Editable fields
+  const [editableLead, setEditableLead] = useState<Partial<Lead>>({});
 
   useEffect(() => {
     params.then(resolved => {
       getLeadById(resolved.id).then(data => {
         setLead(data);
-        setNotes(data?.notes || "");
+        if (data) {
+          setNotes(data.notes || "");
+          setEditableLead({
+            extracted_mosque_name: data.extracted_mosque_name || "",
+            state: data.state || "",
+            contact_name: data.contact_name || "",
+            contact_phone: data.contact_phone || "",
+            detected_bank_name: data.detected_bank_name || "",
+            detected_acc_number: data.detected_acc_number || "",
+            detected_acc_name: data.detected_acc_name || "",
+            detected_project_type: data.detected_project_type || "Maintenance",
+          });
+        }
         setIsLoading(false);
       });
     });
@@ -29,11 +45,26 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   if (isLoading) return <div>Memuatkan...</div>;
   if (!lead) return notFound();
 
+  const handleSave = async () => {
+    setIsSaving(true);
+    const resolvedParams = await params;
+    const updated = await updateLead(resolvedParams.id, editableLead);
+    setIsSaving(false);
+    if (updated) {
+      setLead(updated);
+      alert("Berjaya kemaskini maklumat lead.");
+    } else {
+      alert("Gagal mengemaskini maklumat lead.");
+    }
+  };
+
   const handleAction = async (action: string) => {
     setIsActing(true);
     const resolvedParams = await params;
     
+    // First save the current editable data before approving
     if (action === "Approved") {
+      await updateLead(resolvedParams.id, editableLead);
       const success = await approveAndConvertToProject(resolvedParams.id, notes);
       setIsActing(false);
       if (success) {
@@ -56,8 +87,12 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
     router.push('/admin/leads');
   };
 
+  const updateField = (field: keyof Lead, value: string) => {
+    setEditableLead(prev => ({ ...prev, [field]: value }));
+  };
+
   return (
-    <div className="w-full max-w-4xl">
+    <div className="w-full max-w-4xl pb-20">
       <div className="mb-6 flex justify-between items-center">
         <Link 
           href="/admin/leads" 
@@ -94,45 +129,107 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
           </div>
 
           <div className="bg-surface border border-border rounded-xl p-6 shadow-sm">
-            <h2 className="text-sm font-bold text-foreground/50 uppercase tracking-wider mb-4 border-b border-border pb-2">Data Diekstrak</h2>
+            <div className="flex justify-between items-center mb-4 border-b border-border pb-2">
+              <h2 className="text-sm font-bold text-foreground/50 uppercase tracking-wider">Data Diekstrak (Boleh Edit)</h2>
+              <button 
+                onClick={handleSave}
+                disabled={isSaving}
+                className="text-xs bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1 rounded-full font-bold transition-colors disabled:opacity-50"
+              >
+                {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
+              </button>
+            </div>
+            
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                 <p className="text-xs font-semibold text-foreground/60 mb-1">Nama Masjid</p>
-                <p className="text-sm font-medium">{lead.extracted_mosque_name || "T/D"}</p>
+              <div className="sm:col-span-2">
+                 <label className="text-xs font-bold text-foreground/40 uppercase mb-1 block">Nama Masjid</label>
+                 <input 
+                  type="text"
+                  className="w-full bg-surface-muted border border-border rounded-lg px-3 py-2 text-sm font-medium focus:ring-1 focus:ring-primary outline-none"
+                  value={editableLead.extracted_mosque_name || ""}
+                  onChange={(e) => updateField('extracted_mosque_name', e.target.value)}
+                 />
               </div>
+
               <div>
-                 <p className="text-xs font-semibold text-foreground/60 mb-1">Negeri</p>
-                <p className="text-sm font-medium">{lead.state || "T/D"}</p>
+                 <label className="text-xs font-bold text-foreground/40 uppercase mb-1 block">PIC (Wakil)</label>
+                 <input 
+                  type="text"
+                  className="w-full bg-surface-muted border border-border rounded-lg px-3 py-2 text-sm font-medium focus:ring-1 focus:ring-primary outline-none"
+                  value={editableLead.contact_name || ""}
+                  onChange={(e) => updateField('contact_name', e.target.value)}
+                 />
               </div>
+              
               <div>
-                 <p className="text-xs font-semibold text-foreground/60 mb-1">PIC (Wakil)</p>
-                <p className="text-sm font-medium">{lead.contact_name || "T/D"}</p>
+                 <label className="text-xs font-bold text-foreground/40 uppercase mb-1 block">No. Telefon</label>
+                 <input 
+                  type="text"
+                  className="w-full bg-surface-muted border border-border rounded-lg px-3 py-2 text-sm font-medium focus:ring-1 focus:ring-primary outline-none"
+                  value={editableLead.contact_phone || ""}
+                  onChange={(e) => updateField('contact_phone', e.target.value)}
+                 />
               </div>
+
               <div>
-                 <p className="text-xs font-semibold text-foreground/60 mb-1">No. Telefon (WhatsApp)</p>
-                <p className="text-sm font-medium">{lead.contact_phone ? `+${lead.contact_phone}` : "T/D"}</p>
+                 <label className="text-xs font-bold text-foreground/40 uppercase mb-1 block">Negeri</label>
+                 <input 
+                  type="text"
+                  className="w-full bg-surface-muted border border-border rounded-lg px-3 py-2 text-sm font-medium focus:ring-1 focus:ring-primary outline-none"
+                  value={editableLead.state || ""}
+                  onChange={(e) => updateField('state', e.target.value)}
+                 />
               </div>
+
               <div>
-                 <p className="text-xs font-semibold text-foreground/60 mb-1">Jenis Projek</p>
-                <p className="text-sm font-medium">{lead.detected_project_type || "T/D"}</p>
+                 <label className="text-xs font-bold text-foreground/40 uppercase mb-1 block">Jenis Projek</label>
+                 <select 
+                  className="w-full bg-surface-muted border border-border rounded-lg px-3 py-2 text-sm font-medium focus:ring-1 focus:ring-primary outline-none"
+                  value={editableLead.detected_project_type || "Maintenance"}
+                  onChange={(e) => updateField('detected_project_type', e.target.value)}
+                 >
+                   <option value="Construction">Construction</option>
+                   <option value="Renovation">Renovation</option>
+                   <option value="Maintenance">Maintenance</option>
+                   <option value="Emergency Fund">Emergency Fund</option>
+                 </select>
               </div>
+
               <div>
-                 <p className="text-xs font-semibold text-foreground/60 mb-1">Nama Bank</p>
-                <p className="text-sm font-medium">{lead.detected_bank_name || "T/D"}</p>
+                 <label className="text-xs font-bold text-foreground/40 uppercase mb-1 block">Nama Bank</label>
+                 <input 
+                  type="text"
+                  className="w-full bg-surface-muted border border-border rounded-lg px-3 py-2 text-sm font-medium focus:ring-1 focus:ring-primary outline-none"
+                  value={editableLead.detected_bank_name || ""}
+                  onChange={(e) => updateField('detected_bank_name', e.target.value)}
+                 />
               </div>
+
               <div>
-                 <p className="text-xs font-semibold text-foreground/60 mb-1">No. Akaun</p>
-                <p className="text-sm font-medium font-mono">{lead.detected_acc_number || "T/D"}</p>
+                 <label className="text-xs font-bold text-foreground/40 uppercase mb-1 block">No. Akaun</label>
+                 <input 
+                  type="text"
+                  className="w-full bg-surface-muted border border-border rounded-lg px-3 py-2 text-sm font-mono focus:ring-1 focus:ring-primary outline-none"
+                  value={editableLead.detected_acc_number || ""}
+                  onChange={(e) => updateField('detected_acc_number', e.target.value)}
+                 />
               </div>
-              <div>
-                 <p className="text-xs font-semibold text-foreground/60 mb-1">Nama Akaun</p>
-                <p className="text-sm font-medium">{lead.detected_acc_name || "T/D"}</p>
+
+              <div className="sm:col-span-2">
+                 <label className="text-xs font-bold text-foreground/40 uppercase mb-1 block">Nama Akaun</label>
+                 <input 
+                  type="text"
+                  className="w-full bg-surface-muted border border-border rounded-lg px-3 py-2 text-sm font-medium focus:ring-1 focus:ring-primary outline-none"
+                  value={editableLead.detected_acc_name || ""}
+                  onChange={(e) => updateField('detected_acc_name', e.target.value)}
+                 />
               </div>
+
               {lead.detected_qr && (
                 <div className="sm:col-span-1 mt-4 p-4 border border-border rounded-lg bg-surface-muted/50">
                    <p className="text-xs font-semibold text-foreground/60 mb-3 uppercase tracking-wider">QR Dikesan</p>
                    <div className="w-full max-w-[160px]">
-                    <DuitNowQR qrUrl={lead.detected_qr} mosqueName={lead.extracted_mosque_name} />
+                    <DuitNowQR qrUrl={lead.detected_qr} mosqueName={editableLead.extracted_mosque_name || lead.extracted_mosque_name} />
                    </div>
                 </div>
               )}
