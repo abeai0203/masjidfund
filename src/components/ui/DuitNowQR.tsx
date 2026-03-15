@@ -223,7 +223,7 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
                   className="w-full h-full"
                   fgColor="#ed005d"
                   imageSettings={{
-                    src: "/favicon.ico", // Fallback or we can use a data URI
+                    src: "/images/branding/duitnow-official.png",
                     height: 50,
                     width: 50,
                     excavate: true,
