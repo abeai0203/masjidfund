@@ -35,7 +35,7 @@ export default function DonationModal({
   onClose: () => void;
 }) {
   const [step, setStep] = useState<"amount" | "method" | "details" | "alhamdulillah" | "summary">("amount");
-  const [paymentMethod, setPaymentMethod] = useState<"qr" | "bank" | "billplz">("qr");
+  const [paymentMethod, setPaymentMethod] = useState<"qr" | "bank" | "toyyibpay">("qr");
   const [donationAmount, setDonationAmount] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -53,7 +53,7 @@ export default function DonationModal({
       // Default method logic
       if (project.donation_method_type === "DuitNow QR") setPaymentMethod("qr");
       else if (project.donation_method_type === "Bank Transfer") setPaymentMethod("bank");
-      else setPaymentMethod("billplz");
+      else setPaymentMethod("toyyibpay");
     }
   }, [isOpen, project]);
 
@@ -74,26 +74,27 @@ export default function DonationModal({
     setStep("method");
   };
 
-  const handleSelectMethod = (method: "qr" | "bank" | "billplz") => {
+  const handleSelectMethod = (method: "qr" | "bank" | "toyyibpay") => {
     setPaymentMethod(method);
-    if (method === "billplz") {
-       handleCompleteDonation("billplz");
+    if (method === "toyyibpay") {
+       handleCompleteDonation();
     } else {
        setStep("details");
     }
   };
 
   const handleCompleteDonation = async (methodOverride?: string) => {
-    const method = methodOverride || paymentMethod;
     const amountNum = parseFloat(donationAmount);
     
     setIsProcessing(true);
 
-    if (method === "billplz") {
-      // Simulation: Redirecting to Billplz
-      setTimeout(async () => {
-        setStep("alhamdulillah");
-        
+    const method = paymentMethod === 'toyyibpay' ? 'FPX' : (paymentMethod === 'qr' ? 'DuitNow QR' : 'Bank Transfer');
+    console.log(`Donation recorded locally for simulation: RM${donationAmount} via ${method}`);
+    
+    // If it was ToyyibPay, we simulate the "Processing" state before showing success
+    if (paymentMethod === 'toyyibpay') {
+      setStep("alhamdulillah");
+      const timer = setTimeout(async () => {
         // Update project collected amount even for simulation to show progress
         const newCollected = (project.collected_amount || 0) + amountNum;
         const result = await updateProject(project.slug, {
@@ -253,7 +254,7 @@ export default function DonationModal({
               </button>
 
               <button 
-                onClick={() => handleSelectMethod("billplz")}
+                onClick={() => handleSelectMethod("toyyibpay")}
                 className="w-full p-4 rounded-2xl bg-surface border-2 border-primary/5 hover:border-primary shadow-sm hover:shadow-md transition-all group relative overflow-hidden"
               >
                 <div className="flex items-center space-x-4 relative z-10">
@@ -264,10 +265,10 @@ export default function DonationModal({
                   </div>
                   <div className="text-left">
                     <p className="font-bold text-foreground">Online Banking (FPX)</p>
-                    <p className="text-xs text-foreground/50">Mudah & Automatik via Billplz</p>
+                    <p className="text-xs text-foreground/50">Mudah & Automatik via ToyyibPay</p>
                   </div>
                 </div>
-                <div className="absolute top-2 right-2 px-2 py-0.5 bg-primary/10 text-primary text-[8px] font-black rounded uppercase tracking-tighter">Caj RM1.50</div>
+                <div className="absolute top-2 right-2 px-2 py-0.5 bg-primary/10 text-primary text-[8px] font-black rounded uppercase tracking-tighter">Caj RM1.00</div>
               </button>
 
               <button 
@@ -380,7 +381,7 @@ export default function DonationModal({
                 </svg>
               </div>
               <h1 className="text-4xl font-extrabold text-primary mb-4 font-serif italic text-center">Alhamdulillah</h1>
-              <p className="text-lg text-foreground/70 text-center font-medium">Sumbangan anda {paymentMethod === 'billplz' ? 'sedang diproses.' : 'telah direkodkan.'}</p>
+              <p className="text-lg text-foreground/70 text-center font-medium">Sumbangan anda {paymentMethod === 'toyyibpay' ? 'sedang diproses.' : 'telah direkodkan.'}</p>
               <p className="text-sm text-foreground/40 mt-8 animate-pulse text-center">Menyiapkan resit digital anda...</p>
             </div>
           )}
@@ -401,10 +402,10 @@ export default function DonationModal({
                   <span className="text-sm font-medium text-foreground/60">Jumlah Derma</span>
                   <span className="text-2xl font-black text-primary">RM {parseFloat(donationAmount).toLocaleString('ms-MY', { minimumFractionDigits: 2 })}</span>
                 </div>
-                {paymentMethod === 'billplz' && (
+                {paymentMethod === 'toyyibpay' && (
                   <div className="flex justify-between items-center mb-4 text-[10px] text-foreground/40 italic">
                     <span>* Termasuk caj gerbang pembayaran</span>
-                    <span>RM { (parseFloat(donationAmount) + 1.50).toFixed(2) } total</span>
+                    <span>RM { (parseFloat(donationAmount) + 1.00).toFixed(2) } total</span>
                   </div>
                 )}
                 <div className="h-px bg-border mb-4"></div>
