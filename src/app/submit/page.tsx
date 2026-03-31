@@ -480,16 +480,22 @@ export default function SubmitPage() {
       if (key === 'magic_scan') {
         handleMagicScan(file);
       } else if (key === 'qr') {
-        // Validation for manual QR upload
         const qrResult = await extractQrFromImage(file);
         if (!qrResult) {
-          alert("❌ Tiada kod QR dikesan dalam gambar ini. Sila muat naik gambar yang mempunyai kod QR yang jelas.");
-          e.target.value = ""; // Clear input
-          return;
+          const proceed = confirm("⚠️ Tiada kod QR dikesan dalam gambar ini oleh sistem AI. Anda masih boleh meneruskan, tetapi maklumat pembayaran mungkin perlu diisi secara manual. Teruskan?");
+          if (!proceed) {
+            e.target.value = ""; 
+            return;
+          }
         }
         setFiles(prev => ({ ...prev, [key]: file, magic_scan: null }));
-        setExtractedQrUrl(qrResult.url);
-        setExtractedValue(qrResult.value);
+        if (qrResult) {
+          setExtractedQrUrl(qrResult.url);
+          setExtractedValue(qrResult.value);
+        } else {
+          setExtractedQrUrl(URL.createObjectURL(file));
+          setExtractedValue(null);
+        }
       } else {
         setFiles(prev => ({ ...prev, [key]: file, magic_scan: null }));
         setExtractedType(null);
@@ -824,13 +830,44 @@ export default function SubmitPage() {
 
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-foreground/80 mb-4">Imej Automatik dari Magic Scan (Boleh ditukar):</label>
+              
+              {/* Hidden Manual Inputs */}
+              <input 
+                type="file" 
+                id="qr_manual_input" 
+                className="hidden" 
+                accept="image/*" 
+                onChange={handleFileChange('qr')}
+              />
+              <input 
+                type="file" 
+                id="main_image_manual_input" 
+                className="hidden" 
+                accept="image/*" 
+                onChange={handleFileChange('main_image')}
+              />
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* QR Extractions */}
                 <div className="space-y-3">
-                  <p className="text-xs font-bold text-foreground/40 tracking-wide">DuitNow QR Dikesan</p>
-                  <div className="relative aspect-square bg-white border-2 border-dashed border-border rounded-2xl flex items-center justify-center p-4 overflow-hidden group">
+                  <p className="text-xs font-bold text-foreground/40 tracking-wide flex justify-between items-center">
+                    DuitNow QR Dikesan
+                    { (extractedQrUrl || files.qr) && (
+                      <button 
+                        type="button"
+                        onClick={() => triggerInput('qr_manual_input')}
+                        className="text-primary hover:underline text-[10px] font-black uppercase"
+                      >
+                        Tukar Manual
+                      </button>
+                    )}
+                  </p>
+                  <div 
+                    onClick={() => triggerInput('qr_manual_input')}
+                    className="relative aspect-square bg-white border-2 border-dashed border-border rounded-2xl flex items-center justify-center p-4 overflow-hidden group cursor-pointer hover:border-primary/50 transition-colors"
+                  >
                     {extractedQrUrl || (files.qr && URL.createObjectURL(files.qr)) || (extractedType && (extractedType === 'hazelton' || extractedType === 'lestari')) ? (
-                      <div className="w-full max-w-[200px] relative">
+                      <div className="w-full max-w-[200px] relative pointer-events-none">
                          <DuitNowQR 
                           qrUrl={extractedQrUrl || (files.qr ? URL.createObjectURL(files.qr) : (extractedType === 'hazelton' ? "/images/qr-hazelton.png" : "/images/qr-cropped.png"))} 
                           mosqueName={formName || "Nama Masjid Anda"}
@@ -853,9 +890,19 @@ export default function SubmitPage() {
                         ) : null}
                       </div>
                     ) : (
-                       <svg className="w-12 h-12 text-foreground/10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                       <div className="flex flex-col items-center justify-center text-foreground/20">
+                         <svg className="w-12 h-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                         <p className="text-[10px] font-bold uppercase">Klik untuk Muat Naik QR</p>
+                       </div>
                     )}
                     {(extractedQrUrl || extractedType) && <span className="absolute top-3 right-3 bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg animate-pulse">Dikesan</span>}
+                    
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 flex items-center justify-center transition-all pb-12">
+                      <span className="opacity-0 group-hover:opacity-100 bg-white/90 text-primary text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 border border-primary/10">
+                        {extractedQrUrl ? 'Tukar Kod QR' : 'Muat Naik QR'}
+                      </span>
+                    </div>
                   </div>
                   
                   {!extractedValue && !isScanning && (extractedQrUrl || files.qr) && (
@@ -880,8 +927,29 @@ export default function SubmitPage() {
 
                 {/* Perspective Image Extraction */}
                 <div className="space-y-3">
-                  <p className="text-xs font-bold text-foreground/40 tracking-wide">Visual Projek Dikesan</p>
-                  <div className="relative aspect-square bg-white border border-border rounded-2xl flex items-center justify-center overflow-hidden group">
+                  <p className="text-xs font-bold text-foreground/40 tracking-wide flex justify-between items-center">
+                    Visual Projek Dikesan
+                    { (magicScanPreview || files.main_image) && (
+                      <button 
+                        type="button"
+                        onClick={() => triggerInput('main_image_manual_input')}
+                        className="text-primary hover:underline text-[10px] font-black uppercase"
+                      >
+                        Tukar Manual
+                      </button>
+                    )}
+                  </p>
+                  <div 
+                    className="relative aspect-square bg-white border border-border rounded-2xl flex items-center justify-center overflow-hidden group cursor-pointer hover:border-primary/50 transition-colors"
+                  >
+                    <div 
+                      className="absolute inset-0 z-0" 
+                      onClick={(e) => {
+                        // Only trigger if not clicking the ImagePop (which has its own modal)
+                        // Actually ImagePop might consume the event.
+                        triggerInput('main_image_manual_input');
+                      }}
+                    />
                     {magicScanPreview ? (
                       <ImagePop 
                         src={magicScanPreview} 
@@ -903,13 +971,23 @@ export default function SubmitPage() {
                       </div>
                     )}
                     { (magicScanPreview || files.main_image) && (
-                      <div className="absolute top-3 right-3 z-10">
+                      <div className="absolute top-3 left-3 z-10">
                         <span className="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full backdrop-blur-md border border-primary/20">
-                          Klik untuk Teropong
+                          Klik Imej untuk Teropong
                         </span>
                       </div>
                     )}
-                    {files.magic_scan && <span className="absolute top-3 right-3 bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg animate-pulse">Dikesan</span>}
+                    {files.magic_scan && <span className="absolute top-3 right-3 bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg animate-pulse z-10">Dikesan</span>}
+                    
+                    {/* Hover Overlay */}
+                    <div 
+                      onClick={() => triggerInput('main_image_manual_input')}
+                      className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 flex items-center justify-center transition-all z-20 pointer-events-none"
+                    >
+                      <span className="opacity-0 group-hover:opacity-100 bg-white/90 text-primary text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 border border-primary/10 pointer-events-auto">
+                        Tukar Visual Projek
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
