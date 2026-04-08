@@ -30,6 +30,8 @@ export interface Project {
   contact_person?: string;
   contact_phone?: string;
   address?: string;
+  latitude?: number;
+  longitude?: number;
   google_maps_url?: string;
   source_url?: string;
 }
@@ -44,6 +46,9 @@ export interface Lead {
   raw_summary: string;
   extracted_mosque_name?: string;
   state?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
   source_type: LeadSourceType;
   source_url?: string;
   lead_score: number; // e.g. 0-100 confidence score

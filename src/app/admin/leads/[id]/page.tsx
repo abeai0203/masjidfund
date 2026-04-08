@@ -48,11 +48,50 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
           detected_acc_name: data.detected_acc_name || "",
           detected_project_type: data.detected_project_type || "Maintenance",
           detected_qr: data.detected_qr || "",
+          address: data.address || "",
+          latitude: data.latitude,
+          longitude: data.longitude,
         });
       }
       setIsLoading(false);
     });
   }, [leadId]);
+
+  const [isGeocoding, setIsGeocoding] = useState(false);
+
+  const geocodeAddress = async () => {
+    const query = editableLead.address || 
+                 `${editableLead.extracted_mosque_name}, ${editableLead.state}`;
+    
+    if (!query || query.length < 5) {
+      alert("Sila masukkan alamat atau nama masjid yang lengkap.");
+      return;
+    }
+
+    setIsGeocoding(true);
+    try {
+      const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+      const data = await resp.json();
+      
+      if (data && data.length > 0) {
+        const result = data[0];
+        setEditableLead(prev => ({
+          ...prev,
+          latitude: parseFloat(result.lat),
+          longitude: parseFloat(result.lon),
+          // Only update address if it was empty
+          address: prev.address || result.display_name
+        }));
+      } else {
+        alert("Lokasi tidak dijumpai. Sila cuba masukkan alamat yang lebih spesifik.");
+      }
+    } catch (err) {
+      console.error("Geocoding error:", err);
+      alert("Ralat teknikal semasa mencari lokasi.");
+    } finally {
+      setIsGeocoding(false);
+    }
+  };
 
   if (isLoading) return <div>Memuatkan...</div>;
   if (!lead) return notFound();
@@ -389,7 +428,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                  />
               </div>
 
-              <div className="sm:col-span-2">
+              <div>
                  <label className="text-xs font-bold text-foreground/40 uppercase mb-1 block">Nama Akaun</label>
                  <input 
                   type="text"
@@ -397,6 +436,68 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                   value={editableLead.detected_acc_name || ""}
                   onChange={(e) => updateField('detected_acc_name', e.target.value)}
                  />
+              </div>
+
+              <div className="sm:col-span-2 pt-4 border-t border-border mt-2">
+                 <div className="flex justify-between items-center mb-2">
+                   <label className="text-xs font-bold text-foreground/40 uppercase block">Alamat Penuh & Lokasi</label>
+                   <button 
+                    onClick={geocodeAddress}
+                    disabled={isGeocoding}
+                    className="text-[10px] font-bold text-primary hover:underline uppercase flex items-center gap-1"
+                   >
+                     {isGeocoding ? (
+                       "Mencari..."
+                     ) : (
+                       <>
+                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                         </svg>
+                         Auto-Cari Lokasi
+                       </>
+                     )}
+                   </button>
+                 </div>
+                 <textarea 
+                  className="w-full bg-surface-muted border border-border rounded-lg px-3 py-2 text-sm font-medium focus:ring-1 focus:ring-primary outline-none min-h-[60px]"
+                  placeholder="Masukkan alamat penuh masjid..."
+                  value={editableLead.address || ""}
+                  onChange={(e) => updateField('address', e.target.value)}
+                 />
+                 
+                 <div className="grid grid-cols-2 gap-3 mt-3">
+                    <div>
+                      <label className="text-[10px] font-bold text-foreground/40 uppercase mb-1 block">Latitude</label>
+                      <input 
+                        type="number"
+                        step="any"
+                        className="w-full bg-surface-muted border border-border rounded-lg px-3 py-1.5 text-xs font-mono focus:ring-1 focus:ring-primary outline-none"
+                        value={editableLead.latitude || ""}
+                        onChange={(e) => updateField('latitude' as any, e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-foreground/40 uppercase mb-1 block">Longitude</label>
+                      <input 
+                        type="number"
+                        step="any"
+                        className="w-full bg-surface-muted border border-border rounded-lg px-3 py-1.5 text-xs font-mono focus:ring-1 focus:ring-primary outline-none"
+                        value={editableLead.longitude || ""}
+                        onChange={(e) => updateField('longitude' as any, e.target.value)}
+                      />
+                    </div>
+                 </div>
+
+                 {editableLead.latitude && editableLead.longitude && (
+                   <div className="mt-3 aspect-video rounded-lg overflow-hidden border border-border">
+                     <iframe 
+                        src={`https://www.google.com/maps?q=${editableLead.latitude},${editableLead.longitude}&z=15&output=embed`}
+                        className="w-full h-full border-0"
+                        loading="lazy"
+                      ></iframe>
+                   </div>
+                 )}
               </div>
 
               <div className="sm:col-span-2">

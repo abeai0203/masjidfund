@@ -207,7 +207,17 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                   <label className="text-xs font-black text-foreground/60 uppercase tracking-widest block mb-1">Alamat Penuh</label>
                   <p className="font-bold text-foreground">{project.address || `${project.mosque_name}, ${project.district}, ${project.state}`}</p>
                 </div>
-                {project.google_maps_url && (
+                {project.latitude && project.longitude ? (
+                  <div className="aspect-[4/3] rounded-xl overflow-hidden border border-border">
+                    <iframe 
+                      src={`https://www.google.com/maps?q=${project.latitude},${project.longitude}&z=15&output=embed`}
+                      className="w-full h-full border-0"
+                      allowFullScreen={true}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    ></iframe>
+                  </div>
+                ) : project.google_maps_url ? (
                   <div className="aspect-[4/3] rounded-xl overflow-hidden border border-border">
                     <iframe 
                       src={project.google_maps_url}
@@ -217,7 +227,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                       referrerPolicy="no-referrer-when-downgrade"
                     ></iframe>
                   </div>
-                )}
+                ) : null}
               </div>
             </section>
           </div>

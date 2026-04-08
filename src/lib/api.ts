@@ -373,19 +373,26 @@ export async function approveAndConvertToProject(id: string, notes?: string): Pr
       return m.startsWith('0') ? `6${m}` : m.startsWith('60') ? m : m.startsWith('6') ? m : `6${m}`;
     })(),
     source_url: lead.source_url,
-    address: (() => {
+    address: lead.address || (() => {
       const notes = lead.notes || "";
       const addressMatch = notes.match(/(?:Alamat|Lokasi):\s*([^\n]+)/i);
       if (addressMatch) return addressMatch[1].trim();
       return lead.extracted_mosque_name ? `${lead.extracted_mosque_name}, ${lead.state}` : `${lead.raw_title}, ${lead.state}`;
     })(),
+    latitude: lead.latitude,
+    longitude: lead.longitude,
     google_maps_url: (() => {
+      // If we have explicit coordinates, use them for a precise pin
+      if (lead.latitude && lead.longitude) {
+        return `https://www.google.com/maps?q=${lead.latitude},${lead.longitude}&z=15&output=embed`;
+      }
+
       const notes = lead.notes || "";
       const addressMatch = notes.match(/(?:Alamat|Lokasi):\s*([^\n]+)/i);
       const extractedAddress = addressMatch ? addressMatch[1].trim() : null;
       
       // Preserve specific coordinates for known mosques if no explicit address is provided
-      if (!extractedAddress) {
+      if (!extractedAddress && !lead.address) {
         if (lead.extracted_mosque_name?.includes("Lestari Putra")) {
           return "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1500!2d101.666!3d3.010!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31cdb5a034638a29%3A0xe5a363a0a3a60!2sMasjid%20Lestari%20Putra!5e0!3m2!1sen!2smy!4v1710332000000!5m2!1sen!2smy";
         }
@@ -394,7 +401,7 @@ export async function approveAndConvertToProject(id: string, notes?: string): Pr
         }
       }
 
-      const searchTarget = extractedAddress || (lead.extracted_mosque_name ? `${lead.extracted_mosque_name}, ${lead.state}` : `${lead.raw_title}, ${lead.state}`);
+      const searchTarget = lead.address || extractedAddress || (lead.extracted_mosque_name ? `${lead.extracted_mosque_name}, ${lead.state}` : `${lead.raw_title}, ${lead.state}`);
       return `https://www.google.com/maps?q=${encodeURIComponent(searchTarget)}&output=embed`;
     })()
   };

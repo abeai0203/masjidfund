@@ -56,6 +56,8 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
       contact_phone: formData.get('contact_phone') as string,
       address: formData.get('address') as string,
       google_maps_url: formData.get('google_maps_url') as string,
+      latitude: formData.get('latitude') ? Number(formData.get('latitude')) : undefined,
+      longitude: formData.get('longitude') ? Number(formData.get('longitude')) : undefined,
       source_url: formData.get('source_url') as string,
       publish_status: isPublish ? 'Published' : 'Draft'
     };
@@ -356,12 +358,71 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-foreground/80 mb-2">Alamat Penuh</label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-sm font-semibold text-foreground/80">Alamat Penuh</label>
+                <button 
+                  type="button"
+                  onClick={async () => {
+                    const address = (formRef.current?.elements.namedItem('address') as HTMLTextAreaElement)?.value || 
+                                   `${project?.mosque_name}, ${project?.state}`;
+                    if (!address || address.length < 5) {
+                      alert("Sila masukkan alamat atau nama masjid yang lengkap.");
+                      return;
+                    }
+                    try {
+                      const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`);
+                      const data = await resp.json();
+                      if (data && data.length > 0) {
+                        const result = data[0];
+                        if (formRef.current) {
+                          (formRef.current.elements.namedItem('latitude') as HTMLInputElement).value = result.lat;
+                          (formRef.current.elements.namedItem('longitude') as HTMLInputElement).value = result.lon;
+                          // Trigger re-render would be nice, but since we're using formRef for save it works
+                          alert("Lokasi dijumpai & koordinat telah dikemaskini!");
+                        }
+                      } else {
+                        alert("Lokasi tidak dijumpai.");
+                      }
+                    } catch (e) {
+                      alert("Ralat mencari lokasi.");
+                    }
+                  }}
+                  className="text-xs font-bold text-primary hover:underline uppercase flex items-center gap-1"
+                >
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Auto-Cari Lokasi
+                </button>
+              </div>
               <textarea 
                 name="address"
                 defaultValue={project.address}
                 rows={2}
                 className="w-full bg-surface-muted border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-foreground/80 mb-2">Latitude</label>
+              <input 
+                name="latitude"
+                type="number" 
+                step="any"
+                defaultValue={project.latitude}
+                className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-foreground/80 mb-2">Longitude</label>
+              <input 
+                name="longitude"
+                type="number" 
+                step="any"
+                defaultValue={project.longitude}
+                className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
 
@@ -374,7 +435,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
                 className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                 placeholder="https://www.google.com/maps/embed?pb=..."
               />
-                <p className="text-[10px] text-foreground/50 mt-1 uppercase font-bold">Nota: Masukkan pautan iframe 'src' dari Google Maps Share &gt; Embed a map</p>
+                <p className="text-[10px] text-foreground/50 mt-1 uppercase font-bold">Nota: Jika koordinat diisi, sistem akan menggunakan koordinat secara automatik.</p>
             </div>
           </div>
         </div>
