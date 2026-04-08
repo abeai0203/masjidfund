@@ -4,7 +4,7 @@ export const runtime = 'edge';
 import React, { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
-import { getLeadById, updateLead, updateLeadStatus, approveAndConvertToProject } from "@/lib/api";
+import { getLeadById, updateLead, updateLeadStatus, approveAndConvertToProject, uploadImage } from "@/lib/api";
 import { Lead } from "@/lib/types";
 import StatusPill from "@/components/admin/StatusPill";
 import DuitNowQR from "@/components/ui/DuitNowQR";
@@ -139,6 +139,26 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       }
       setIsActing(false);
     };
+  };
+
+  const handleQrUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsActing(true);
+    try {
+      const { url, error } = await uploadImage(file, 'leads');
+      if (error || !url) {
+        alert(`Gagal memuat naik imej: ${error}`);
+      } else {
+        setEditableLead(prev => ({ ...prev, detected_qr: url }));
+        alert("Imej QR berjaya dimuat naik!");
+      }
+    } catch (err) {
+      alert("Ralat berlaku semasa muat naik.");
+    } finally {
+      setIsActing(false);
+    }
   };
 
   // OCR Manual Logic
@@ -328,12 +348,19 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
               <div className="sm:col-span-1 mt-4 p-4 border border-border rounded-lg bg-surface-muted/50">
                  <div className="flex justify-between items-center mb-3">
                   <p className="text-xs font-semibold text-foreground/60 uppercase tracking-wider">QR Preview</p>
-                  <button 
-                    onClick={() => setIsCroppingQR(true)}
-                    className="text-[10px] font-bold text-primary hover:underline uppercase"
-                  >
-                    Ubah Kawasan
-                  </button>
+                  <div className="flex gap-2">
+                    <label className="text-[10px] font-bold text-emerald-600 hover:underline uppercase cursor-pointer">
+                      Upload QR Imej
+                      <input type="file" className="hidden" accept="image/*" onChange={handleQrUpload} />
+                    </label>
+                    <span className="text-foreground/20">|</span>
+                    <button 
+                      onClick={() => setIsCroppingQR(true)}
+                      className="text-[10px] font-bold text-primary hover:underline uppercase"
+                    >
+                      Crop Poster
+                    </button>
+                  </div>
                  </div>
                  <div className="w-full max-w-[160px]">
                   {editableLead.detected_qr ? (
@@ -341,6 +368,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                       qrUrl={editableLead.detected_qr} 
                       mosqueName={editableLead.extracted_mosque_name || lead.extracted_mosque_name} 
                       accountName={editableLead.detected_acc_name || lead.detected_acc_name}
+                      className="bg-white p-2 rounded-xl"
                     />
                   ) : (
                     <div className="aspect-square bg-slate-100 rounded-lg flex items-center justify-center border-2 border-dashed border-slate-200">
