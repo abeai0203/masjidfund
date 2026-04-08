@@ -121,6 +121,7 @@ export default function DonatePage() {
 
       // LOG DONATION RECORD TO DATABASE
       const logResult = await logDonation({
+        contributor_id: contributor?.id,
         donor_name: donorName,
         donor_phone: donorPhone,
         total_amount: parsedTotal,

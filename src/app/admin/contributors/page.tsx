@@ -44,9 +44,9 @@ export default function AdminContributorsPage() {
           </h2>
         </div>
         <div className="bg-white p-6 rounded-2xl border border-border shadow-sm">
-          <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest mb-1">Aktif Hari Ini</p>
+          <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest mb-1">Total Infaq (RM)</p>
           <h2 className="text-3xl font-black text-emerald-600">
-            {contributors.filter(c => new Date(c.created_at).toDateString() === new Date().toDateString()).length}
+            RM {contributors.reduce((acc, curr) => acc + (curr.total_infaq_amount || 0), 0).toLocaleString()}
           </h2>
         </div>
       </div>
@@ -58,6 +58,7 @@ export default function AdminContributorsPage() {
               <tr>
                 <th className="px-6 py-4">Profil</th>
                 <th className="px-6 py-4 text-center">Hantaran</th>
+                <th className="px-6 py-4 text-center">Infaq</th>
                 <th className="px-6 py-4">Lokasi Terakhir</th>
                 <th className="px-6 py-4">Tarikh Daftar</th>
                 <th className="px-6 py-4 text-right">Tindakan</th>
@@ -88,6 +89,16 @@ export default function AdminContributorsPage() {
                       <span className="inline-flex px-2 py-1 rounded-lg bg-primary/5 text-primary text-xs font-black">
                         {c.total_submissions}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex flex-col items-center">
+                        <span className="text-sm font-black text-emerald-600">
+                          {c.total_infaq_count || 0}
+                        </span>
+                        <span className="text-[10px] font-bold text-foreground/30">
+                          (RM {(c.total_infaq_amount || 0).toFixed(2)})
+                        </span>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       {c.last_lat && c.last_lng ? (

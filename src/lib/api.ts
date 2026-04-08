@@ -772,6 +772,7 @@ export async function markFeedbackAsRead(id: string): Promise<boolean> {
 // --- Donation Logging & Admin ---
 
 export async function logDonation(data: {
+  contributor_id?: string;
   donor_name: string;
   donor_phone: string;
   total_amount: number;

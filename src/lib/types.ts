@@ -90,6 +90,7 @@ export interface Feedback {
 
 export interface Donation {
   id: string;
+  contributor_id?: string;
   donor_name: string;
   donor_phone: string;
   total_amount: number;
@@ -108,5 +109,7 @@ export interface Contributor {
   last_lat?: number;
   last_lng?: number;
   total_submissions: number;
+  total_infaq_count: number;
+  total_infaq_amount: number;
   created_at: string;
 }
