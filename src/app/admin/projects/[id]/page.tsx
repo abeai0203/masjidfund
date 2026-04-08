@@ -16,6 +16,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
   const [isDeleting, setIsDeleting] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const [coords, setCoords] = useState<{lat: string, lng: string}>({lat: "", lng: ""});
+  const [address, setAddress] = useState("");
 
   useEffect(() => {
     params.then(resolved => {
@@ -26,6 +27,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             lat: data.latitude?.toString() || "",
             lng: data.longitude?.toString() || ""
           });
+          setAddress(data.address || "");
         }
         setIsLoading(false);
       });
@@ -61,10 +63,10 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
       duitnow_qr_url: formData.get('duitnow_qr_url') as string,
       contact_person: formData.get('contact_person') as string,
       contact_phone: formData.get('contact_phone') as string,
-      address: formData.get('address') as string,
+      address: address, // Use state instead of raw formData
       google_maps_url: formData.get('google_maps_url') as string,
-      latitude: formData.get('latitude') ? Number(formData.get('latitude')) : undefined,
-      longitude: formData.get('longitude') ? Number(formData.get('longitude')) : undefined,
+      latitude: coords.lat ? Number(coords.lat) : undefined,
+      longitude: coords.lng ? Number(coords.lng) : undefined,
       source_url: formData.get('source_url') as string,
       publish_status: isPublish ? 'Published' : 'Draft'
     };
@@ -370,8 +372,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
                 <button 
                   type="button"
                   onClick={async () => {
-                    const addressField = formRef.current?.elements.namedItem('address') as HTMLTextAreaElement;
-                    const addressQuery = addressField?.value.trim();
+                    const addressQuery = address.trim();
                     const mosqueName = (formRef.current?.elements.namedItem('mosque_name') as HTMLInputElement)?.value.trim();
                     const state = (formRef.current?.elements.namedItem('state') as HTMLInputElement)?.value.trim();
 
@@ -400,7 +401,10 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
                       }
 
                       if (!found) {
-                        alert("Lokasi tidak dijumpai. Cuba ringkaskan nama masjid.");
+                        const confirmSearch = confirm(`Lokasi tidak dijumpai dalam pangkalan data peta untuk carian: "${addressQuery}".\n\nAdakah anda mahu cari secara manual di Google Maps?`);
+                        if (confirmSearch) {
+                          window.open(`https://www.google.com/maps/search/${encodeURIComponent(addressQuery)}`, '_blank');
+                        }
                       }
                     } catch (e) {
                       alert("Ralat mencari lokasi.");
@@ -417,7 +421,8 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
               </div>
               <textarea 
                 name="address"
-                defaultValue={project.address}
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
                 rows={2}
                 className="w-full bg-surface-muted border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
