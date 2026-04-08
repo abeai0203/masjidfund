@@ -48,7 +48,7 @@ export function useAuth() {
           user_id: supabaseUser.id,
           email: supabaseUser.email,
           full_name: supabaseUser.user_metadata.full_name || supabaseUser.email?.split('@')[0],
-          avatar_url: supabaseUser.user_metadata.avatar_url,
+          avatar_url: supabaseUser.user_metadata.avatar_url || supabaseUser.user_metadata.picture,
         }, { onConflict: 'user_id' })
         .select()
         .single();
