@@ -23,8 +23,8 @@ function createPillIcon(label: string, isActive: boolean) {
 
 function formatAmt(num: number) {
   if (num >= 1_000_000) return `RM${(num / 1_000_000).toFixed(1)}M`;
-  if (num >= 1_000) return `RM${(num / 1_000).toFixed(0)}k`;
-  return `RM${num}`;
+  if (num >= 1_000) return `RM${(num / 1_000).toFixed(1)}k`;
+  return `RM${num.toFixed(1)}`;
 }
 
 // ─── Map fly-to helper ─────────────────────────────────────────────────────────
@@ -215,21 +215,25 @@ export default function InteractiveMap() {
                   </button>
                 </div>
 
-                <div className="flex items-center border-t border-slate-100">
-                  <div className="flex-1 px-4 py-3">
-                    <span className="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Sasaran Dana</span>
-                    <span className="text-base font-black text-slate-800">{formatAmt(selectedProject.target_amount)}</span>
+                <div className="border-t border-slate-100">
+                  <div className="flex items-center gap-0">
+                    <div className="flex-1 px-4 py-3">
+                      <span className="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Sasaran Dana</span>
+                      <span className="text-sm font-black text-slate-800">{formatAmt(selectedProject.target_amount)}</span>
+                    </div>
+                    <div className="flex-1 px-4 py-3 border-l border-slate-100">
+                      <span className="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Terkumpul</span>
+                      <span className="text-sm font-black text-primary">{formatAmt(selectedProject.collected_amount)}</span>
+                    </div>
                   </div>
-                  <div className="flex-1 px-4 py-3 border-l border-slate-100">
-                    <span className="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Terkumpul</span>
-                    <span className="text-base font-black text-primary">{formatAmt(selectedProject.collected_amount)}</span>
+                  <div className="px-4 pb-4">
+                    <Link
+                      href={`/projects/${selectedProject.slug}`}
+                      className="block w-full bg-primary hover:bg-primary-hover text-white text-center text-sm font-black py-2.5 rounded-xl transition-all"
+                    >
+                      Infaq Sekarang →
+                    </Link>
                   </div>
-                  <Link
-                    href={`/projects/${selectedProject.slug}`}
-                    className="flex-shrink-0 mx-4 bg-primary hover:bg-primary-hover text-white text-[11px] font-black px-4 py-1.5 rounded-xl transition-all"
-                  >
-                    Infaq →
-                  </Link>
                 </div>
               </div>
             </div>
