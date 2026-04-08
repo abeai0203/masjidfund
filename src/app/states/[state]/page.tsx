@@ -2,10 +2,18 @@ import Link from "next/link";
 import { getProjectsByState } from "@/lib/api";
 import ProjectCard from "@/components/public/ProjectCard";
 
-export const runtime = 'edge';
-
 export default async function StateProjectsPage({ params }: { params: Promise<{ state: string }> }) {
   const resolvedParams = await params;
+  
+  if (!resolvedParams?.state) {
+    return (
+      <div className="max-w-7xl mx-auto py-20 px-4 text-center">
+        <h1 className="text-xl font-bold">Negeri tidak sah</h1>
+        <Link href="/projects" className="text-primary mt-4 inline-block">Kembali</Link>
+      </div>
+    );
+  }
+
   const stateParam = decodeURIComponent(resolvedParams.state);
   
   // Format the state name for display (e.g. "kuala lumpur" -> "Kuala Lumpur")
