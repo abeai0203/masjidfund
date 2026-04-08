@@ -106,14 +106,36 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      const tryDecode = (scale: number, mode: 'normal' | 'grayscale' | 'contrast' | 'invert'): string | null => {
-        canvas.width = img.width * scale;
-        canvas.height = img.height * scale;
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const tryDecode = (scale: number, mode: 'normal' | 'grayscale' | 'contrast' | 'green' | 'blue', addPadding: boolean = true): string | null => {
+        // ADD ARTIFICIAL QUIET ZONE (White padding)
+        const padding = addPadding ? Math.max(img.width, img.height) * 0.15 : 0;
+        const targetWidth = (img.width + padding * 2) * scale;
+        const targetHeight = (img.height + padding * 2) * scale;
+        
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        
+        // Fill white background
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw image in center
+        ctx.drawImage(img, padding * scale, padding * scale, img.width * scale, img.height * scale);
+        
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imageData.data;
 
-        if (mode === 'grayscale' || mode === 'contrast') {
+        if (mode === 'green') {
+          for (let i = 0; i < data.length; i += 4) {
+            const g = data[i+1];
+            data[i] = data[i+1] = data[i+2] = g;
+          }
+        } else if (mode === 'blue') {
+          for (let i = 0; i < data.length; i += 4) {
+            const b = data[i+2];
+            data[i] = data[i+1] = data[i+2] = b;
+          }
+        } else if (mode === 'grayscale' || mode === 'contrast') {
           for (let i = 0; i < data.length; i += 4) {
             const avg = (data[i] + data[i+1] + data[i+2]) / 3;
             if (mode === 'contrast') {
@@ -123,22 +145,16 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
               data[i] = data[i+1] = data[i+2] = avg;
             }
           }
-        } else if (mode === 'invert') {
-          for (let i = 0; i < data.length; i += 4) {
-            data[i] = 255 - data[i];
-            data[i+1] = 255 - data[i+1];
-            data[i+2] = 255 - data[i+2];
-          }
         }
 
         const code = jsQR(data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
         return code ? code.data : null;
       };
 
-      // Aggressive 12-pass Strategy
+      // Aggressive 15-pass Strategy focused on DuitNow & Standard QRs
       let detectedData = null;
-      const modes: ('normal' | 'grayscale' | 'contrast' | 'invert')[] = ['normal', 'grayscale', 'contrast', 'invert'];
-      const scales = [1.0, 1.5, 0.75];
+      const modes: ('green' | 'normal' | 'grayscale' | 'contrast' | 'blue')[] = ['green', 'normal', 'grayscale', 'contrast', 'blue'];
+      const scales = [1.0, 1.2, 0.8];
 
       for (const mode of modes) {
         for (const scale of scales) {
@@ -150,14 +166,13 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
 
       if (detectedData) {
         setEditableLead(prev => ({ ...prev, detected_qr: detectedData }));
-        alert("Sempurna! Kod QR berjaya dikesan dan di-jenamakan semula.");
+        alert("Sempurna! Kod QR berjaya dikesan.");
       } else {
         if (isUpload) {
-          // Store the URL for reference, but the UI will show "No QR Found" placeholder
           setEditableLead(prev => ({ ...prev, detected_qr: imgSource }));
-          alert("Gagal: Kod QR tidak dapat dikesan dalam gambar ini. Sila muat naik gambar yang lebih jelas atau berdekatan (close-up).");
+          alert("Gagal: Sila pastikan gambar QR adalah tegak dan jelas. Cuba tinggalkan sedikit ruang putih di sekeliling kod.");
         } else {
-          alert("Gagal: Kod QR tidak dapat dikesan. Sila pilih kawasan yang lebih fokus.");
+          alert("Gagal: Sila cuba 'crop' semula dengan membiarkan lebih banyak ruang putih di sekeliling kod.");
         }
       }
       setIsActing(false);
@@ -180,18 +195,24 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
     if (!file) return;
 
     setIsActing(true);
+    
+    // 1. LOCAL-FIRST DECODING (Bypasses CORS & latency)
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        decodeAndSetQr(event.target.result as string, true);
+      }
+    };
+    reader.readAsDataURL(file);
+
+    // 2. BACKGROUND UPLOAD
     try {
       const { url, error } = await uploadImage(file, 'images');
-      if (error || !url) {
-        alert(`Gagal memuat naik imej: ${error}`);
-        setIsActing(false);
-      } else {
-        // After upload, try to decode it to get the raw string for better branding
-        decodeAndSetQr(url, true);
+      if (error) {
+        console.error("Upload error:", error);
       }
     } catch (err) {
-      alert("Ralat berlaku semasa muat naik.");
-      setIsActing(false);
+      console.error("Background upload catch:", err);
     }
   };
 

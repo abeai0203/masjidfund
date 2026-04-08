@@ -63,16 +63,33 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
       const context = canvas.getContext("2d");
       if (!context) return;
 
-      const tryDecode = (scale: number, mode: 'normal' | 'grayscale' | 'contrast' | 'invert'): string | null => {
+      const tryDecode = (scale: number, mode: 'normal' | 'grayscale' | 'contrast' | 'green' | 'blue', addPadding: boolean = true): string | null => {
         try {
-          canvas.width = img.width * scale;
-          canvas.height = img.height * scale;
-          context.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const padding = addPadding ? Math.max(img.width, img.height) * 0.15 : 0;
+          const targetWidth = (img.width + padding * 2) * scale;
+          const targetHeight = (img.height + padding * 2) * scale;
+          
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          
+          context.fillStyle = "white";
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(img, padding * scale, padding * scale, img.width * scale, img.height * scale);
           
           const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
           const data = imageData.data;
 
-          if (mode === 'grayscale' || mode === 'contrast') {
+          if (mode === 'green') {
+            for (let i = 0; i < data.length; i += 4) {
+              const g = data[i + 1];
+              data[i] = data[i + 1] = data[i + 2] = g;
+            }
+          } else if (mode === 'blue') {
+            for (let i = 0; i < data.length; i += 4) {
+              const b = data[i + 2];
+              data[i] = data[i + 1] = data[i + 2] = b;
+            }
+          } else if (mode === 'grayscale' || mode === 'contrast') {
             for (let i = 0; i < data.length; i += 4) {
               const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
               if (mode === 'contrast') {
@@ -81,12 +98,6 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
               } else {
                 data[i] = data[i + 1] = data[i + 2] = avg;
               }
-            }
-          } else if (mode === 'invert') {
-            for (let i = 0; i < data.length; i += 4) {
-              data[i] = 255 - data[i];
-              data[i + 1] = 255 - data[i + 1];
-              data[i + 2] = 255 - data[i + 2];
             }
           }
           
@@ -99,10 +110,10 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
         }
       };
 
-      // Aggressive 12-pass Strategy for internal component too
+      // Aggressive 15-pass Strategy focused on DuitNow & Standard QRs
       let detectedData = null;
-      const modes: ('normal' | 'grayscale' | 'contrast' | 'invert')[] = ['normal', 'grayscale', 'contrast', 'invert'];
-      const scales = [1.0, 1.2, 1.5, 0.75];
+      const modes: ('green' | 'normal' | 'grayscale' | 'contrast' | 'blue')[] = ['green', 'normal', 'grayscale', 'contrast', 'blue'];
+      const scales = [1.0, 1.2, 0.8];
 
       for (const mode of modes) {
         for (const scale of scales) {
