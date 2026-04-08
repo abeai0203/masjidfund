@@ -57,70 +57,71 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
     img.crossOrigin = "anonymous";
     img.src = qrUrl;
     
-    img.onload = () => {
-      // ... same decoding logic ...
+    img.onload = async () => {
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
       if (!context) return;
 
-      const tryDecode = (scale: number, mode: 'normal' | 'grayscale' | 'contrast' | 'green' | 'blue', addPadding: boolean = true): string | null => {
+      // --- PASS 1: NATIVE BARCODE DETECTOR ---
+      // @ts-ignore
+      if ('BarcodeDetector' in window) {
         try {
-          const padding = addPadding ? Math.max(img.width, img.height) * 0.15 : 0;
+          // @ts-ignore
+          const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
+          const barcodes = await detector.detect(img);
+          if (barcodes.length > 0) {
+            setBaseQrValue(barcodes[0].rawValue);
+            setIsDecoding(false);
+            return;
+          }
+        } catch (e) {}
+      }
+
+      const tryDecode = (scale: number, threshold: number | null, paddingScale: number): string | null => {
+        try {
+          const padding = Math.max(img.width, img.height) * paddingScale;
           const targetWidth = (img.width + padding * 2) * scale;
           const targetHeight = (img.height + padding * 2) * scale;
-          
           canvas.width = targetWidth;
           canvas.height = targetHeight;
-          
           context.fillStyle = "white";
           context.fillRect(0, 0, canvas.width, canvas.height);
           context.drawImage(img, padding * scale, padding * scale, img.width * scale, img.height * scale);
-          
           const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
           const data = imageData.data;
 
-          if (mode === 'green') {
+          if (threshold !== null) {
+            for (let i = 0; i < data.length; i += 4) {
+              const g = data[i + 1];
+              const val = g > threshold ? 255 : 0;
+              data[i] = data[i + 1] = data[i + 2] = val;
+            }
+          } else {
             for (let i = 0; i < data.length; i += 4) {
               const g = data[i + 1];
               data[i] = data[i + 1] = data[i + 2] = g;
             }
-          } else if (mode === 'blue') {
-            for (let i = 0; i < data.length; i += 4) {
-              const b = data[i + 2];
-              data[i] = data[i + 1] = data[i + 2] = b;
-            }
-          } else if (mode === 'grayscale' || mode === 'contrast') {
-            for (let i = 0; i < data.length; i += 4) {
-              const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-              if (mode === 'contrast') {
-                const val = avg > 128 ? 255 : 0;
-                data[i] = data[i + 1] = data[i + 2] = val;
-              } else {
-                data[i] = data[i + 1] = data[i + 2] = avg;
-              }
-            }
           }
           
-          const code = jsQR(data, imageData.width, imageData.height, {
-            inversionAttempts: "attemptBoth",
-          });
+          const code = jsQR(data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
           return code ? code.data : null;
         } catch (e) {
           return null;
         }
       };
 
-      // Aggressive 15-pass Strategy focused on DuitNow & Standard QRs
       let detectedData = null;
-      const modes: ('green' | 'normal' | 'grayscale' | 'contrast' | 'blue')[] = ['green', 'normal', 'grayscale', 'contrast', 'blue'];
-      const scales = [1.0, 1.2, 0.8];
+      const paddings = [0.1, 0.25, 0.05];
+      const scales = [1.0, 1.2];
+      const thresholds = [128, 80, 180, null];
 
-      for (const mode of modes) {
-        for (const scale of scales) {
-          detectedData = tryDecode(scale, mode);
-          if (detectedData) break;
+      outer: for (const p of paddings) {
+        for (const s of scales) {
+          for (const t of thresholds) {
+            detectedData = tryDecode(s, t, p);
+            if (detectedData) break outer;
+          }
         }
-        if (detectedData) break;
       }
       
       if (detectedData) {

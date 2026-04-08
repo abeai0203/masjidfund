@@ -97,53 +97,61 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
     router.push('/admin/leads');
   };
 
-  const decodeAndSetQr = (imgSource: string, isUpload: boolean = false) => {
+  const decodeAndSetQr = async (imgSource: string, isUpload: boolean = false) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.src = imgSource;
-    img.onload = () => {
+    img.onload = async () => {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      const tryDecode = (scale: number, mode: 'normal' | 'grayscale' | 'contrast' | 'green' | 'blue', addPadding: boolean = true): string | null => {
-        // ADD ARTIFICIAL QUIET ZONE (White padding)
-        const padding = addPadding ? Math.max(img.width, img.height) * 0.15 : 0;
+      // --- PASS 1: NATIVE BARCODE DETECTOR (Most Powerful) ---
+      // @ts-ignore - BarcodeDetector is a newer API
+      if ('BarcodeDetector' in window) {
+        try {
+          // @ts-ignore
+          const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
+          const barcodes = await detector.detect(img);
+          if (barcodes.length > 0) {
+            setEditableLead(prev => ({ ...prev, detected_qr: barcodes[0].rawValue }));
+            alert("Sempurna! Kod QR berjaya dikesan (Native).");
+            setIsActing(false);
+            return;
+          }
+        } catch (e) {
+          console.error("Native detector failed, falling back...", e);
+        }
+      }
+
+      // --- PASS 2: AGGRESSIVE JSQR WITH ADAPTIVE PREPROCESSING ---
+      const tryDecode = (scale: number, threshold: number | null, paddingScale: number): string | null => {
+        const padding = Math.max(img.width, img.height) * paddingScale;
         const targetWidth = (img.width + padding * 2) * scale;
         const targetHeight = (img.height + padding * 2) * scale;
         
         canvas.width = targetWidth;
         canvas.height = targetHeight;
-        
-        // Fill white background
         ctx.fillStyle = "white";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Draw image in center
         ctx.drawImage(img, padding * scale, padding * scale, img.width * scale, img.height * scale);
         
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imageData.data;
 
-        if (mode === 'green') {
+        // Apply pre-processing based on pass
+        if (threshold !== null) {
+          // Channel selection: Use Green Channel for pink/black robustness
+          for (let i = 0; i < data.length; i += 4) {
+            const g = data[i+1];
+            const val = g > threshold ? 255 : 0;
+            data[i] = data[i+1] = data[i+2] = val;
+          }
+        } else {
+          // Just Green Channel Grayscale
           for (let i = 0; i < data.length; i += 4) {
             const g = data[i+1];
             data[i] = data[i+1] = data[i+2] = g;
-          }
-        } else if (mode === 'blue') {
-          for (let i = 0; i < data.length; i += 4) {
-            const b = data[i+2];
-            data[i] = data[i+1] = data[i+2] = b;
-          }
-        } else if (mode === 'grayscale' || mode === 'contrast') {
-          for (let i = 0; i < data.length; i += 4) {
-            const avg = (data[i] + data[i+1] + data[i+2]) / 3;
-            if (mode === 'contrast') {
-              const val = avg > 128 ? 255 : 0;
-              data[i] = data[i+1] = data[i+2] = val;
-            } else {
-              data[i] = data[i+1] = data[i+2] = avg;
-            }
           }
         }
 
@@ -151,17 +159,19 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
         return code ? code.data : null;
       };
 
-      // Aggressive 15-pass Strategy focused on DuitNow & Standard QRs
+      // 24-pass Sweep Strategy (3 paddings x 2 scales x 4 thresholds)
       let detectedData = null;
-      const modes: ('green' | 'normal' | 'grayscale' | 'contrast' | 'blue')[] = ['green', 'normal', 'grayscale', 'contrast', 'blue'];
-      const scales = [1.0, 1.2, 0.8];
+      const paddings = [0.1, 0.25, 0.05];
+      const scales = [1.0, 1.5];
+      const thresholds = [128, 80, 180, null]; // Brightness thresholds
 
-      for (const mode of modes) {
-        for (const scale of scales) {
-          detectedData = tryDecode(scale, mode);
-          if (detectedData) break;
+      outer: for (const p of paddings) {
+        for (const s of scales) {
+          for (const t of thresholds) {
+            detectedData = tryDecode(s, t, p);
+            if (detectedData) break outer;
+          }
         }
-        if (detectedData) break;
       }
 
       if (detectedData) {
@@ -170,7 +180,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       } else {
         if (isUpload) {
           setEditableLead(prev => ({ ...prev, detected_qr: imgSource }));
-          alert("Gagal: Sila pastikan gambar QR adalah tegak dan jelas. Cuba tinggalkan sedikit ruang putih di sekeliling kod.");
+          alert("Gagal: Kod QR masih gagal dikesan. Sila pastikan anda mengambil gambar secara tegak dan tepat.");
         } else {
           alert("Gagal: Sila cuba 'crop' semula dengan membiarkan lebih banyak ruang putih di sekeliling kod.");
         }
