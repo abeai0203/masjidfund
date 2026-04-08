@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { getAllStates, submitLead, uploadImage } from "@/lib/api";
 import { ProjectType } from "@/lib/types";
+import { useAuth } from "@/hooks/useAuth";
 
 import Tesseract from 'tesseract.js';
 import jsQR from 'jsqr';
@@ -12,6 +13,7 @@ import DuitNowQR from "@/components/ui/DuitNowQR";
 import ImagePop from "@/components/ui/ImagePop";
 
 export default function SubmitPage() {
+  const { user, contributor, signInWithGoogle } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [states, setStates] = useState<string[]>([]);
@@ -33,11 +35,24 @@ export default function SubmitPage() {
 
   const [isEditingQr, setIsEditingQr] = useState(false);
   const [editingImageUrl, setEditingImageUrl] = useState<string | null>(null);
+  const [isAnonymous, setIsAnonymous] = useState(true);
+  const [contributorLoc, setContributorLoc] = useState<{lat: number, lng: number} | null>(null);
 
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     getAllStates().then(setStates);
+
+    // Capture geolocation
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setContributorLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        },
+        (err) => console.warn("Geolocation access denied:", err.message),
+        { enableHighAccuracy: true }
+      );
+    }
   }, []);
 
   const extractQrFromImage = (file: File): Promise<{ url: string, value: string } | null> => {
@@ -580,6 +595,10 @@ export default function SubmitPage() {
         contact_name: formData.get('contact_name') as string,
         contact_phone: `60${formData.get('contact_phone') as string}`,
         image_url: finalMainImageUrl,
+        contributor_id: contributor?.id,
+        contributor_lat: contributorLoc?.lat,
+        contributor_lng: contributorLoc?.lng,
+        is_anonymous: isAnonymous,
         notes: `Lokasi: ${formData.get('district')}, ${formData.get('state')}\nAlamat: ${formData.get('address')}\n\nCerita Penuh: ${formData.get('full_desc')}\n\nSasaran: RM${formData.get('target_amount')}\nHubungi: ${formData.get('contact_name')} (60${formData.get('contact_phone')})\n\n[Extracted via Magic Scan]${extractedValue ? `\n[Verified QR Data: ${extractedValue}]` : ''}${finalQrUrl ? `\n[QR Image Ref: ${finalQrUrl}]` : ''}`
       });
       setIsSubmitting(false);
@@ -622,6 +641,55 @@ export default function SubmitPage() {
         <p className="text-lg text-foreground/70 leading-relaxed max-w-2xl">
           Bantu kami menghubungkan masjid tempatan dengan penderma yang prihatin. Semua penyerahan disahkan secara manual.
         </p>
+      </div>
+
+      {/* Section 0: Contributor Info */}
+      <div className="mb-8 bg-white rounded-2xl border-2 border-primary/20 p-6 sm:p-8 shadow-xl">
+        <div className="flex flex-col sm:flex-row items-center gap-6">
+          <div className="w-20 h-20 rounded-full bg-primary/5 border-4 border-white shadow-lg overflow-hidden flex-shrink-0">
+            {user?.user_metadata.avatar_url ? (
+              <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-primary/20">
+                 <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+              </div>
+            )}
+          </div>
+          <div className="text-center sm:text-left flex-grow">
+            {user ? (
+              <>
+                <h3 className="text-lg font-black text-foreground">Assalamualaikum, {user.user_metadata.full_name || user.email}</h3>
+                <p className="text-sm text-foreground/50 font-medium">Anda sedang menghantar kempen sebagai kontributor berdaftar.</p>
+                {contributorLoc ? (
+                  <p className="text-[10px] text-emerald-600 font-bold uppercase mt-1 flex items-center gap-1">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    Lokasi dikesan: {contributorLoc.lat.toFixed(4)}, {contributorLoc.lng.toFixed(4)}
+                  </p>
+                ) : (
+                  <p className="text-[10px] text-amber-600 font-bold uppercase mt-1">Mencari lokasi GPS...</p>
+                )}
+              </>
+            ) : (
+              <>
+                <h3 className="text-lg font-black text-foreground">Jom Jadi Kontributor!</h3>
+                <p className="text-sm text-foreground/50 font-medium mb-4">Log masuk dengan Google untuk menjejak sumbangan kempen anda dan dapatkan lencana eksklusif.</p>
+                <button 
+                  type="button"
+                  onClick={signInWithGoogle}
+                  className="inline-flex items-center gap-2 bg-white border border-border rounded-xl px-6 py-2.5 text-sm font-black hover:bg-surface-muted transition-all shadow-sm"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                  </svg>
+                  Log Masuk dengan Google
+                </button>
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Magic Scan Section */}
@@ -1008,7 +1076,21 @@ export default function SubmitPage() {
 
         {/* Submit */}
         <div className="flex flex-col items-center border-t border-border pt-10">
-          <input type="hidden" name="method_type" value="Both" />
+            {user && (
+              <div className="flex items-center gap-3 mb-6 bg-surface p-4 rounded-xl border border-border">
+                <input 
+                  type="checkbox" 
+                  id="anonymous_toggle"
+                  checked={!isAnonymous}
+                  onChange={(e) => setIsAnonymous(!e.target.checked)}
+                  className="w-5 h-5 rounded border-border text-primary focus:ring-primary"
+                />
+                <label htmlFor="anonymous_toggle" className="text-sm font-bold text-foreground/70 cursor-pointer select-none">
+                  Papar profil saya sebagai kontributor (Hanya nama penderma dipaparkan jika tidak ditanda)
+                </label>
+              </div>
+            )}
+
             <button 
               type="submit"
               disabled={isSubmitting}

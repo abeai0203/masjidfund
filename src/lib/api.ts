@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { Project, Lead, DiscoveryLead, Feedback } from './types';
+import { Project, Lead, DiscoveryLead, Feedback, Contributor } from './types';
 import { MOCK_PROJECTS, MOCK_LEADS } from './mock-data';
 
 // --- Simulation Persistence Helpers ---
@@ -452,7 +452,12 @@ export async function submitLead(lead: Partial<Lead>): Promise<Lead | null> {
       console.error("Supabase lead submission failed:", error);
       console.warn("Falling back to local simulation due to:", error.message);
       const simLeads = getStoredData('leads', MOCK_LEADS);
-      const newLead = { id: `sim-${Date.now()}`, created_at: new Date().toISOString(), ...lead } as Lead;
+      const newLead = { 
+        id: `sim-${Date.now()}`, 
+        status: 'Pending',
+        created_at: new Date().toISOString(), 
+        ...lead 
+      } as Lead;
       simLeads.push(newLead);
       setStoredData('leads', simLeads);
       return newLead;
@@ -851,4 +856,16 @@ export async function markDonationRead(id: string) {
   } catch (e) {
     return { error: e };
   }
+}
+export async function getContributors(): Promise<Contributor[]> {
+  const { data, error } = await supabase
+    .from('contributors')
+    .select('*')
+    .order('total_submissions', { ascending: false });
+    
+  if (error) {
+    console.error("Supabase error fetching contributors:", error);
+    return [];
+  }
+  return (data as Contributor[]) || [];
 }

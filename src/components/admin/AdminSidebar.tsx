@@ -60,6 +60,9 @@ export default function AdminSidebar() {
             </span>
           )}
         </Link>
+        <Link href="/admin/contributors" className="block px-3 py-2 rounded-md text-sm font-medium hover:bg-surface-muted hover:text-primary transition-colors text-foreground">
+          Kontributor
+        </Link>
         <Link href="/admin/projects" className="block px-3 py-2 rounded-md text-sm font-medium hover:bg-surface-muted hover:text-primary transition-colors text-foreground">
           Projek Aktif
         </Link>

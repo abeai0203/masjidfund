@@ -64,6 +64,10 @@ export interface Lead {
   image_url?: string;
   contact_name?: string;
   contact_phone?: string;
+  contributor_id?: string;
+  contributor_lat?: number;
+  contributor_lng?: number;
+  is_anonymous?: boolean;
 }
 
 export interface DiscoveryLead extends Partial<Lead> {
@@ -92,5 +96,17 @@ export interface Donation {
   mosque_count: number;
   mosque_names: string[];
   status: "Unread" | "Read";
+  created_at: string;
+}
+
+export interface Contributor {
+  id: string;
+  user_id: string;
+  full_name: string;
+  email: string;
+  avatar_url?: string;
+  last_lat?: number;
+  last_lng?: number;
+  total_submissions: number;
   created_at: string;
 }
