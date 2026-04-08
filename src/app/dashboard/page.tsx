@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function UserDashboardPage() {
   const { user, contributor, loading } = useAuth();
@@ -28,23 +29,29 @@ export default function UserDashboardPage() {
       label: "Jumlah Infaq",
       value: `RM ${(contributor?.total_infaq_amount || 0).toLocaleString()}`,
       sub: `${contributor?.total_infaq_count || 0} kali menderma`,
+      link: "/projects",
+      cta: (contributor?.total_infaq_count || 0) === 0 ? "Mula Infaq" : null,
       icon: (
         <svg className="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
-      color: "bg-emerald-50 border-emerald-100"
+      color: "bg-emerald-50 border-emerald-100",
+      btnClass: "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200"
     },
     {
       label: "Sumbangan Kempen",
       value: contributor?.total_submissions || 0,
       sub: "Maklumat masjid dihantar",
+      link: "/contribute",
+      cta: (contributor?.total_submissions || 0) === 0 ? "Hantar Kempen" : null,
       icon: (
         <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
         </svg>
       ),
-      color: "bg-primary/5 border-primary/10"
+      color: "bg-primary/5 border-primary/10",
+      btnClass: "bg-primary hover:bg-primary-hover text-white shadow-primary/20"
     },
     {
       label: "Status Profil",
@@ -112,7 +119,16 @@ export default function UserDashboardPage() {
               </div>
               <h3 className="text-xs font-black text-foreground/30 uppercase tracking-[0.2em] mb-2">{stat.label}</h3>
               <p className="text-3xl font-black text-foreground mb-1 tracking-tight">{stat.value}</p>
-              <p className="text-xs font-bold text-foreground/40">{stat.sub}</p>
+              <p className="text-xs font-bold text-foreground/40 mb-6">{stat.sub}</p>
+              
+              {stat.cta && stat.link && (
+                <Link 
+                  href={stat.link}
+                  className={`w-full py-3 px-6 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg transition-all transform hover:-translate-y-1 active:translate-y-0 ${stat.btnClass}`}
+                >
+                  {stat.cta}
+                </Link>
+              )}
             </div>
           ))}
         </div>
