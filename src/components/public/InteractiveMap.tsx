@@ -155,11 +155,11 @@ export default function InteractiveMap() {
         </div>
 
         {/* Map + Popup wrapper */}
-        <div className="relative w-full h-[520px] rounded-[32px] overflow-hidden border border-slate-100 shadow-lg">
+        <div className="relative w-full h-[460px] sm:h-[520px] rounded-[24px] sm:rounded-[32px] overflow-hidden border border-slate-100 shadow-lg">
 
           {/* OpenStreetMap via Leaflet */}
           <MapContainer
-            center={[4.5, 108.8]}
+            center={[4.5, 108.5]}
             zoom={7}
             scrollWheelZoom
             zoomControl={false}
@@ -194,8 +194,8 @@ export default function InteractiveMap() {
 
           {/* Airbnb-style popup card */}
           {selectedProject && (
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] w-full max-w-sm px-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-              <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
+            <div className="absolute bottom-0 sm:bottom-6 left-0 sm:left-1/2 sm:-translate-x-1/2 z-[1000] w-full sm:max-w-sm sm:px-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <div className="bg-white sm:rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
                 <div className="flex items-start gap-4 p-4">
                   <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                     <svg className="w-7 h-7 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
