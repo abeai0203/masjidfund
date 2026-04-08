@@ -146,41 +146,149 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
     }
   }, [baseQrValue, amount]);
 
-  const handleDownload = () => {
-    const svg = qrRef.current?.querySelector("svg");
-    if (!svg) {
-      // Fallback: If no vectorized QR, download the image source
-      const link = document.createElement("a");
-      link.href = qrUrl;
-      link.download = `QR-${mosqueName?.replace(/\s+/g, "-") || "Donation"}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      return;
-    }
-    
-    const svgData = new XMLSerializer().serializeToString(svg);
+  const handleDownload = async () => {
+    if (!displayValue && !qrUrl) return;
+
+    // ── Canvas dimensions ──────────────────────────────────────────────
+    const W = 1080;
+    const H = 1400;
     const canvas = document.createElement("canvas");
+    canvas.width = W;
+    canvas.height = H;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const img = new Image();
-    img.onload = () => {
-      canvas.width = 1000; // High resolution
-      canvas.height = 1000;
-      ctx.fillStyle = "white";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 100, 100, 800, 800);
-      
-      const pngUrl = canvas.toDataURL("image/png");
-      const downloadLink = document.createElement("a");
-      downloadLink.href = pngUrl;
-      downloadLink.download = `QR-${mosqueName?.replace(/\s+/g, "-") || "Donation"}.png`;
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-    };
-    img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+    // ── Background ─────────────────────────────────────────────────────
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, W, H);
+
+    // ── Pink DuitNow card ──────────────────────────────────────────────
+    const cardX = 90, cardY = 140, cardW = W - 180, cardH = cardW;
+    const r = 60;
+    ctx.fillStyle = "#ed005d";
+    ctx.beginPath();
+    ctx.moveTo(cardX + r, cardY);
+    ctx.lineTo(cardX + cardW - r, cardY);
+    ctx.quadraticCurveTo(cardX + cardW, cardY, cardX + cardW, cardY + r);
+    ctx.lineTo(cardX + cardW, cardY + cardH - r);
+    ctx.quadraticCurveTo(cardX + cardW, cardY + cardH, cardX + cardW - r, cardY + cardH);
+    ctx.lineTo(cardX + r, cardY + cardH);
+    ctx.quadraticCurveTo(cardX, cardY + cardH, cardX, cardY + cardH - r);
+    ctx.lineTo(cardX, cardY + r);
+    ctx.quadraticCurveTo(cardX, cardY, cardX + r, cardY);
+    ctx.closePath();
+    ctx.fill();
+
+    // ── White inner plate ──────────────────────────────────────────────
+    const pad = 36;
+    const plateX = cardX + pad, plateY = cardY + pad;
+    const plateW = cardW - pad * 2, plateH = cardH - pad * 2;
+    const pr = 36;
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.moveTo(plateX + pr, plateY);
+    ctx.lineTo(plateX + plateW - pr, plateY);
+    ctx.quadraticCurveTo(plateX + plateW, plateY, plateX + plateW, plateY + pr);
+    ctx.lineTo(plateX + plateW, plateY + plateH - pr);
+    ctx.quadraticCurveTo(plateX + plateW, plateY + plateH, plateX + plateW - pr, plateY + plateH);
+    ctx.lineTo(plateX + pr, plateY + plateH);
+    ctx.quadraticCurveTo(plateX, plateY + plateH, plateX, plateY + plateH - pr);
+    ctx.lineTo(plateX, plateY + pr);
+    ctx.quadraticCurveTo(plateX, plateY, plateX + pr, plateY);
+    ctx.closePath();
+    ctx.fill();
+
+    // ── Draw QR SVG onto canvas ────────────────────────────────────────
+    const drawQR = (): Promise<void> => new Promise((resolve) => {
+      const svg = qrRef.current?.querySelector("svg");
+      if (!svg) { resolve(); return; }
+      const svgData = new XMLSerializer().serializeToString(svg);
+      const img = new Image();
+      img.onload = () => {
+        const qrPad = 16;
+        ctx.drawImage(img, plateX + qrPad, plateY + qrPad, plateW - qrPad * 2, plateH - qrPad * 2);
+        resolve();
+      };
+      img.onerror = () => resolve();
+      img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+    });
+    await drawQR();
+
+    // ── DuitNow logo overlay in QR center ──────────────────────────────
+    const drawLogo = (): Promise<void> => new Promise((resolve) => {
+      const logo = new Image();
+      logo.crossOrigin = "anonymous";
+      logo.onload = () => {
+        const lSize = 120;
+        const lx = W / 2 - lSize / 2;
+        const ly = cardY + cardH / 2 - lSize / 2;
+        // White circle behind logo
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(W / 2, cardY + cardH / 2, lSize / 2 + 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.drawImage(logo, lx, ly, lSize, lSize);
+        resolve();
+      };
+      logo.onerror = () => resolve();
+      logo.src = "/images/branding/duitnow-logo-v2.png";
+    });
+    await drawLogo();
+
+    // ── DuitNow logo bubble at top of card ────────────────────────────
+    const drawLogoBubble = (): Promise<void> => new Promise((resolve) => {
+      const logo = new Image();
+      logo.crossOrigin = "anonymous";
+      logo.onload = () => {
+        const bSize = 72;
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(W / 2, cardY, bSize / 2 + 14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.drawImage(logo, W / 2 - bSize / 2, cardY - bSize / 2, bSize, bSize);
+        resolve();
+      };
+      logo.onerror = () => resolve();
+      logo.src = "/images/branding/duitnow-logo-v2.png";
+    });
+    await drawLogoBubble();
+
+    // ── Mosque name ────────────────────────────────────────────────────
+    const textY = cardY + cardH + 70;
+    if (mosqueName) {
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "bold 52px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(mosqueName, W / 2, textY, W - 100);
+    }
+
+    // ── "DuitNow QR" label ─────────────────────────────────────────────
+    ctx.fillStyle = "#ed005d";
+    ctx.font = "bold 32px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("DuitNow QR", W / 2, textY + 56);
+
+    // ── Amount (if locked) ─────────────────────────────────────────────
+    if (amount && amount > 0) {
+      ctx.fillStyle = "#059669";
+      ctx.font = "bold 44px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(`RM ${amount.toFixed(2)} Dikunci`, W / 2, textY + 120);
+    }
+
+    // ── Footer watermark ───────────────────────────────────────────────
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "28px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("masjidfund.pages.dev", W / 2, H - 48);
+
+    // ── Download ───────────────────────────────────────────────────────
+    const link = document.createElement("a");
+    link.href = canvas.toDataURL("image/png");
+    link.download = `QR-${mosqueName?.replace(/\s+/g, "-") || "DuitNow"}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleShare = async () => {
