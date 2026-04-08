@@ -78,3 +78,14 @@ export interface Feedback {
   attachment_url?: string;
   status: "Unread" | "Read" | "Resolved";
 }
+
+export interface Donation {
+  id: string;
+  donor_name: string;
+  donor_phone: string;
+  total_amount: number;
+  mosque_count: number;
+  mosque_names: string[];
+  status: "Unread" | "Read";
+  created_at: string;
+}

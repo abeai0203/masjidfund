@@ -4,13 +4,15 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import ProgressBar from "@/components/ui/ProgressBar";
-import { getPublicProjects, updateProject } from "@/lib/api";
+import { getPublicProjects, updateProject, logDonation } from "@/lib/api";
 import DuitNowQR from "@/components/ui/DuitNowQR";
 
 type ScopeType = "All" | "Best" | "State";
 
 export default function DonatePage() {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
+  const [donorName, setDonorName] = useState("Hamba Allah");
+  const [donorPhone, setDonorPhone] = useState("");
   const [totalAmount, setTotalAmount] = useState<number | "">(10);
   const [numMosques, setNumMosques] = useState(3);
   const [scope, setScope] = useState<ScopeType>("Best");
@@ -100,6 +102,15 @@ export default function DonatePage() {
     // Pick a random hadith for the end
     if (currentPaymentIdx === actualNum - 1) {
       setRandomHadith(HADITHS[Math.floor(Math.random() * HADITHS.length)]);
+
+      // LOG DONATION RECORD TO DATABASE
+      await logDonation({
+        donor_name: donorName,
+        donor_phone: donorPhone,
+        total_amount: parsedTotal,
+        mosque_count: actualNum,
+        mosque_names: recommendations.map(r => r.mosque_name)
+      });
     }
 
     setTimeout(() => {
@@ -126,7 +137,7 @@ export default function DonatePage() {
       {/* Progress Indicator */}
       <div className="flex justify-center mb-10 no-print">
         <div className="flex items-center space-x-2">
-          {[1, 2, 3, 4, 5, 6].map(s => (
+          {[0, 1, 2, 3, 4, 5, 6].map(s => (
             <div key={s} className="flex items-center">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-500 shadow-sm ${
                 step >= s 
@@ -136,7 +147,7 @@ export default function DonatePage() {
                 {s === 6 ? "✓" : s}
               </div>
               {s < 6 && (
-                <div className={`w-6 sm:w-12 h-1 mx-1 rounded-full transition-all duration-700 ${
+                <div className={`w-4 sm:w-8 h-1 mx-0.5 rounded-full transition-all duration-700 ${
                   step > s ? "bg-primary/60" : "bg-border"
                 }`} />
               )}
@@ -144,6 +155,57 @@ export default function DonatePage() {
           ))}
         </div>
       </div>
+
+      {/* STEP 0: Donor Info */}
+      {step === 0 && (
+        <div className="bg-surface rounded-2xl border border-border p-8 sm:p-12 shadow-sm animate-in fade-in zoom-in-95 duration-500">
+          <div className="max-w-md mx-auto text-center">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Langkah 0: Maklumat Infaq</h2>
+            <p className="text-foreground/60 mb-8">Sila masukkan maklumat anda untuk tujuan rekod.</p>
+            
+            <div className="space-y-6 mb-8 text-left">
+              <div>
+                <label className="block text-sm font-bold text-foreground/70 mb-2">Nama Penuh</label>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    value={donorName}
+                    onChange={(e) => setDonorName(e.target.value)}
+                    className={`w-full bg-surface-muted border-2 border-border rounded-xl px-6 py-4 text-xl font-bold focus:outline-none focus:border-primary transition-all ${
+                      donorName === "Hamba Allah" ? "text-foreground/30 font-medium italic" : "text-foreground"
+                    }`}
+                    placeholder="Hamba Allah"
+                    onFocus={() => { if(donorName === "Hamba Allah") setDonorName(""); }}
+                    onBlur={() => { if(donorName.trim() === "") setDonorName("Hamba Allah"); }}
+                  />
+                  {donorName === "Hamba Allah" && (
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-widest text-foreground/20 pointer-events-none">Default</span>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-foreground/70 mb-2">No. Telefon (Wajib)</label>
+                <input 
+                  type="tel" 
+                  value={donorPhone}
+                  onChange={(e) => setDonorPhone(e.target.value)}
+                  className="w-full bg-surface-muted border-2 border-border rounded-xl px-6 py-4 text-xl font-bold focus:outline-none focus:border-primary transition-all text-foreground"
+                  placeholder="Contoh: 0123456789"
+                />
+              </div>
+            </div>
+
+            <button 
+              onClick={() => setStep(1)}
+              disabled={!donorPhone.trim()}
+              className="w-full bg-primary hover:bg-primary-hover text-white font-black py-5 px-8 rounded-2xl shadow-lg shadow-primary/20 transition-all text-xl disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed hover:-translate-y-1 active:scale-95"
+            >
+              Seterusnya
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* STEP 1: Amount */}
       {step === 1 && (

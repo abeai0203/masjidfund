@@ -755,3 +755,92 @@ export async function markFeedbackAsRead(id: string): Promise<boolean> {
     return false;
   }
 }
+
+// --- Donation Logging & Admin ---
+
+export async function logDonation(data: {
+  donor_name: string;
+  donor_phone: string;
+  total_amount: number;
+  mosque_count: number;
+  mosque_names: string[];
+}) {
+  try {
+    const { error } = await supabase
+      .from('donations')
+      .insert([data]);
+
+    if (error) {
+      console.error('Supabase error logging donation:', error);
+      return { error };
+    }
+    return { success: true };
+  } catch (e) {
+    console.error('Unexpected error logging donation:', e);
+    return { error: e };
+  }
+}
+
+export async function getDonations(period: 'day' | 'week' | 'month' = 'day') {
+  try {
+    let query = supabase.from('donations').select('*').order('created_at', { ascending: false });
+
+    const now = new Date();
+    if (period === 'day') {
+      const startOfDay = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+      query = query.gte('created_at', startOfDay);
+    } else if (period === 'week') {
+      const today = new Date();
+      const firstDay = today.getDate() - today.getDay();
+      const startOfWeek = new Date(today.setDate(firstDay)).toISOString();
+      query = query.gte('created_at', startOfWeek);
+    } else if (period === 'month') {
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      query = query.gte('created_at', startOfMonth);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      console.error('Supabase error fetching donations:', error);
+      return [];
+    }
+    return data || [];
+  } catch (e) {
+    console.error('Unexpected error fetching donations:', e);
+    return [];
+  }
+}
+
+export async function getUnreadDonationsCount() {
+  try {
+    const { count, error } = await supabase
+      .from('donations')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'Unread');
+
+    if (error) {
+      console.error('Supabase error fetching unread donations count:', error);
+      return 0;
+    }
+    return count || 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
+export async function markDonationRead(id: string) {
+  try {
+    const { error } = await supabase
+      .from('donations')
+      .update({ status: 'Read' })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Supabase error marking donation as read:', error);
+      return { error };
+    }
+    return { success: true };
+  } catch (e) {
+    return { error: e };
+  }
+}

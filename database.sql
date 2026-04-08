@@ -177,3 +177,32 @@ ALTER TABLE public.dismissed_leads ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone can manage dismissals." 
 ON public.dismissed_leads FOR ALL 
 USING (true);
+
+-- ==========================================
+-- 7. DONATIONS TABLE
+-- ==========================================
+CREATE TABLE public.donations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    donor_name TEXT NOT NULL DEFAULT 'Hamba Allah',
+    donor_phone TEXT NOT NULL,
+    total_amount NUMERIC NOT NULL DEFAULT 0,
+    mosque_count INTEGER NOT NULL DEFAULT 0,
+    mosque_names TEXT[] NOT NULL DEFAULT '{}',
+    status TEXT NOT NULL DEFAULT 'Unread', -- 'Unread', 'Read'
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.donations ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can insert donations." 
+ON public.donations FOR INSERT 
+WITH CHECK (true);
+
+CREATE POLICY "Anyone can view donations." 
+ON public.donations FOR SELECT 
+USING (true);
+
+CREATE POLICY "Anyone can update donations." 
+ON public.donations FOR UPDATE 
+USING (true)
+WITH CHECK (true);
