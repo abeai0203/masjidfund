@@ -2,18 +2,11 @@
 
 import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import Link from "next/link";
 import { getPublicProjects } from "@/lib/api";
 import { Project } from "@/lib/types";
-
-// ─── Fix Leaflet default icon in Next.js ──────────────────────────────────────
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
 
 // ─── Custom pill marker factory ────────────────────────────────────────────────
 function createPillIcon(label: string, isActive: boolean) {
@@ -73,6 +66,15 @@ export default function InteractiveMap() {
   };
 
   useEffect(() => {
+    // Fix Leaflet default icons (must run client-side only)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+      iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+      shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+    });
+
     getPublicProjects().then((ps) => {
       const withCoords = ps.filter((p) => {
         const c = STATE_COORDS[p.state] || STATE_COORDS[Object.keys(STATE_COORDS).find(k => p.state.includes(k) || k.includes(p.state)) || ""];

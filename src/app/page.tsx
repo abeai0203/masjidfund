@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import ProjectCard from "@/components/public/ProjectCard";
-import InteractiveMap from "@/components/public/InteractiveMap";
+import dynamic from "next/dynamic";
+const InteractiveMap = dynamic(() => import("@/components/public/InteractiveMap"), { ssr: false });
+
 import { getPublicProjects, getAllStates, getHomeStats } from "@/lib/api";
 import StatsSection from "@/components/public/StatsSection";
 import { Project } from "@/lib/types";
