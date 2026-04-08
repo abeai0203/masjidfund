@@ -98,7 +98,8 @@ export async function getAllStates(): Promise<string[]> {
     const simData = getStoredData('projects', MOCK_PROJECTS);
     return Array.from(new Set(simData.filter(p => p.publish_status === 'Published').map(p => p.state))).sort();
   }
-  const states = new Set(data.filter(p => p.state).map(p => p.state));
+  const toTitleCase = (s: string) => s.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+  const states = new Set(data.filter(p => p.state).map(p => toTitleCase(p.state.trim())));
   return Array.from(states).sort();
 }
 
