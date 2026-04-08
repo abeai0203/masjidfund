@@ -10,8 +10,24 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "MasjidFund - Malaysia Mosque Donation Discovery",
-  description: "Discover and support verified mosque construction and renovation projects across Malaysia.",
+  title: "MasjidFund - Platform Derma Masjid Malaysia",
+  description: "Temui dan sokong projek pembinaan & pengubahsuaian masjid yang disahkan di seluruh Malaysia.",
+  manifest: "/manifest.json",
+  themeColor: "#059669",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "MasjidFund",
+  },
+  icons: {
+    icon: "/icon-192.png",
+    apple: "/icon-512.png",
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+  },
 };
 
 export default function RootLayout({
