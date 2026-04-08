@@ -22,7 +22,7 @@ export default function Home() {
       const st = await getAllStates();
       const s = await getHomeStats();
       setPublicProjects(projects);
-      setStates(st);
+      setStates([...new Set(st)]);
       setStats(s);
       setIsLoading(false);
     }
