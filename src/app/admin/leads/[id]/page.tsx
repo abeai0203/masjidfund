@@ -379,10 +379,12 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                  <div className="w-full max-w-[160px]">
                   {editableLead.detected_qr ? (
                     <DuitNowQR 
+                      key={editableLead.detected_qr}
                       qrUrl={editableLead.detected_qr} 
+                      initialValue={editableLead.detected_qr.startsWith('0002') ? editableLead.detected_qr : undefined}
                       mosqueName={editableLead.extracted_mosque_name || lead.extracted_mosque_name} 
                       accountName={editableLead.detected_acc_name || lead.detected_acc_name}
-                      className="bg-white p-2 rounded-xl"
+                      className="bg-white p-2 rounded-xl shadow-inner"
                     />
                   ) : (
                     <div className="aspect-square bg-slate-100 rounded-lg flex items-center justify-center border-2 border-dashed border-slate-200">
