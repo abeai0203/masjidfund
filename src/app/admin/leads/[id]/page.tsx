@@ -97,7 +97,11 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       }
 
       if (!found) {
-        alert("Lokasi tidak dijumpai. Sila cuba masukkan nama masjid yang lebih ringkas atau alamat yang lebih spesifik.");
+        const searchQuery = `${mosqueName || ""}, ${addressQuery || ""}, ${state || ""}`.trim();
+        const confirmSearch = confirm(`Lokasi tidak dijumpai secara automatik.\n\nAdakah anda mahu cari secara manual di Google Maps? (Pin merah akan cuba diletakkan)`);
+        if (confirmSearch) {
+          window.open(`https://www.google.com/maps/place/${encodeURIComponent(searchQuery)}`, '_blank');
+        }
       }
     } catch (err) {
       console.error("Geocoding error:", err);

@@ -401,9 +401,10 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
                       }
 
                       if (!found) {
-                        const confirmSearch = confirm(`Lokasi tidak dijumpai dalam pangkalan data peta untuk carian: "${addressQuery}".\n\nAdakah anda mahu cari secara manual di Google Maps?`);
+                        const searchQuery = `${mosqueName || ""}, ${addressQuery}`.trim();
+                        const confirmSearch = confirm(`Lokasi tidak dijumpai dalam pangkalan data peta untuk carian: "${addressQuery}".\n\nAdakah anda mahu cari secara manual di Google Maps? (Pin merah akan cuba diletakkan)`);
                         if (confirmSearch) {
-                          window.open(`https://www.google.com/maps/search/${encodeURIComponent(addressQuery)}`, '_blank');
+                          window.open(`https://www.google.com/maps/place/${encodeURIComponent(searchQuery)}`, '_blank');
                         }
                       }
                     } catch (e) {
