@@ -289,7 +289,7 @@ export default function DonatePage() {
            <div className="bg-surface p-8 rounded-3xl border border-border shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
              <div>
                 <h2 className="text-2xl font-bold text-foreground">Langkah 4: Sahkan Cadangan</h2>
-                <p className="text-foreground/60 mt-1">Sistem telah memilih <strong>{actualNum} masjid</strong> untuk anda sani.</p>
+                <p className="text-foreground/60 mt-1">Sistem telah memilih <strong>{actualNum} masjid</strong> untuk anda infaqkan</p>
              </div>
              <button onClick={generateRecommendations} className="flex items-center gap-2 px-6 py-3 bg-surface-muted border border-border rounded-xl font-bold text-sm hover:bg-white transition-all shadow-sm">
                 <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
