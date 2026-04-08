@@ -370,23 +370,37 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
                 <button 
                   type="button"
                   onClick={async () => {
-                    const address = (formRef.current?.elements.namedItem('address') as HTMLTextAreaElement)?.value || 
-                                   `${project?.mosque_name}, ${project?.state}`;
-                    if (!address || address.length < 5) {
-                      alert("Sila masukkan alamat atau nama masjid yang lengkap.");
+                    const addressField = formRef.current?.elements.namedItem('address') as HTMLTextAreaElement;
+                    const addressQuery = addressField?.value.trim();
+                    const mosqueName = (formRef.current?.elements.namedItem('mosque_name') as HTMLInputElement)?.value.trim();
+                    const state = (formRef.current?.elements.namedItem('state') as HTMLInputElement)?.value.trim();
+
+                    const queries = [];
+                    if (addressQuery && addressQuery.length > 5) queries.push(addressQuery);
+                    if (mosqueName && state) queries.push(`${mosqueName}, ${state}`);
+                    if (mosqueName) queries.push(mosqueName);
+
+                    if (queries.length === 0) {
+                      alert("Sila masukkan alamat atau nama masjid.");
                       return;
                     }
+
                     try {
-                      const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`);
-                      const data = await resp.json();
-                      if (data && data.length > 0) {
-                        const result = data[0];
-                        if (formRef.current) {
+                      let found = false;
+                      for (const q of queries) {
+                        const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1&countrycodes=my`);
+                        const data = await resp.json();
+                        if (data && data.length > 0) {
+                          const result = data[0];
                           setCoords({ lat: result.lat, lng: result.lon });
-                          alert("Lokasi dijumpai & koordinat telah dikemaskini!");
+                          found = true;
+                          alert(`Lokasi dijumpai via "${q}"!`);
+                          break;
                         }
-                      } else {
-                        alert("Lokasi tidak dijumpai.");
+                      }
+
+                      if (!found) {
+                        alert("Lokasi tidak dijumpai. Cuba ringkaskan nama masjid.");
                       }
                     } catch (e) {
                       alert("Ralat mencari lokasi.");

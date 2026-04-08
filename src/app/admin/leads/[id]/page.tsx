@@ -60,30 +60,44 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   const [isGeocoding, setIsGeocoding] = useState(false);
 
   const geocodeAddress = async () => {
-    const query = editableLead.address || 
-                 `${editableLead.extracted_mosque_name}, ${editableLead.state}`;
-    
-    if (!query || query.length < 5) {
-      alert("Sila masukkan alamat atau nama masjid yang lengkap.");
+    const addressQuery = editableLead.address?.trim();
+    const mosqueName = editableLead.extracted_mosque_name?.trim();
+    const state = editableLead.state?.trim();
+
+    // List of queries to try in order of specificity
+    const queries = [];
+    if (addressQuery && addressQuery.length > 5) queries.push(addressQuery);
+    if (mosqueName && state) queries.push(`${mosqueName}, ${state}`);
+    if (mosqueName) queries.push(mosqueName);
+
+    if (queries.length === 0) {
+      alert("Sila masukkan alamat atau nama masjid.");
       return;
     }
 
     setIsGeocoding(true);
+    let found = false;
+
     try {
-      const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
-      const data = await resp.json();
-      
-      if (data && data.length > 0) {
-        const result = data[0];
-        setEditableLead(prev => ({
-          ...prev,
-          latitude: parseFloat(result.lat),
-          longitude: parseFloat(result.lon),
-          // Only update address if it was empty
-          address: prev.address || result.display_name
-        }));
-      } else {
-        alert("Lokasi tidak dijumpai. Sila cuba masukkan alamat yang lebih spesifik.");
+      for (const q of queries) {
+        const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1&countrycodes=my`);
+        const data = await resp.json();
+        
+        if (data && data.length > 0) {
+          const result = data[0];
+          setEditableLead(prev => ({
+            ...prev,
+            latitude: parseFloat(result.lat),
+            longitude: parseFloat(result.lon),
+            address: prev.address || result.display_name
+          }));
+          found = true;
+          break; // Stop once we find a match
+        }
+      }
+
+      if (!found) {
+        alert("Lokasi tidak dijumpai. Sila cuba masukkan nama masjid yang lebih ringkas atau alamat yang lebih spesifik.");
       }
     } catch (err) {
       console.error("Geocoding error:", err);
