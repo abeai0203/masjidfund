@@ -126,8 +126,8 @@ export default function DonatePage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8 w-full">
-      <div className="mb-10 text-center">
+    <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8 w-full print:py-0 print:px-0">
+      <div className="mb-10 text-center print:hidden">
         <h1 className="text-3xl font-bold text-foreground mb-3 font-serif italic">Pembahagi Derma</h1>
         <p className="text-lg text-foreground/70">
           Agihkan sumbangan anda dengan telus ke beberapa masjid terpilih.
@@ -135,7 +135,7 @@ export default function DonatePage() {
       </div>
 
       {/* Progress Indicator */}
-      <div className="flex justify-center mb-10 no-print">
+      <div className="flex justify-center mb-10 no-print print:hidden">
         <div className="flex items-center space-x-2">
           {[0, 1, 2, 3, 4, 5, 6].map(s => (
             <div key={s} className="flex items-center">
@@ -527,7 +527,17 @@ export default function DonatePage() {
       {/* STEP 6: Summary & Receipt */}
       {step === 6 && (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
-           <div className="bg-white rounded-[40px] border-2 border-slate-100 shadow-2xl p-8 sm:p-12 overflow-hidden print:p-0 print:border-0 print:shadow-none">
+           <div className="bg-white rounded-[40px] border-2 border-slate-100 shadow-2xl p-8 sm:p-12 overflow-hidden print:p-0 print:border-0 print:shadow-none print:w-full print:max-w-none">
+              {/* Print Only Header */}
+              <div className="hidden print:flex flex-col items-center mb-8 border-b-2 border-slate-100 pb-8">
+                 <div className="flex items-center gap-3 mb-2">
+                   <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black">M</div>
+                   <h1 className="text-2xl font-black text-slate-800 tracking-tighter uppercase">MasjidFund.my</h1>
+                 </div>
+                 <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.3em]">Resit Pengesahan Infaq Digital</p>
+                 <p className="text-[10px] text-slate-400 mt-1 font-bold italic">Tarikh: {new Date().toLocaleDateString('ms-MY', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+              </div>
+
               <div className="text-center mb-12">
                  <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-6 no-print">
                     <svg className="w-10 h-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -558,18 +568,19 @@ export default function DonatePage() {
                  ))}
               </div>
 
-              <div className="border-t-2 border-dashed border-slate-100 pt-8 mt-8">
-                 <div className="flex justify-between items-center bg-slate-800 text-white p-6 rounded-2xl shadow-xl shadow-slate-900/20">
+              {/* Total Section for Print */}
+              <div className="border-t-2 border-dashed border-slate-100 pt-8 mt-8 print:mt-4 print:pt-4">
+                 <div className="flex justify-between items-center bg-slate-800 text-white p-6 rounded-2xl shadow-xl shadow-slate-900/20 print:bg-slate-100 print:text-slate-800 print:shadow-none print:border print:border-slate-200">
                     <div>
                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Jumlah Keseluruhan</span>
-                       <span className="text-sm text-slate-300 font-medium italic">Dibahagi kepada {actualNum} masjid</span>
+                       <span className="text-sm text-slate-300 font-medium italic print:text-slate-500">Dibahagi kepada {actualNum} masjid</span>
                     </div>
                     <span className="text-4xl font-black tabular-nums tracking-tight">RM {parsedTotal.toFixed(2)}</span>
                  </div>
               </div>
 
               {/* Hadith Section */}
-              <div className="mt-12 p-8 bg-primary/5 rounded-3xl border border-primary/10 text-center relative overflow-hidden group">
+              <div className="mt-12 p-8 bg-primary/5 rounded-3xl border border-primary/10 text-center relative overflow-hidden group print:mt-6 print:p-6">
                  <div className="absolute top-0 right-0 p-4 opacity-10 no-print">
                    <svg className="w-12 h-12 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21L14.017 18C14.017 16.8954 13.1216 16 12.017 16C10.9124 16 10.017 16.8954 10.017 18V21M10.017 21H3.983C3.43072 21 2.983 20.5523 2.983 20V4C2.983 3.44772 3.43072 3 3.983 3H20.017C20.5693 3 21.017 3.44772 21.017 4V20C21.017 20.5523 20.5693 21 20.017 21H14.017" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                  </div>
@@ -604,8 +615,18 @@ export default function DonatePage() {
 
       <style jsx global>{`
         @media print {
-          .no-print { display: none !important; }
-          body { background: white !important; }
+          @page { size: A4; margin: 1.5cm; }
+          .no-print, nav, footer, header, #navbar, #footer, .sticky { display: none !important; }
+          body { background: white !important; padding: 0 !important; margin: 0 !important; color: #1e293b !important; }
+          main { padding: 0 !important; margin: 0 !important; display: block !important; overflow: visible !important; }
+          .max-w-4xl { max-width: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+          .bg-slate-50 { background-color: #f8fafc !important; -webkit-print-color-adjust: exact; }
+          .bg-primary\/5 { background-color: #f0fdf4 !important; -webkit-print-color-adjust: exact; }
+          .bg-emerald-600 { background-color: #059669 !important; -webkit-print-color-adjust: exact; }
+          .bg-slate-800 { background-color: #1e293b !important; -webkit-print-color-adjust: exact; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          .shadow-2xl, .shadow-xl, .shadow-lg, .shadow-md, .shadow-sm { box-shadow: none !important; }
+          .border-2 { border-width: 1px !important; }
         }
       `}</style>
     </div>
