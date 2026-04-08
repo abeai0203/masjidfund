@@ -86,38 +86,42 @@ export default function DonatePage() {
     setIsProcessing(true);
     setShowAlhamdulillah(true);
 
-    // Update Project in Database/Simulation
+    // Update Project in Database
     const newAmount = (currentProject.collected_amount || 0) + splitAmount;
     await updateProject(currentProject.slug, {
       collected_amount: newAmount,
     });
 
     // Record for Summary
-    setRecords(prev => [...prev, {
+    const updatedRecords = [...records, {
       name: currentProject.mosque_name,
       amount: splitAmount,
       total_after: newAmount
-    }]);
+    }];
+    setRecords(updatedRecords);
+
+    const isLastPayment = currentPaymentIdx === actualNum - 1;
 
     // Pick a random hadith for the end
-    if (currentPaymentIdx === actualNum - 1) {
+    if (isLastPayment) {
       setRandomHadith(HADITHS[Math.floor(Math.random() * HADITHS.length)]);
 
       // LOG DONATION RECORD TO DATABASE
-      await logDonation({
+      const logResult = await logDonation({
         donor_name: donorName,
         donor_phone: donorPhone,
         total_amount: parsedTotal,
         mosque_count: actualNum,
         mosque_names: recommendations.map(r => r.mosque_name)
       });
+      console.log('[MasjidFund] Donation log result:', logResult);
     }
 
     setTimeout(() => {
       setShowAlhamdulillah(false);
       setIsProcessing(false);
       
-      if (currentPaymentIdx < actualNum - 1) {
+      if (!isLastPayment) {
         setCurrentPaymentIdx(prev => prev + 1);
       } else {
         setStep(6);
