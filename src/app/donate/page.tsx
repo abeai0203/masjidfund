@@ -533,7 +533,7 @@ export default function DonatePage() {
                     <svg className="w-10 h-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                  </div>
                  <h2 className="text-4xl font-black text-slate-800 tracking-tight mb-2">Ringkasan Sumbangan</h2>
-                 <p className="text-slate-500 font-medium">Terima kasih kerana menyuburkan rumah Allah.</p>
+                 <p className="text-slate-500 font-medium tracking-tight">Terima kasih <strong className="text-primary font-black uppercase tracking-widest">{donorName}</strong> kerana menyuburkan rumah Allah.</p>
               </div>
 
               <div className="space-y-4 mb-12">
