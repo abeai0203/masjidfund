@@ -97,13 +97,10 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
     router.push('/admin/leads');
   };
 
-  // QR Manual Selection Logic
-  const handleQrCropComplete = async (croppedImage: string) => {
-    setIsCroppingQR(false);
-    setIsActing(true); // Re-use for loading state
-    
+  const decodeAndSetQr = (imgSource: string, isUpload: boolean = false) => {
     const img = new Image();
-    img.src = croppedImage;
+    img.crossOrigin = "anonymous";
+    img.src = imgSource;
     img.onload = () => {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
@@ -120,7 +117,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
 
       if (code) {
         setEditableLead(prev => ({ ...prev, detected_qr: code.data }));
-        alert("Sempurna! Kod QR berjaya dikesan daripada pilihan anda.");
+        if (isUpload) alert("Sempurna! Kod QR dikesan dari gambar yang dimuat naik.");
       } else {
         // Try contrast pass if normal fails
         const data = imageData.data;
@@ -132,13 +129,30 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
         const code2 = jsQR(data, imageData.width, imageData.height);
         if (code2) {
           setEditableLead(prev => ({ ...prev, detected_qr: code2.data }));
-          alert("Sempurna! Kod QR berjaya dikesan (mod kontras) daripada pilihan anda.");
+          if (isUpload) alert("Sempurna! Kod QR dikesan (mod kontras) dari gambar yang dimuat naik.");
+        } else if (isUpload) {
+          // If upload fails to decode, we keep the URL as fallback
+          setEditableLead(prev => ({ ...prev, detected_qr: imgSource }));
+          alert("Imej berjaya dimuat naik, tetapi kod QR tidak dapat dibaca secara automatik. Imej asal akan digunakan.");
         } else {
-          alert("Gagal: Kod QR masih tidak dapat dikesan. Sila pilih kawasan yang lebih tepat atau gambar yang lebih jelas.");
+          alert("Gagal: Kod QR tidak dapat dikesan. Sila pilih kawasan yang lebih tepat.");
         }
       }
       setIsActing(false);
     };
+    img.onerror = () => {
+      if (isUpload) {
+        setEditableLead(prev => ({ ...prev, detected_qr: imgSource }));
+      }
+      setIsActing(false);
+    };
+  };
+
+  // QR Manual Selection Logic
+  const handleQrCropComplete = async (croppedImage: string) => {
+    setIsCroppingQR(false);
+    setIsActing(true);
+    decodeAndSetQr(croppedImage);
   };
 
   const handleQrUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -147,16 +161,16 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
 
     setIsActing(true);
     try {
-      const { url, error } = await uploadImage(file, 'leads');
+      const { url, error } = await uploadImage(file, 'images');
       if (error || !url) {
         alert(`Gagal memuat naik imej: ${error}`);
+        setIsActing(false);
       } else {
-        setEditableLead(prev => ({ ...prev, detected_qr: url }));
-        alert("Imej QR berjaya dimuat naik!");
+        // After upload, try to decode it to get the raw string for better branding
+        decodeAndSetQr(url, true);
       }
     } catch (err) {
       alert("Ralat berlaku semasa muat naik.");
-    } finally {
       setIsActing(false);
     }
   };
