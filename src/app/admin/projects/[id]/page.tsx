@@ -15,11 +15,18 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const [coords, setCoords] = useState<{lat: string, lng: string}>({lat: "", lng: ""});
 
   useEffect(() => {
     params.then(resolved => {
       getProjectBySlug(resolved.id).then(data => {
         setProject(data);
+        if (data) {
+          setCoords({
+            lat: data.latitude?.toString() || "",
+            lng: data.longitude?.toString() || ""
+          });
+        }
         setIsLoading(false);
       });
     });
@@ -375,9 +382,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
                       if (data && data.length > 0) {
                         const result = data[0];
                         if (formRef.current) {
-                          (formRef.current.elements.namedItem('latitude') as HTMLInputElement).value = result.lat;
-                          (formRef.current.elements.namedItem('longitude') as HTMLInputElement).value = result.lon;
-                          // Trigger re-render would be nice, but since we're using formRef for save it works
+                          setCoords({ lat: result.lat, lng: result.lon });
                           alert("Lokasi dijumpai & koordinat telah dikemaskini!");
                         }
                       } else {
@@ -410,7 +415,8 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
                 name="latitude"
                 type="number" 
                 step="any"
-                defaultValue={project.latitude}
+                value={coords.lat}
+                onChange={(e) => setCoords(prev => ({ ...prev, lat: e.target.value }))}
                 className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
@@ -421,10 +427,23 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
                 name="longitude"
                 type="number" 
                 step="any"
-                defaultValue={project.longitude}
+                value={coords.lng}
+                onChange={(e) => setCoords(prev => ({ ...prev, lng: e.target.value }))}
                 className="w-full bg-surface-muted border border-border rounded-lg px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
+
+            {coords.lat && coords.lng && (
+              <div className="md:col-span-2">
+                 <div className="aspect-video w-full rounded-xl overflow-hidden border border-border shadow-inner">
+                    <iframe 
+                      src={`https://www.google.com/maps?q=${coords.lat},${coords.lng}&z=15&output=embed`}
+                      className="w-full h-full border-0"
+                      loading="lazy"
+                    ></iframe>
+                 </div>
+              </div>
+            )}
 
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-foreground/80 mb-2">URL Google Maps Embed (iframe src)</label>
