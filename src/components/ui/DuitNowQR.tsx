@@ -268,13 +268,6 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
     ctx.textAlign = "center";
     ctx.fillText("DuitNow QR", W / 2, textY + 56);
 
-    // ── Amount (if locked) ─────────────────────────────────────────────
-    if (amount && amount > 0) {
-      ctx.fillStyle = "#059669";
-      ctx.font = "bold 44px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(`RM ${amount.toFixed(2)} Dikunci`, W / 2, textY + 120);
-    }
 
     // ── Footer watermark ───────────────────────────────────────────────
     ctx.fillStyle = "#94a3b8";
