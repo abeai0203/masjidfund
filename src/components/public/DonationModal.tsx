@@ -304,6 +304,7 @@ export default function DonationModal({
                         ref={qrRef}
                         qrUrl={project.duitnow_qr_url || ""} 
                         mosqueName={project.mosque_name}
+                        accountName={project.account_name}
                         amount={parseFloat(donationAmount)}
                       />
                     </div>

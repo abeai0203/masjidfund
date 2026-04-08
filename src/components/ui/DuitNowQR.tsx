@@ -7,6 +7,7 @@ import DuitNowLogo from "./DuitNowLogo";
 interface DuitNowQRProps {
   qrUrl: string;
   mosqueName?: string;
+  accountName?: string;
   amount?: number;
   initialValue?: string;
   className?: string;
@@ -16,7 +17,7 @@ export interface DuitNowQRHandle {
   download: () => void;
 }
 
-const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueName, amount, initialValue, className = "" }, ref) => {
+const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueName, accountName, amount, initialValue, className = "" }, ref) => {
   const [baseQrValue, setBaseQrValue] = useState<string | null>(initialValue || null);
   const [displayValue, setDisplayValue] = useState<string | null>(null);
   const [isDecoding, setIsDecoding] = useState(false);
@@ -253,13 +254,14 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
     });
     await drawLogoBubble();
 
-    // ── Mosque name ────────────────────────────────────────────────────
+    // ── Account name (registered name) ────────────────────────────────
+    const displayName = accountName || mosqueName;
     const textY = cardY + cardH + 70;
-    if (mosqueName) {
+    if (displayName) {
       ctx.fillStyle = "#0f172a";
       ctx.font = "bold 52px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(mosqueName, W / 2, textY, W - 100);
+      ctx.fillText(displayName, W / 2, textY, W - 100);
     }
 
     // ── "DuitNow QR" label ─────────────────────────────────────────────
@@ -278,7 +280,7 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
     // ── Download ───────────────────────────────────────────────────────
     const link = document.createElement("a");
     link.href = canvas.toDataURL("image/png");
-    link.download = `QR-${mosqueName?.replace(/\s+/g, "-") || "DuitNow"}.png`;
+    link.download = `QR-${(accountName || mosqueName)?.replace(/\s+/g, "-") || "DuitNow"}.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -345,10 +347,10 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
           </div>
         </div>
         
-        {/* Mosque Name & Dynamic Badge */}
+        {/* Account Name & Dynamic Badge */}
         <div className="mt-6 text-center space-y-1">
-          {mosqueName && (
-            <p className="text-slate-800 font-bold text-sm tracking-tight">{mosqueName}</p>
+          {(accountName || mosqueName) && (
+            <p className="text-slate-800 font-bold text-sm tracking-tight">{accountName || mosqueName}</p>
           )}
           {amount && amount > 0 && (
             <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-[10px] font-bold uppercase tracking-wider border border-green-100 shadow-sm animate-pulse">

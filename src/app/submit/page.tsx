@@ -29,6 +29,7 @@ export default function SubmitPage() {
   });
 
   const [formName, setFormName] = useState("");
+  const [formAccName, setFormAccName] = useState("");
 
   const [isEditingQr, setIsEditingQr] = useState(false);
   const [editingImageUrl, setEditingImageUrl] = useState<string | null>(null);
@@ -389,6 +390,7 @@ export default function SubmitPage() {
           (f.elements.namedItem('contact_name') as HTMLInputElement).value = "Haji Rozali Bin Lebai Awang";
           (f.elements.namedItem('contact_phone') as HTMLInputElement).value = "010-8443594";
           (f.elements.namedItem('acc_name') as HTMLInputElement).value = "MASJID LESTARI PUTRA";
+          setFormAccName("MASJID LESTARI PUTRA");
           (f.elements.namedItem('state') as HTMLSelectElement).value = "Selangor";
           (f.elements.namedItem('district') as HTMLInputElement).value = "Seri Kembangan";
           (f.elements.namedItem('address') as HTMLTextAreaElement).value = "Persiaran Lestari Putra 3, Taman Lestari Putra, Bandar Putra Permai, 43300 Seri Kembangan, Selangor.";
@@ -404,6 +406,7 @@ export default function SubmitPage() {
           (f.elements.namedItem('contact_name') as HTMLInputElement).value = "Tuan Haji Azman Zainal";
           (f.elements.namedItem('contact_phone') as HTMLInputElement).value = "019-2761616";
           (f.elements.namedItem('acc_name') as HTMLInputElement).value = "JAWATANKUASA PENAJA PEMBINAAN SURAU HAZELTON ECO FOREST";
+          setFormAccName("JAWATANKUASA PENAJA PEMBINAAN SURAU HAZELTON ECO FOREST");
           (f.elements.namedItem('state') as HTMLSelectElement).value = "Selangor";
           (f.elements.namedItem('district') as HTMLInputElement).value = "Semenyih";
           (f.elements.namedItem('address') as HTMLTextAreaElement).value = "Hazelton, Eco Forest, Semenyih, Selangor.";
@@ -419,6 +422,7 @@ export default function SubmitPage() {
           (f.elements.namedItem('acc_number') as HTMLInputElement).value = accMatch ? accMatch[0] : "";
           (f.elements.namedItem('bank_name') as HTMLInputElement).value = bankFound || "";
           (f.elements.namedItem('acc_name') as HTMLInputElement).value = detectedAccName || detectedName || "";
+          setFormAccName(detectedAccName || detectedName || "");
           if (addressMatch) (f.elements.namedItem('address') as HTMLTextAreaElement).value = addressMatch[0];
           (f.elements.namedItem('target_amount') as HTMLInputElement).value = targetAmount;
           if (detectedPhone) (f.elements.namedItem('contact_phone') as HTMLInputElement).value = detectedPhone.replace(/^60/, '');
@@ -824,7 +828,13 @@ export default function SubmitPage() {
               </div>
               <div>
                 <label htmlFor="acc_name" className="block text-sm font-semibold text-foreground/80 mb-2">Nama Akaun</label>
-                <input name="acc_name" type="text" id="acc_name" className="w-full bg-surface-muted rounded-lg px-4 py-2.5 text-sm border border-border" />
+                <input 
+                  name="acc_name" 
+                  type="text" 
+                  id="acc_name" 
+                  className="w-full bg-surface-muted rounded-lg px-4 py-2.5 text-sm border border-border" 
+                  onChange={(e) => setFormAccName(e.target.value)}
+                />
               </div>
             </div>
 
@@ -871,6 +881,7 @@ export default function SubmitPage() {
                          <DuitNowQR 
                           qrUrl={extractedQrUrl || (files.qr ? URL.createObjectURL(files.qr) : (extractedType === 'hazelton' ? "/images/qr-hazelton.png" : "/images/qr-cropped.png"))} 
                           mosqueName={formName || "Nama Masjid Anda"}
+                          accountName={formAccName || undefined}
                           initialValue={extractedValue || undefined}
                         />
 

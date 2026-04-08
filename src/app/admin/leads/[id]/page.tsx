@@ -326,7 +326,11 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                     </button>
                    </div>
                    <div className="w-full max-w-[160px]">
-                    <DuitNowQR qrUrl={lead.detected_qr} mosqueName={editableLead.extracted_mosque_name || lead.extracted_mosque_name} />
+                    <DuitNowQR 
+                      qrUrl={lead.detected_qr} 
+                      mosqueName={editableLead.extracted_mosque_name || lead.extracted_mosque_name} 
+                      accountName={editableLead.detected_acc_name || lead.detected_acc_name}
+                    />
                    </div>
                 </div>
               )}
