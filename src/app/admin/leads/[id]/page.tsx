@@ -105,47 +105,66 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
-      
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
-      
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const code = jsQR(imageData.data, imageData.width, imageData.height, {
-        inversionAttempts: "attemptBoth",
-      });
 
-      if (code) {
-        // SUCCESS: Update the raw string field
-        setEditableLead(prev => ({ ...prev, detected_qr: code.data }));
-        if (isUpload) alert("Sempurna! Kod QR dikesan dari gambar yang dimuat naik.");
-      } else {
-        // Try contrast pass if normal fails
+      const tryDecode = (scale: number, mode: 'normal' | 'grayscale' | 'contrast' | 'invert'): string | null => {
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imageData.data;
-        for (let i = 0; i < data.length; i += 4) {
-          const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-          const val = avg > 128 ? 255 : 0;
-          data[i] = data[i+1] = data[i+2] = val;
+
+        if (mode === 'grayscale' || mode === 'contrast') {
+          for (let i = 0; i < data.length; i += 4) {
+            const avg = (data[i] + data[i+1] + data[i+2]) / 3;
+            if (mode === 'contrast') {
+              const val = avg > 128 ? 255 : 0;
+              data[i] = data[i+1] = data[i+2] = val;
+            } else {
+              data[i] = data[i+1] = data[i+2] = avg;
+            }
+          }
+        } else if (mode === 'invert') {
+          for (let i = 0; i < data.length; i += 4) {
+            data[i] = 255 - data[i];
+            data[i+1] = 255 - data[i+1];
+            data[i+2] = 255 - data[i+2];
+          }
         }
-        const code2 = jsQR(data, imageData.width, imageData.height);
-        if (code2) {
-          setEditableLead(prev => ({ ...prev, detected_qr: code2.data }));
-          if (isUpload) alert("Sempurna! Kod QR dikesan (mod kontras) dari gambar yang dimuat naik.");
-        } else if (isUpload) {
-          // If upload fails to decode, we keep the URL as fallback
+
+        const code = jsQR(data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
+        return code ? code.data : null;
+      };
+
+      // Aggressive 12-pass Strategy
+      let detectedData = null;
+      const modes: ('normal' | 'grayscale' | 'contrast' | 'invert')[] = ['normal', 'grayscale', 'contrast', 'invert'];
+      const scales = [1.0, 1.5, 0.75];
+
+      for (const mode of modes) {
+        for (const scale of scales) {
+          detectedData = tryDecode(scale, mode);
+          if (detectedData) break;
+        }
+        if (detectedData) break;
+      }
+
+      if (detectedData) {
+        setEditableLead(prev => ({ ...prev, detected_qr: detectedData }));
+        alert("Sempurna! Kod QR berjaya dikesan dan di-jenamakan semula.");
+      } else {
+        if (isUpload) {
+          // Store the URL for reference, but the UI will show "No QR Found" placeholder
           setEditableLead(prev => ({ ...prev, detected_qr: imgSource }));
-          alert("Imej berjaya dimuat naik, tetapi kod QR tidak dapat dibaca secara automatik. Imej asal akan digunakan.");
+          alert("Gagal: Kod QR tidak dapat dikesan dalam gambar ini. Sila muat naik gambar yang lebih jelas atau berdekatan (close-up).");
         } else {
-          alert("Gagal: Kod QR tidak dapat dikesan. Sila pilih kawasan yang lebih tepat.");
+          alert("Gagal: Kod QR tidak dapat dikesan. Sila pilih kawasan yang lebih fokus.");
         }
       }
       setIsActing(false);
     };
     img.onerror = () => {
-      if (isUpload) {
-        setEditableLead(prev => ({ ...prev, detected_qr: imgSource }));
-      }
       setIsActing(false);
+      alert("Ralat memproses imej.");
     };
   };
 

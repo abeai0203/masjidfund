@@ -63,22 +63,46 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
       const context = canvas.getContext("2d");
       if (!context) return;
 
-      const tryDecode = (scale: number, mode: 'normal' | 'grayscale' | 'green' | 'blue' | 'contrast'): string | null => {
+      const tryDecode = (scale: number, mode: 'normal' | 'grayscale' | 'contrast' | 'invert'): string | null => {
         try {
           canvas.width = img.width * scale;
           canvas.height = img.height * scale;
           context.drawImage(img, 0, 0, canvas.width, canvas.height);
+          
           const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-          const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
+          const data = imageData.data;
+
+          if (mode === 'grayscale' || mode === 'contrast') {
+            for (let i = 0; i < data.length; i += 4) {
+              const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+              if (mode === 'contrast') {
+                const val = avg > 128 ? 255 : 0;
+                data[i] = data[i + 1] = data[i + 2] = val;
+              } else {
+                data[i] = data[i + 1] = data[i + 2] = avg;
+              }
+            }
+          } else if (mode === 'invert') {
+            for (let i = 0; i < data.length; i += 4) {
+              data[i] = 255 - data[i];
+              data[i + 1] = 255 - data[i + 1];
+              data[i + 2] = 255 - data[i + 2];
+            }
+          }
+          
+          const code = jsQR(data, imageData.width, imageData.height, {
+            inversionAttempts: "attemptBoth",
+          });
           return code ? code.data : null;
         } catch (e) {
           return null;
         }
       };
 
+      // Aggressive 12-pass Strategy for internal component too
       let detectedData = null;
-      const modes: ('normal' | 'grayscale' | 'green' | 'blue' | 'contrast')[] = ['green', 'normal', 'grayscale', 'blue', 'contrast'];
-      const scales = [1.0, 1.2, 1.5, 0.75, 0.5, 2.0];
+      const modes: ('normal' | 'grayscale' | 'contrast' | 'invert')[] = ['normal', 'grayscale', 'contrast', 'invert'];
+      const scales = [1.0, 1.2, 1.5, 0.75];
 
       for (const mode of modes) {
         for (const scale of scales) {
@@ -304,19 +328,19 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
               </div>
             ) : isDecoding ? (
               <div className="w-full h-full flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
               </div>
-            ) : (qrUrl?.startsWith('http') || qrUrl?.startsWith('blob:') || qrUrl?.startsWith('data:') || qrUrl?.startsWith('/')) ? (
-              <img 
-                src={qrUrl} 
-                alt="DuitNow QR Code" 
-                className="w-full h-full object-contain mix-blend-multiply opacity-50 grayscale" 
-              />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-slate-50 text-slate-300">
-                <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="w-full h-full flex flex-col items-center justify-center bg-slate-50 text-slate-400 p-4 text-center">
+                <svg className="w-16 h-16 mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                 </svg>
+                <button 
+                  onClick={() => document.querySelector<HTMLInputElement>('input[type="file"]')?.click()}
+                  className="text-[10px] font-black uppercase text-primary border-b border-primary/30"
+                >
+                  Scan Gagal. Sila Upload Semula.
+                </button>
               </div>
             )}
           </div>
