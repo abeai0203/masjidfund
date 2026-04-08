@@ -6,6 +6,8 @@ import Badge from "@/components/ui/Badge";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { getPublicProjects, updateProject, logDonation } from "@/lib/api";
 import DuitNowQR from "@/components/ui/DuitNowQR";
+import { useAuth } from "@/hooks/useAuth";
+import Image from "next/image";
 
 type ScopeType = "All" | "Best" | "State";
 
@@ -25,6 +27,17 @@ export default function DonatePage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [records, setRecords] = useState<{name: string, amount: number, total_after: number}[]>([]);
   const [randomHadith, setRandomHadith] = useState({ text: "", source: "" });
+
+  const { user, contributor } = useAuth();
+
+  // Auto-fill donor name from auth
+  useEffect(() => {
+    if (user?.user_metadata?.full_name) {
+      setDonorName(user.user_metadata.full_name);
+    } else if (contributor?.full_name) {
+      setDonorName(contributor.full_name);
+    }
+  }, [user, contributor]);
 
   const allStates = [
     "Selangor", "Johor", "Perak", "Pahang", "Kedah", "Terengganu", 
@@ -182,8 +195,21 @@ export default function DonatePage() {
                     onFocus={() => { if(donorName === "Hamba Allah") setDonorName(""); }}
                     onBlur={() => { if(donorName.trim() === "") setDonorName("Hamba Allah"); }}
                   />
-                  {donorName === "Hamba Allah" && (
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-widest text-foreground/20 pointer-events-none">Default</span>
+                  {user ? (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-lg shadow-sm">
+                      <div className="w-5 h-5 rounded-full overflow-hidden bg-primary/10 relative">
+                        {user.user_metadata.avatar_url ? (
+                          <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-[8px] font-black text-primary uppercase">{user.email?.[0]}</div>
+                        )}
+                      </div>
+                      <span className="text-[10px] font-black text-emerald-700 uppercase tracking-tight">Profil Aktif</span>
+                    </div>
+                  ) : (
+                    donorName === "Hamba Allah" && (
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-widest text-foreground/20 pointer-events-none">Default</span>
+                    )
                   )}
                 </div>
               </div>
