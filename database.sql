@@ -184,7 +184,7 @@ USING (true);
 CREATE TABLE public.donations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     donor_name TEXT NOT NULL DEFAULT 'Hamba Allah',
-    donor_phone TEXT NOT NULL,
+    donor_phone TEXT,
     total_amount NUMERIC NOT NULL DEFAULT 0,
     mosque_count INTEGER NOT NULL DEFAULT 0,
     mosque_names TEXT[] NOT NULL DEFAULT '{}',

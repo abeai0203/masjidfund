@@ -185,7 +185,7 @@ export default function DonatePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-foreground/70 mb-2">No. Telefon (Wajib)</label>
+                <label className="block text-sm font-bold text-foreground/70 mb-2">No. Telefon (Pilihan)</label>
                 <input 
                   type="tel" 
                   value={donorPhone}
@@ -198,8 +198,7 @@ export default function DonatePage() {
 
             <button 
               onClick={() => setStep(1)}
-              disabled={!donorPhone.trim()}
-              className="w-full bg-primary hover:bg-primary-hover text-white font-black py-5 px-8 rounded-2xl shadow-lg shadow-primary/20 transition-all text-xl disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed hover:-translate-y-1 active:scale-95"
+              className="w-full bg-primary hover:bg-primary-hover text-white font-black py-5 px-8 rounded-2xl shadow-lg shadow-primary/20 transition-all text-xl hover:-translate-y-1 active:scale-95"
             >
               Seterusnya
             </button>
