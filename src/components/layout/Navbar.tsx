@@ -11,7 +11,6 @@ export default function Navbar() {
     { name: "Temui Projek", href: "/projects" },
     { name: "Agih Derma", href: "/donate" },
     { name: "Hantar Kempen", href: "/submit" },
-    { name: "Dashboard", href: "/admin" },
   ];
 
   return (
