@@ -118,6 +118,8 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
 }
 
 export async function getProjectsByState(state: string): Promise<Project[]> {
+  if (!state) return [];
+  
   const { data, error } = await supabase
     .from('projects')
     .select('*')
@@ -127,7 +129,7 @@ export async function getProjectsByState(state: string): Promise<Project[]> {
     
   if (error) {
     const simData = getStoredData('projects', MOCK_PROJECTS);
-    return simData.filter(p => p.publish_status === 'Published' && p.state.toLowerCase() === state.toLowerCase());
+    return simData.filter(p => p.publish_status === 'Published' && p.state && p.state.toLowerCase() === state.toLowerCase());
   }
   return (data as Project[]) || [];
 }
