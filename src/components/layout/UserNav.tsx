@@ -99,17 +99,19 @@ export default function UserNav() {
             <p className="text-sm font-black text-foreground truncate">{displayName}</p>
             <p className="text-[10px] text-foreground/40 truncate">{user.email}</p>
           </div>
-          <div className="p-2">
-            {contributor?.role === 'admin' && (
+          <div className="p-2 space-y-1">
+            {contributor && (
               <Link 
-                href="/admin" 
-                className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-foreground hover:bg-primary/5 hover:text-primary rounded-xl transition-colors"
+                href={contributor.role === 'admin' ? "/admin" : "/dashboard"} 
+                className="flex items-center gap-3 px-3 py-2.5 text-xs font-black text-primary bg-primary/5 hover:bg-primary/10 rounded-xl transition-all border border-primary/10 group/btn"
                 onClick={() => setIsOpen(false)}
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                Dashboard Admin
+                <div className="p-1 rounded-lg bg-primary/10 group-hover/btn:bg-primary/20 transition-colors">
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d={contributor.role === 'admin' ? "M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" : "M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"} />
+                  </svg>
+                </div>
+                <span>{contributor.role === 'admin' ? "Dashboard Admin" : "Dashboard Saya"}</span>
               </Link>
             )}
             <button 
