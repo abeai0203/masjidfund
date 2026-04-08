@@ -41,8 +41,21 @@ export function useAuth() {
 
   const syncContributor = async (supabaseUser: User) => {
     try {
-      // Upsert into contributors table
-      const { data, error } = await supabase
+      // 1. First, try to just fetch the existing contributor
+      const { data: existing, error: fetchError } = await supabase
+        .from('contributors')
+        .select('*')
+        .eq('user_id', supabaseUser.id)
+        .single();
+
+      if (existing) {
+        setContributor(existing as Contributor);
+        setLoading(false);
+        return;
+      }
+
+      // 2. If not found, then perform the upsert (first time login)
+      const { data: upserted, error: upsertError } = await supabase
         .from('contributors')
         .upsert({
           user_id: supabaseUser.id,
@@ -53,10 +66,10 @@ export function useAuth() {
         .select()
         .single();
 
-      if (error) {
-        console.error("Error syncing contributor:", error);
+      if (upsertError) {
+        console.error("Error syncing contributor:", upsertError);
       } else {
-        setContributor(data as Contributor);
+        setContributor(upserted as Contributor);
       }
     } catch (err) {
       console.error("Failed to sync contributor:", err);
@@ -77,6 +90,9 @@ export function useAuth() {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setUser(null);
+    setContributor(null);
+    window.location.href = "/";
   };
 
   return {
