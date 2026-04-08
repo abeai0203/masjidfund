@@ -116,6 +116,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       });
 
       if (code) {
+        // SUCCESS: Update the raw string field
         setEditableLead(prev => ({ ...prev, detected_qr: code.data }));
         if (isUpload) alert("Sempurna! Kod QR dikesan dari gambar yang dimuat naik.");
       } else {

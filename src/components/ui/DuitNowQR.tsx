@@ -18,8 +18,8 @@ export interface DuitNowQRHandle {
 }
 
 const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueName, accountName, amount, initialValue, className = "" }, ref) => {
-  const [baseQrValue, setBaseQrValue] = useState<string | null>(initialValue || null);
-  const [displayValue, setDisplayValue] = useState<string | null>(null);
+  const [baseQrValue, setBaseQrValue] = useState<string | null>(initialValue || (qrUrl?.startsWith('0002') ? qrUrl : null));
+  const [displayValue, setDisplayValue] = useState<string | null>(initialValue || (qrUrl?.startsWith('0002') ? qrUrl : null));
   const [isDecoding, setIsDecoding] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
@@ -32,25 +32,24 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
 
   // Initial Decode
   useEffect(() => {
-    if (initialValue) {
-      try {
-        setBaseQrValue(decodeURIComponent(initialValue));
-      } catch {
-        setBaseQrValue(initialValue);
-      }
+    // If it's already a DuitNow string, just use it
+    if (initialValue?.startsWith('0002')) {
+      setBaseQrValue(initialValue);
       return;
     }
     
-    if (!qrUrl) return;
-
-    // Detect raw EMVCo/DuitNow strings (starts with 0002...)
-    if (/^0002\d{2}/.test(qrUrl)) {
-      try {
-        setBaseQrValue(decodeURIComponent(qrUrl));
-      } catch {
-        setBaseQrValue(qrUrl);
-      }
+    if (qrUrl?.startsWith('0002')) {
+      setBaseQrValue(qrUrl);
       return;
+    }
+
+    if (!qrUrl || qrUrl.startsWith('data:') || qrUrl.startsWith('blob:') || qrUrl.startsWith('http') || qrUrl.startsWith('/')) {
+       // Proceed to image decode if it looks like a URL/data
+       if (!qrUrl) return;
+    } else {
+       // It's some other string, but doesn't look like DuitNow, maybe a path?
+       // If it doesn't look like a URL, don't try to decode as image
+       return;
     }
 
     setIsDecoding(true);
@@ -59,6 +58,7 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
     img.src = qrUrl;
     
     img.onload = () => {
+      // ... same decoding logic ...
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
       if (!context) return;
@@ -68,44 +68,14 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
           canvas.width = img.width * scale;
           canvas.height = img.height * scale;
           context.drawImage(img, 0, 0, canvas.width, canvas.height);
-          
           const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-          const data = imageData.data;
-
-          if (mode === 'grayscale') {
-            for (let i = 0; i < data.length; i += 4) {
-              const avg = (data[i] * 0.3 + data[i + 1] * 0.59 + data[i + 2] * 0.11);
-              data[i] = data[i + 1] = data[i + 2] = avg;
-            }
-          } else if (mode === 'green') {
-            for (let i = 0; i < data.length; i += 4) {
-              const g = data[i + 1];
-              data[i] = data[i + 1] = data[i + 2] = g;
-            }
-          } else if (mode === 'blue') {
-            for (let i = 0; i < data.length; i += 4) {
-              const b = data[i + 2];
-              data[i] = data[i + 1] = data[i + 2] = b;
-            }
-          } else if (mode === 'contrast') {
-            for (let i = 0; i < data.length; i += 4) {
-              const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-              const val = avg > 128 ? 255 : 0;
-              data[i] = data[i + 1] = data[i + 2] = val;
-            }
-          }
-          
-          const code = jsQR(data, imageData.width, imageData.height, {
-            inversionAttempts: "attemptBoth",
-          });
+          const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
           return code ? code.data : null;
         } catch (e) {
-          console.error("Decoding pass failed (likely CORS):", e);
           return null;
         }
       };
 
-      // Multi-pass strategy for robustness
       let detectedData = null;
       const modes: ('normal' | 'grayscale' | 'green' | 'blue' | 'contrast')[] = ['green', 'normal', 'grayscale', 'blue', 'contrast'];
       const scales = [1.0, 1.2, 1.5, 0.75, 0.5, 2.0];
@@ -126,7 +96,6 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
 
     img.onerror = () => {
       setIsDecoding(false);
-      console.error("Failed to load QR image for decoding:", qrUrl);
     };
   }, [qrUrl, initialValue]);
 
@@ -337,12 +306,18 @@ const DuitNowQR = forwardRef<DuitNowQRHandle, DuitNowQRProps>(({ qrUrl, mosqueNa
               <div className="w-full h-full flex items-center justify-center">
                 <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
               </div>
-            ) : (
+            ) : (qrUrl?.startsWith('http') || qrUrl?.startsWith('blob:') || qrUrl?.startsWith('data:') || qrUrl?.startsWith('/')) ? (
               <img 
                 src={qrUrl} 
                 alt="DuitNow QR Code" 
                 className="w-full h-full object-contain mix-blend-multiply opacity-50 grayscale" 
               />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-slate-50 text-slate-300">
+                <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                </svg>
+              </div>
             )}
           </div>
         </div>
