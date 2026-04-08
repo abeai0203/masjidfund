@@ -480,6 +480,24 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                   onChange={(e) => updateField('address', e.target.value)}
                  />
                  
+                 <div className="sm:col-span-2 pt-2 mt-1">
+                    <label className="text-[10px] font-bold text-primary uppercase mb-1 block">Tampal Koordinat (Pantas)</label>
+                    <input 
+                      type="text" 
+                      placeholder="Tampal cth: 3.14, 101.69"
+                      className="w-full bg-primary/5 border border-primary/20 rounded-lg px-3 py-1.5 text-xs focus:ring-1 focus:ring-primary outline-none placeholder:text-primary/30"
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val.includes(',')) {
+                          const [lat, lng] = val.split(',').map(s => s.trim());
+                          if (lat && lng && !isNaN(Number(lat)) && !isNaN(Number(lng))) {
+                            setEditableLead(prev => ({ ...prev, latitude: parseFloat(lat), longitude: parseFloat(lng) }));
+                          }
+                        }
+                      }}
+                    />
+                 </div>
+
                  <div className="grid grid-cols-2 gap-3 mt-3">
                     <div>
                       <label className="text-[10px] font-bold text-foreground/40 uppercase mb-1 block">Latitude</label>

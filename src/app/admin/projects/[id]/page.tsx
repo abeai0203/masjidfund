@@ -428,6 +428,25 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
               />
             </div>
 
+            <div className="md:col-span-2 pt-4 border-t border-border mt-2">
+              <label className="block text-xs font-bold text-primary uppercase mb-2">Tampal Koordinat (Pantas)</label>
+              <input 
+                type="text" 
+                placeholder="Tampal dari Google Maps (cth: 3.14, 101.69)"
+                className="w-full bg-primary/5 border border-primary/20 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-primary/30"
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val.includes(',')) {
+                    const [lat, lng] = val.split(',').map(s => s.trim());
+                    if (lat && lng && !isNaN(Number(lat)) && !isNaN(Number(lng))) {
+                      setCoords({ lat, lng });
+                    }
+                  }
+                }}
+              />
+              <p className="text-[10px] text-foreground/40 mt-1 uppercase font-medium">Tip: Klik kanan pin di Google Maps, klik nombor koordinat untuk salin, dan tampal di sini.</p>
+            </div>
+
             <div>
               <label className="block text-sm font-semibold text-foreground/80 mb-2">Latitude</label>
               <input 
