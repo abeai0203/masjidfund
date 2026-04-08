@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 
 export default function UserNav() {
-  const { user, loading, signInWithGoogle, signOut } = useAuth();
+  const { user, contributor, loading, signInWithGoogle, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -100,16 +100,18 @@ export default function UserNav() {
             <p className="text-[10px] text-foreground/40 truncate">{user.email}</p>
           </div>
           <div className="p-2">
-            <Link 
-              href="/admin" 
-              className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-foreground hover:bg-primary/5 hover:text-primary rounded-xl transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              Dashboard Admin
-            </Link>
+            {contributor?.role === 'admin' && (
+              <Link 
+                href="/admin" 
+                className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-foreground hover:bg-primary/5 hover:text-primary rounded-xl transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Dashboard Admin
+              </Link>
+            )}
             <button 
               onClick={() => {
                 signOut();

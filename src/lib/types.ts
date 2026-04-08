@@ -111,5 +111,6 @@ export interface Contributor {
   total_submissions: number;
   total_infaq_count: number;
   total_infaq_amount: number;
+  role: 'admin' | 'user';
   created_at: string;
 }
