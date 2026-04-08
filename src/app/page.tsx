@@ -50,7 +50,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto relative z-20 flex flex-col md:flex-row items-center justify-between gap-12">
           <div className="text-center md:text-left flex-1 max-w-2xl px-4">
             <h2 className="text-2xl sm:text-4xl font-black text-white mb-3 tracking-tighter leading-tight">
-              Rebut <span className="text-yellow-400">Pahala</span> <br />
+              Ladang <span className="text-yellow-400">Pahala</span> <br />
               <span className="underline decoration-white decoration-4 sm:decoration-6 underline-offset-4 sm:underline-offset-8">Tanpa Henti.</span>
             </h2>
             <h3 className="text-base sm:text-lg font-bold text-white mb-3">
