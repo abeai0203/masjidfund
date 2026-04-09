@@ -82,21 +82,15 @@ export async function uploadImage(file: File | Blob | string, bucket: string = '
 // --- Utility Helpers ---
 
 /**
- * Resilient wrapper to handle intermittent Supabase lock errors or network jitters.
+ * Lightweight resilient wrapper for public API calls.
  */
-async function withRetry<T>(fn: () => Promise<T>, retries = 3, delay = 200): Promise<T> {
+async function withRetry<T>(fn: () => Promise<T>, retries = 2, delay = 100): Promise<T> {
   try {
     return await fn();
   } catch (error: any) {
-    const isLockError = 
-      error?.name === 'AbortError' || 
-      error?.message?.includes('Lock broken') ||
-      error?.message?.includes('database is locked');
-
-    if (isLockError && retries > 0) {
-      console.warn(`Supabase lock detected, retrying... (${retries} left)`);
+    if (retries > 0) {
       await new Promise(resolve => setTimeout(resolve, delay));
-      return withRetry(fn, retries - 1, delay * 1.5);
+      return withRetry(fn, retries - 1, delay * 2);
     }
     throw error;
   }
