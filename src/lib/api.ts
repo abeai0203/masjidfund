@@ -82,39 +82,52 @@ export async function uploadImage(file: File | Blob | string, bucket: string = '
 // --- API Functions ---
 
 export async function getPublicProjects(): Promise<Project[]> {
-  const { data, error } = await supabase
-    .from('projects')
-    .select('*')
-    .eq('publish_status', 'Published')
-    .order('created_at', { ascending: false });
+  try {
+    if (!supabase) return [];
     
-  if (error) {
-    console.error("Supabase error fetching public projects:", error);
-    const simData = getStoredData('projects', MOCK_PROJECTS);
-    return simData.filter(p => p.publish_status === 'Published');
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('publish_status', 'Published')
+      .order('created_at', { ascending: false });
+      
+    if (error) {
+      console.error("Supabase error fetching public projects:", error);
+      const simData = getStoredData('projects', MOCK_PROJECTS);
+      return simData.filter(p => p.publish_status === 'Published');
+    }
+    
+    return (data as Project[]) || [];
+  } catch (e) {
+    console.error("Critical crash in getPublicProjects:", e);
+    return [];
   }
-  
-  // If data is empty but no error, return empty array to reflect the real database state
-  return (data as Project[]) || [];
 }
 
 export async function getAllStates(): Promise<string[]> {
-  const { data, error } = await supabase
-    .from('projects')
-    .select('state')
-    .eq('publish_status', 'Published');
-    
-  if (error) {
-    console.error("Supabase error fetching states:", error);
-    const simData = getStoredData('projects', MOCK_PROJECTS);
-    return Array.from(new Set(simData.filter(p => p.publish_status === 'Published').map(p => p.state))).sort();
-  }
-  
-  if (!data || data.length === 0) return [];
+  try {
+    if (!supabase) return [];
 
-  const toTitleCase = (s: string) => s.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-  const states = new Set(data.filter(p => p.state).map(p => toTitleCase(p.state.trim())));
-  return Array.from(states).sort();
+    const { data, error } = await supabase
+      .from('projects')
+      .select('state')
+      .eq('publish_status', 'Published');
+      
+    if (error) {
+      console.error("Supabase error fetching states:", error);
+      const simData = getStoredData('projects', MOCK_PROJECTS);
+      return Array.from(new Set(simData.filter(p => p.publish_status === 'Published').map(p => p.state))).sort();
+    }
+    
+    if (!data || data.length === 0) return [];
+  
+    const toTitleCase = (s: string) => s.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    const states = new Set(data.filter(p => p.state).map(p => toTitleCase(p.state.trim())));
+    return Array.from(states).sort();
+  } catch (e) {
+    console.error("Critical crash in getAllStates:", e);
+    return [];
+  }
 }
 
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
@@ -133,19 +146,26 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
 }
 
 export async function getProjectsByState(state: string): Promise<Project[]> {
-  const { data, error } = await supabase
-    .from('projects')
-    .select('*')
-    .eq('publish_status', 'Published')
-    .ilike('state', state)
-    .order('created_at', { ascending: false });
+  try {
+    if (!supabase) return [];
     
-  if (error) {
-    console.error(`Error fetching projects for state ${state}:`, error);
-    const simData = getStoredData('projects', MOCK_PROJECTS);
-    return simData.filter(p => p.publish_status === 'Published' && p.state.toLowerCase() === state.toLowerCase());
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('publish_status', 'Published')
+      .ilike('state', state)
+      .order('created_at', { ascending: false });
+      
+    if (error) {
+      console.error(`Error fetching projects for state ${state}:`, error);
+      const simData = getStoredData('projects', MOCK_PROJECTS);
+      return simData.filter(p => p.publish_status === 'Published' && p.state.toLowerCase() === state.toLowerCase());
+    }
+    return (data as Project[]) || [];
+  } catch (e) {
+    console.error(`Critical crash in getProjectsByState for ${state}:`, e);
+    return [];
   }
-  return (data as Project[]) || [];
 }
 
 export async function getHomeStats() {
