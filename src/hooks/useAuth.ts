@@ -11,24 +11,21 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        syncContributor(session.user);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    // 2. Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    // Single source of truth for auth state
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       const currentUser = session?.user ?? null;
-      setUser(currentUser);
       
-      if (currentUser) {
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setContributor(null);
+        setLoading(false);
+      } else if (currentUser) {
+        setUser(currentUser);
+        // Only mark loading as false AFTER contributor is synced
         await syncContributor(currentUser);
       } else {
+        // Handle initial load with no session
+        setUser(null);
         setContributor(null);
         setLoading(false);
       }

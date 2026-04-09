@@ -31,9 +31,14 @@ function ProjectsContent() {
   }, [urlState]);
 
   useEffect(() => {
-    if (loading) return;
+    // Keep showing loading state if auth hasn't synced yet
+    if (loading) {
+      setIsLoading(true);
+      return;
+    }
     
     async function loadData() {
+      setIsLoading(true);
       const data = await getPublicProjects();
       setAllProjects(data);
       setIsLoading(false);
