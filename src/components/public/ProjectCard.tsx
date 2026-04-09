@@ -15,7 +15,7 @@ function shareToWhatsApp(e: React.MouseEvent, project: Project) {
 export default function ProjectCard({ project }: { project: Project }) {
   return (
     <Link href={`/projects/${project.slug}`} className="group block h-full">
-      <div className="bg-surface border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col hover:border-primary/50">
+      <div className="bg-surface border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col hover:border-primary/50 glow-card">
         <div className="relative h-56 w-full bg-slate-100 overflow-hidden">
           {project.image_url ? (
             // eslint-disable-next-line @next/next/no-img-element

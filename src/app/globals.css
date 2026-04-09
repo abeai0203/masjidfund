@@ -38,10 +38,35 @@
   --color-primary-light: #d1fae5; /* Emerald 100 */
   --color-secondary: #0ea5e9; /* Sky 500 */
   --color-accent: #d97706; /* Amber 600 - for urgencies */
+
+  /* Animations */
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-pointer: pointer-pulse 3s ease-in-out infinite;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  @keyframes pointer-pulse {
+    0%, 100% { transform: translate(0, 0) rotate(15deg) scale(1); }
+    50% { transform: translate(-10px, 10px) rotate(10deg) scale(1.1); }
+  }
+}
+
+@layer utilities {
+  .glow-card {
+    transition: all 0.5s ease;
+  }
+  .glow-card:hover {
+    box-shadow: 0 20px 60px -15px rgba(5, 150, 105, 0.15);
+    border-color: rgba(16, 185, 129, 0.2);
+    transform: translateY(-4px);
+  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }

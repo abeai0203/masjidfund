@@ -59,7 +59,7 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 w-full h-16 bg-surface z-10 pointer-events-none" style={{ borderRadius: '100% 100% 0 0 / 100% 100% 0 0', transform: 'scaleX(2)', marginBottom: '-1px' }}></div>
         
         <div className="max-w-7xl mx-auto relative z-20 flex flex-col md:flex-row items-center justify-between gap-12">
-          <div className="text-center md:text-left flex-1 max-w-2xl px-4">
+          <div className="text-center md:text-left flex-1 max-w-2xl px-4 animate-in slide-in-from-left duration-1000">
             <h2 className="text-2xl sm:text-4xl font-black text-white mb-3 tracking-tighter leading-tight">
               Ladang <span className="text-yellow-400">Pahala</span> <br />
               <span className="underline decoration-white decoration-4 sm:decoration-6 underline-offset-4 sm:underline-offset-8">Tanpa Henti.</span>
@@ -73,7 +73,7 @@ export default function Home() {
             </p>
 
             {/* Hadith Quote Box - Glassmorphism */}
-            <div className="flex items-start gap-3 bg-white/10 backdrop-blur-xl border border-white/20 p-3 sm:p-4 rounded-[20px] max-w-xl shadow-2xl mt-4 sm:mt-0">
+            <div className="flex items-start gap-3 bg-white/10 backdrop-blur-xl border border-white/20 p-3 sm:p-4 rounded-[20px] max-w-xl shadow-2xl mt-4 sm:mt-0 transition-all hover:bg-white/15">
               <div className="text-xl sm:text-2xl text-emerald-300 opacity-50 font-serif leading-none mt-1">“</div>
               <div>
                 <p className="text-white text-[11px] sm:text-xs font-bold leading-relaxed">
@@ -84,8 +84,16 @@ export default function Home() {
             </div>
           </div>
           
-          <div className="flex-1 flex justify-center md:justify-end w-full">
-            <div className="w-full max-w-sm bg-white/10 p-4 rounded-[40px] backdrop-blur-2xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+          <div className="flex-1 flex justify-center md:justify-end w-full relative group animate-in slide-in-from-right duration-1000">
+            {/* Playful Curved Arrow CTA Indicator */}
+            <div className="absolute -left-20 top-0 hidden lg:block pointer-events-none animate-pointer">
+              <svg width="120" height="100" viewBox="0 0 120 100" fill="none" className="text-yellow-400 drop-shadow-lg">
+                <path d="M10 10C30 30 70 10 90 60M90 60L75 55M90 60L100 45" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                <text x="10" y="5" className="fill-yellow-400 text-[10px] font-black uppercase tracking-widest rotate-[-10deg]">Derma Sini</text>
+              </svg>
+            </div>
+
+            <div className="w-full max-w-sm bg-white/10 p-4 rounded-[40px] backdrop-blur-2xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all group-hover:bg-white/15 group-hover:scale-[1.02]">
               <div className="bg-white p-10 rounded-[32px] shadow-xl text-center space-y-6">
                 <Link
                   href="/donate"

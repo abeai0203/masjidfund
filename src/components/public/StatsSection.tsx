@@ -125,7 +125,7 @@ export default function StatsSection({ stats, isLoading = false }: { stats: Stat
           {items.map((item, idx) => (
             <div 
               key={idx} 
-              className="bg-white p-6 sm:p-8 rounded-[32px] shadow-xl shadow-emerald-900/5 border border-emerald-50 flex flex-col items-center text-center group hover:-translate-y-1 transition-all duration-300"
+              className="bg-white p-6 sm:p-8 rounded-[32px] shadow-xl shadow-emerald-900/5 border border-emerald-50 flex flex-col items-center text-center group transition-all duration-300 glow-card"
             >
               <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 {item.icon}
