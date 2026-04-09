@@ -79,10 +79,33 @@ export async function uploadImage(file: File | Blob | string, bucket: string = '
   }
 }
 
+// --- Utility Helpers ---
+
+/**
+ * Resilient wrapper to handle intermittent Supabase lock errors or network jitters.
+ */
+async function withRetry<T>(fn: () => Promise<T>, retries = 3, delay = 200): Promise<T> {
+  try {
+    return await fn();
+  } catch (error: any) {
+    const isLockError = 
+      error?.name === 'AbortError' || 
+      error?.message?.includes('Lock broken') ||
+      error?.message?.includes('database is locked');
+
+    if (isLockError && retries > 0) {
+      console.warn(`Supabase lock detected, retrying... (${retries} left)`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return withRetry(fn, retries - 1, delay * 1.5);
+    }
+    throw error;
+  }
+}
+
 // --- API Functions ---
 
 export async function getPublicProjects(): Promise<Project[]> {
-  try {
+  return withRetry(async () => {
     if (!supabase) return [];
     
     const { data, error } = await supabase
@@ -91,16 +114,12 @@ export async function getPublicProjects(): Promise<Project[]> {
       .eq('publish_status', 'Published')
       .order('created_at', { ascending: false });
       
-    if (error) {
-      console.error("Supabase error fetching public projects:", error);
-      return [];
-    }
-    
+    if (error) throw error;
     return (data as Project[]) || [];
-  } catch (e) {
+  }).catch(e => {
     console.error("Critical crash in getPublicProjects:", e);
     return [];
-  }
+  });
 }
 
 export async function getAllStates(): Promise<string[]> {
@@ -165,30 +184,27 @@ export async function getProjectsByState(state: string): Promise<Project[]> {
 }
 
 export async function getHomeStats() {
-  const { data: dbData, error } = await supabase
-    .from('projects')
-    .select('collected_amount, project_type, publish_status');
+  return withRetry(async () => {
+    if (!supabase) return { totalMosques: 0, todayCollection: 0, todayDonors: 0, activeConstruction: 0 };
     
-  let activeProjects: Project[] = [];
-
-  if (error) {
-    console.error("Supabase stats error:", error);
+    const { data: dbData, error } = await supabase
+      .from('projects')
+      .select('project_type, publish_status');
+    
+    if (error) throw error;
+    
+    const activeProjects = (dbData as any[]).filter(p => p.publish_status === 'Published');
+    
     return {
-      totalMosques: 0,
-      todayCollection: 0,
+      totalMosques: activeProjects.length,
+      todayCollection: 0, 
       todayDonors: 0,
-      activeConstruction: 0
+      activeConstruction: activeProjects.filter(p => p.project_type === 'Construction').length
     };
-  } else {
-    activeProjects = (dbData as any[]).filter(p => p.publish_status === 'Published');
-  }
-
-  return {
-    totalMosques: activeProjects.length,
-    todayCollection: 0, // Placeholder or calculated from live donations if trackable
-    todayDonors: 0,
-    activeConstruction: activeProjects.filter(p => p.project_type === 'Construction').length
-  };
+  }).catch(e => {
+    console.error("Error in getHomeStats:", e);
+    return { totalMosques: 0, todayCollection: 0, todayDonors: 0, activeConstruction: 0 };
+  });
 }
 
 export function incrementSimulatedStats(amount: number) {
@@ -201,16 +217,18 @@ export function incrementSimulatedStats(amount: number) {
 }
 
 export async function getAdminProjects(): Promise<Project[]> {
-  const { data, error } = await supabase
-    .from('projects')
-    .select('*')
-    .order('created_at', { ascending: false });
+  return withRetry(async () => {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .order('created_at', { ascending: false });
     
-  if (error) {
-    console.error("Supabase error fetching admin projects:", error);
+    if (error) throw error;
+    return (data as Project[]) || [];
+  }).catch(e => {
+    console.error("Error in getAdminProjects:", e);
     return [];
-  }
-  return (data as Project[]) || [];
+  });
 }
 
 export async function getLeadById(id: string): Promise<Lead | null> {
@@ -431,16 +449,18 @@ export async function approveAndConvertToProject(id: string, notes?: string): Pr
 }
 
 export async function getAllLeads(): Promise<Lead[]> {
-  const { data, error } = await supabase
-    .from('leads')
-    .select('*')
-    .order('created_at', { ascending: false });
+  return withRetry(async () => {
+    const { data, error } = await supabase
+      .from('leads')
+      .select('*')
+      .order('created_at', { ascending: false });
     
-  if (error) {
-    console.error("Supabase error fetching leads:", error);
+    if (error) throw error;
+    return (data as Lead[]) || [];
+  }).catch(e => {
+    console.error("Error fetching leads:", e);
     return [];
-  }
-  return (data as Lead[]) || [];
+  });
 }
 
 export async function submitLead(lead: Partial<Lead>): Promise<Lead | null> {

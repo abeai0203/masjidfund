@@ -58,6 +58,8 @@ export const metadata: Metadata = {
   },
 };
 
+import AuthLoadingGuard from "@/components/auth/AuthLoadingGuard";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -66,11 +68,14 @@ export default function RootLayout({
   return (
     <html lang="ms">
       <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col`}>
-        <Navbar />
-        <main className="flex-grow flex flex-col">
-          {children}
-        </main>
-        <Footer />
+        <AuthLoadingGuard>
+          <Navbar />
+          <main className="flex-grow flex flex-col">
+            {children}
+          </main>
+          <Footer />
+        </AuthLoadingGuard>
+        
         <Script
           id="sw-register"
           strategy="afterInteractive"
