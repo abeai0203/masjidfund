@@ -1,17 +1,30 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
 /**
  * Global guard that prevents the application from rendering its UI shell
  * until the Supabase authentication session has been fully synchronized.
- * This is the ultimate solution to prevent 'ghost' empty states or 0 statistics
- * during page reloads in an SSO environment.
+ * Includes a 3.5s failsafe timeout to prevent 'Eternal Hang' on lock errors.
  */
 export default function AuthLoadingGuard({ children }: { children: React.ReactNode }) {
   const { loading } = useAuth();
+  const [isTimedOut, setIsTimedOut] = useState(false);
 
-  if (loading) {
+  useEffect(() => {
+    // Failsafe: If auth sync hangs for more than 3.5s, force render anyway
+    const timer = setTimeout(() => {
+      if (loading) {
+        console.warn("[AuthGuard] Session sync timed out. Forcing render.");
+        setIsTimedOut(true);
+      }
+    }, 3500);
+
+    return () => clearTimeout(timer);
+  }, [loading]);
+
+  if (loading && !isTimedOut) {
     return (
       <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-surface animate-in fade-in duration-300">
         <div className="relative">

@@ -11,8 +11,15 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Failsafe: Ensure loading is always released even if Supabase hangs
+    const failsafe = setTimeout(() => {
+      console.warn("[useAuth] Auth listener timed out. Forcing ready state.");
+      setLoading(false);
+    }, 5000);
+
     // Single source of truth for auth state
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      clearTimeout(failsafe);
       const currentUser = session?.user ?? null;
       
       if (event === 'SIGNED_OUT') {
@@ -33,6 +40,7 @@ export function useAuth() {
 
     return () => {
       subscription.unsubscribe();
+      clearTimeout(failsafe);
     };
   }, []);
 
