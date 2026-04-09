@@ -12,6 +12,7 @@ export default function StateProjectsPage({ params }: { params: Promise<{ state:
   
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Format the state name for display (e.g. "kuala lumpur" -> "Kuala Lumpur")
   const displayState = stateParam.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -19,11 +20,13 @@ export default function StateProjectsPage({ params }: { params: Promise<{ state:
   useEffect(() => {
     async function load() {
       setIsLoading(true);
+      setError(null);
       try {
         const data = await getProjectsByState(stateParam);
         setProjects(data);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to load state projects:", err);
+        setError(err.message || "Gagal memuat naik data projek. Sila periksa sambungan internet.");
       } finally {
         setIsLoading(false);
       }
@@ -63,6 +66,16 @@ export default function StateProjectsPage({ params }: { params: Promise<{ state:
             {[1, 2, 3].map(i => (
               <div key={i} className="h-64 bg-surface-muted animate-pulse rounded-2xl border border-border"></div>
             ))}
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 border border-red-100 rounded-xl p-8 text-center">
+            <p className="text-red-700 font-bold mb-4">{error}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="bg-red-600 text-white px-6 py-2 rounded-lg font-bold"
+            >
+              Cuba Lagi
+            </button>
           </div>
         ) : projects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
