@@ -6,6 +6,7 @@ import ProjectCard from "@/components/public/ProjectCard";
 import ProjectFilters, { FilterState } from "@/components/public/ProjectFilters";
 import { getPublicProjects } from "@/lib/api";
 import { Project } from "@/lib/types";
+import { useAuth } from "@/hooks/useAuth";
 
 function ProjectsContent() {
   const searchParams = useSearchParams();
@@ -18,6 +19,7 @@ function ProjectsContent() {
     verificationStatus: "",
   });
   
+  const { user, loading } = useAuth();
   const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -29,13 +31,15 @@ function ProjectsContent() {
   }, [urlState]);
 
   useEffect(() => {
+    if (loading) return;
+    
     async function loadData() {
       const data = await getPublicProjects();
       setAllProjects(data);
       setIsLoading(false);
     }
     loadData();
-  }, []);
+  }, [user, loading]);
   
   const filteredProjects = useMemo(() => {
     return allProjects.filter(project => {

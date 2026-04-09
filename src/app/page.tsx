@@ -9,14 +9,18 @@ const InteractiveMap = dynamic(() => import("@/components/public/InteractiveMap"
 import { getPublicProjects, getAllStates, getHomeStats } from "@/lib/api";
 import StatsSection from "@/components/public/StatsSection";
 import { Project } from "@/lib/types";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Home() {
+  const { user, loading } = useAuth();
   const [publicProjects, setPublicProjects] = useState<Project[]>([]);
   const [states, setStates] = useState<string[]>([]);
   const [stats, setStats] = useState({ totalMosques: 0, todayCollection: 0, todayDonors: 0, activeConstruction: 0 });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (loading) return;
+    
     async function loadData() {
       setIsLoading(true);
       try {
@@ -36,7 +40,7 @@ export default function Home() {
       }
     }
     loadData();
-  }, []);
+  }, [user, loading]);
 
   const featuredProjects = publicProjects.slice(0, 3);
 
