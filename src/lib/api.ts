@@ -93,8 +93,7 @@ export async function getPublicProjects(): Promise<Project[]> {
       
     if (error) {
       console.error("Supabase error fetching public projects:", error);
-      const simData = getStoredData('projects', MOCK_PROJECTS);
-      return simData.filter(p => p.publish_status === 'Published');
+      return [];
     }
     
     return (data as Project[]) || [];
@@ -115,8 +114,7 @@ export async function getAllStates(): Promise<string[]> {
       
     if (error) {
       console.error("Supabase error fetching states:", error);
-      const simData = getStoredData('projects', MOCK_PROJECTS);
-      return Array.from(new Set(simData.filter(p => p.publish_status === 'Published').map(p => p.state))).sort();
+      return [];
     }
     
     if (!data || data.length === 0) return [];
@@ -139,8 +137,7 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
     
   if (error) {
     console.error(`Error fetching project ${slug}:`, error);
-    const simData = getStoredData('projects', MOCK_PROJECTS);
-    return simData.find(p => p.slug === slug) || null;
+    return null;
   }
   return (data as Project) || null;
 }
@@ -158,8 +155,7 @@ export async function getProjectsByState(state: string): Promise<Project[]> {
       
     if (error) {
       console.error(`Error fetching projects for state ${state}:`, error);
-      const simData = getStoredData('projects', MOCK_PROJECTS);
-      return simData.filter(p => p.publish_status === 'Published' && p.state.toLowerCase() === state.toLowerCase());
+      return [];
     }
     return (data as Project[]) || [];
   } catch (e) {
@@ -174,47 +170,23 @@ export async function getHomeStats() {
     .select('collected_amount, project_type, publish_status');
     
   let activeProjects: Project[] = [];
-  let isSimulated = false;
 
   if (error) {
     console.error("Supabase stats error:", error);
-    activeProjects = getStoredData('projects', MOCK_PROJECTS).filter(p => p.publish_status === 'Published');
-    isSimulated = true;
+    return {
+      totalMosques: 0,
+      todayCollection: 0,
+      todayDonors: 0,
+      activeConstruction: 0
+    };
   } else {
     activeProjects = (dbData as any[]).filter(p => p.publish_status === 'Published');
-    isSimulated = activeProjects.length === 0;
   }
 
-  // Handle Today's Stats (Donors & Collection)
-  let todayDonors = 0;
-  let todayCollection = 0;
-  
-  if (!IS_SERVER) {
-    const storedDonors = localStorage.getItem('sim_today_donors');
-    const storedCollection = localStorage.getItem('sim_today_collection');
-    
-    if (storedDonors) {
-      todayDonors = parseInt(storedDonors);
-    } else {
-      todayDonors = (activeProjects.length * 3) + 7;
-      localStorage.setItem('sim_today_donors', todayDonors.toString());
-    }
-
-    if (storedCollection) {
-      todayCollection = parseFloat(storedCollection);
-    } else {
-      todayCollection = todayDonors * 15.5; // Simulated seed data
-      localStorage.setItem('sim_today_collection', todayCollection.toString());
-    }
-  } else {
-    todayDonors = (activeProjects.length * 3) + 7;
-    todayCollection = todayDonors * 15.5;
-  }
-  
   return {
     totalMosques: activeProjects.length,
-    todayCollection: todayCollection,
-    todayDonors: todayDonors,
+    todayCollection: 0, // Placeholder or calculated from live donations if trackable
+    todayDonors: 0,
     activeConstruction: activeProjects.filter(p => p.project_type === 'Construction').length
   };
 }
@@ -265,14 +237,7 @@ export async function updateProject(slug: string, updates: Partial<Project>): Pr
       .single();
       
     if (error) {
-      console.warn("Supabase update fail, falling back to local simulation:", error.message);
-      const simData = getStoredData('projects', MOCK_PROJECTS);
-      const index = simData.findIndex(p => p.slug === slug);
-      if (index !== -1) {
-        simData[index] = { ...simData[index], ...updates };
-        setStoredData('projects', simData);
-        return simData[index];
-      }
+      console.error("Supabase update failed:", error.message);
       return null;
     }
     return data as Project;

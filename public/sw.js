@@ -1,4 +1,4 @@
-const CACHE_NAME = 'masjidfund-v1';
+const CACHE_NAME = 'masjidfund-v2';
 const STATIC_ASSETS = [
   '/',
   '/projects',
@@ -28,16 +28,19 @@ self.addEventListener('activate', (event) => {
 
 // Fetch — network first, fallback to cache
 self.addEventListener('fetch', (event) => {
+  // Only handle GET requests on our own origin
   if (event.request.method !== 'GET') return;
   if (!event.request.url.startsWith(self.location.origin)) return;
   
-  // Exclude admin routes from cache to ensure fresh data for admins
-  if (event.request.url.includes('/admin/')) return;
+  // Exclude admin, api, and internal routes from SW cache to ensure fresh data
+  const url = new URL(event.request.url);
+  if (url.pathname.includes('/admin/') || url.pathname.includes('/api/') || url.pathname.includes('/_next/')) return;
 
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        if (response && response.status === 200) {
+        // Cache successful and fresh responses
+        if (response && response.status === 200 && response.type === 'basic') {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
