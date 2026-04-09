@@ -89,10 +89,16 @@ export function useAuth() {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setContributor(null);
-    window.location.href = "/";
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error("Sign out error:", err);
+    } finally {
+      setUser(null);
+      setContributor(null);
+      // Force a full page reload and redirect to home to clear all state
+      window.location.replace("/");
+    }
   };
 
   return {

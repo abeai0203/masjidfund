@@ -78,13 +78,11 @@ export async function getPublicProjects(): Promise<Project[]> {
     
   if (error) {
     console.error("Supabase error fetching public projects:", error);
-    // Only fall back to mocks if there's an actual error (e.g. network)
     const simData = getStoredData('projects', MOCK_PROJECTS);
     return simData.filter(p => p.publish_status === 'Published');
   }
   
-  // If data is empty but no error, it means the DB is genuinely empty.
-  // We returning it as is (which will show 0 projects) to avoid showing dummy data.
+  // If data is empty but no error, return empty array to reflect the real database state
   return (data as Project[]) || [];
 }
 
@@ -94,10 +92,14 @@ export async function getAllStates(): Promise<string[]> {
     .select('state')
     .eq('publish_status', 'Published');
     
-  if (error || !data || data.length === 0) {
+  if (error) {
+    console.error("Supabase error fetching states:", error);
     const simData = getStoredData('projects', MOCK_PROJECTS);
     return Array.from(new Set(simData.filter(p => p.publish_status === 'Published').map(p => p.state))).sort();
   }
+  
+  if (!data || data.length === 0) return [];
+
   const toTitleCase = (s: string) => s.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
   const states = new Set(data.filter(p => p.state).map(p => toTitleCase(p.state.trim())));
   return Array.from(states).sort();
@@ -110,11 +112,12 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
     .eq('slug', slug)
     .single();
     
-  if (error || !data) {
+  if (error) {
+    console.error(`Error fetching project ${slug}:`, error);
     const simData = getStoredData('projects', MOCK_PROJECTS);
     return simData.find(p => p.slug === slug) || null;
   }
-  return data as Project;
+  return (data as Project) || null;
 }
 
 export async function getProjectsByState(state: string): Promise<Project[]> {
@@ -126,6 +129,7 @@ export async function getProjectsByState(state: string): Promise<Project[]> {
     .order('created_at', { ascending: false });
     
   if (error) {
+    console.error(`Error fetching projects for state ${state}:`, error);
     const simData = getStoredData('projects', MOCK_PROJECTS);
     return simData.filter(p => p.publish_status === 'Published' && p.state.toLowerCase() === state.toLowerCase());
   }
@@ -140,11 +144,13 @@ export async function getHomeStats() {
   let activeProjects: Project[] = [];
   let isSimulated = false;
 
-  if (error || !dbData || dbData.length === 0) {
+  if (error) {
+    console.error("Supabase stats error:", error);
     activeProjects = getStoredData('projects', MOCK_PROJECTS).filter(p => p.publish_status === 'Published');
     isSimulated = true;
   } else {
     activeProjects = (dbData as any[]).filter(p => p.publish_status === 'Published');
+    isSimulated = activeProjects.length === 0;
   }
 
   // Handle Today's Stats (Donors & Collection)
