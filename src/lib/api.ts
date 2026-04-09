@@ -216,7 +216,7 @@ export async function getAdminProjects(): Promise<Project[]> {
     
   if (error) {
     console.error("Supabase error fetching admin projects:", error);
-    return getStoredData('projects', MOCK_PROJECTS);
+    return [];
   }
   return (data as Project[]) || [];
 }
@@ -229,8 +229,8 @@ export async function getLeadById(id: string): Promise<Lead | null> {
     .single();
     
   if (error || !data) {
-    const simLeads = getStoredData('leads', MOCK_LEADS);
-    return simLeads.find(l => l.id === id) || null;
+    console.error(`Error or missing data for lead ${id}:`, error);
+    return null;
   }
   return data as Lead;
 }
@@ -453,7 +453,7 @@ export async function getAllLeads(): Promise<Lead[]> {
     
   if (error) {
     console.error("Supabase error fetching leads:", error);
-    return getStoredData('leads', MOCK_LEADS);
+    return [];
   }
   return (data as Lead[]) || [];
 }

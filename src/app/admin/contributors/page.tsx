@@ -9,11 +9,20 @@ export default function AdminContributorsPage() {
   const [contributors, setContributors] = useState<Contributor[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    getContributors().then((data) => {
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const data = await getContributors();
       setContributors(data);
+    } catch (err) {
+      console.error("Failed to load contributors:", err);
+    } finally {
       setLoading(false);
-    });
+    }
+  };
+
+  useEffect(() => {
+    loadData();
   }, []);
 
   if (loading) {
@@ -27,9 +36,21 @@ export default function AdminContributorsPage() {
 
   return (
     <div className="w-full">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground tracking-tight">Senarai Kontributor</h1>
-        <p className="text-foreground/70 text-sm mt-1">Jejak aktiviti dan lokasi pengguna yang menghantar kempen.</p>
+      <div className="mb-8 flex justify-between items-end">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Senarai Kontributor</h1>
+          <p className="text-foreground/70 text-sm mt-1">Jejak aktiviti dan lokasi pengguna yang menghantar kempen.</p>
+        </div>
+        <button 
+          onClick={loadData}
+          disabled={loading}
+          className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary/20 transition-all active:scale-95 disabled:opacity-50"
+        >
+          <svg className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Segarkan Data
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

@@ -30,6 +30,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   if (!event.request.url.startsWith(self.location.origin)) return;
+  
+  // Exclude admin routes from cache to ensure fresh data for admins
+  if (event.request.url.includes('/admin/')) return;
 
   event.respondWith(
     fetch(event.request)
