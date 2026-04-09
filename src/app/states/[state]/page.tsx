@@ -1,17 +1,35 @@
+"use client";
+
+import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { getProjectsByState } from "@/lib/api";
 import ProjectCard from "@/components/public/ProjectCard";
+import { Project } from "@/lib/types";
 
-
-
-export default async function StateProjectsPage({ params }: { params: Promise<{ state: string }> }) {
-  const resolvedParams = await params;
+export default function StateProjectsPage({ params }: { params: Promise<{ state: string }> }) {
+  const resolvedParams = use(params);
   const stateParam = decodeURIComponent(resolvedParams.state);
   
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   // Format the state name for display (e.g. "kuala lumpur" -> "Kuala Lumpur")
   const displayState = stateParam.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-  
-  const projects = await getProjectsByState(stateParam);
+
+  useEffect(() => {
+    async function load() {
+      setIsLoading(true);
+      try {
+        const data = await getProjectsByState(stateParam);
+        setProjects(data);
+      } catch (err) {
+        console.error("Failed to load state projects:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    load();
+  }, [stateParam]);
 
   return (
     <div className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 w-full flex-grow flex flex-col">
@@ -37,10 +55,16 @@ export default async function StateProjectsPage({ params }: { params: Promise<{ 
 
       <div>
         <div className="mb-6 flex justify-between items-center text-sm text-foreground/60 font-medium tracking-wide">
-          <span>MENUNJUKKAN {projects.length} PROJEK</span>
+          <span>{isLoading ? "MEMUAT TURUN..." : `MENUNJUKKAN ${projects.length} PROJEK`}</span>
         </div>
 
-        {projects.length > 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-64 bg-surface-muted animate-pulse rounded-2xl border border-border"></div>
+            ))}
+          </div>
+        ) : projects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {projects.map((project) => (
               <ProjectCard key={project.slug} project={project} />
