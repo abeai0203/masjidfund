@@ -90,14 +90,32 @@ export function useAuth() {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      // 1. Terminate session globally in Supabase
+      await supabase.auth.signOut({ scope: 'global' });
     } catch (err) {
-      console.error("Sign out error:", err);
+      console.error("Supabase sign out error:", err);
     } finally {
+      // 2. Local state cleanup
       setUser(null);
       setContributor(null);
-      // Force a full page reload and redirect to home to clear all state
-      window.location.replace("/");
+      
+      // 3. Manual Storage Purge (Nuclear Option)
+      // This ensures any stuck keys are removed regardless of Supabase client behavior
+      if (typeof window !== 'undefined') {
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        
+        sessionStorage.clear(); // Safe to clear entire session storage for logout
+        
+        // 4. Force a hard redirect with a cache-buster
+        window.location.replace("/?logout=" + Date.now());
+      }
     }
   };
 
