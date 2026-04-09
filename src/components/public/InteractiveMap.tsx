@@ -76,22 +76,37 @@ export default function InteractiveMap() {
     });
 
     getPublicProjects().then((ps) => {
-      const withCoords = ps.filter((p) => {
-        const c = STATE_COORDS[p.state] || STATE_COORDS[Object.keys(STATE_COORDS).find(k => p.state.includes(k) || k.includes(p.state)) || ""];
-        return !!c;
-      }).map((p) => {
-        const key = Object.keys(STATE_COORDS).find(k => p.state === k || p.state.includes(k) || k.includes(p.state));
+      const processed = ps.map((p) => {
+        // 1. Prioritize real coordinates from DB
+        if (p.latitude && p.longitude) {
+          return { ...p, _lat: p.latitude, _lng: p.longitude, isFallback: false };
+        }
+
+        // 2. Fallback to State Center
+        const stateKey = (p.state || "").trim();
+        const key = Object.keys(STATE_COORDS).find(k => 
+          stateKey === k || 
+          stateKey.toLowerCase() === k.toLowerCase() ||
+          stateKey.toLowerCase().includes(k.toLowerCase()) || 
+          k.toLowerCase().includes(stateKey.toLowerCase())
+        );
+        
         const coords = key ? STATE_COORDS[key] : null;
-        return coords ? { ...p, _lat: coords[0], _lng: coords[1] } : null;
+
+        if (coords) {
+          // Add random jitter to state-level pins so they don't exactly overlap
+          return { 
+            ...p, 
+            _lat: coords[0] + (Math.random() - 0.5) * 0.15, 
+            _lng: coords[1] + (Math.random() - 0.5) * 0.15,
+            isFallback: true 
+          };
+        }
+
+        return null;
       }).filter(Boolean) as (Project & { _lat: number; _lng: number })[];
 
-      // Slight jitter so overlapping state pins don't stack
-      const jittered = withCoords.map((p, i) => ({
-        ...p,
-        _lat: p._lat + (Math.random() - 0.5) * 0.15,
-        _lng: p._lng + (Math.random() - 0.5) * 0.15,
-      }));
-      setProjects(jittered as any);
+      setProjects(processed as any);
     });
   }, []);
 
