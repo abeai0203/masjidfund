@@ -159,8 +159,8 @@ export default function InteractiveMap() {
 
           {/* OpenStreetMap via Leaflet */}
           <MapContainer
-            center={[4.5, 108.5]}
-            zoom={7}
+            center={[3.0738, 101.5183]}
+            zoom={10}
             scrollWheelZoom
             zoomControl={false}
             className="h-full w-full"
