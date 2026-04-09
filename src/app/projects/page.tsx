@@ -1,20 +1,32 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import ProjectCard from "@/components/public/ProjectCard";
 import ProjectFilters, { FilterState } from "@/components/public/ProjectFilters";
 import { getPublicProjects } from "@/lib/api";
 import { Project } from "@/lib/types";
 
-export default function AllProjectsPage() {
+function ProjectsContent() {
+  const searchParams = useSearchParams();
+  const urlState = searchParams.get('state');
+  
   const [filters, setFilters] = useState<FilterState>({
     search: "",
-    state: "",
+    state: urlState || "",
     projectType: "",
     verificationStatus: "",
   });
+  
   const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Sync filter when URL param changes (e.g. clicking different state buttons while on the page)
+  useEffect(() => {
+    if (urlState !== null) {
+      setFilters(prev => ({ ...prev, state: urlState }));
+    }
+  }, [urlState]);
 
   useEffect(() => {
     async function loadData() {
@@ -33,8 +45,15 @@ export default function AllProjectsPage() {
         project.mosque_name.toLowerCase().includes(searchTerm) || 
         project.title.toLowerCase().includes(searchTerm);
 
-      // Dropdown filters
-      const matchesState = !filters.state || project.state === filters.state;
+      // Extract state display name from project
+      const projectState = (project.state || "").trim().toLowerCase();
+      const filterState = filters.state.toLowerCase();
+      
+      const matchesState = !filters.state || 
+        projectState === filterState || 
+        projectState.includes(filterState) || 
+        filterState.includes(projectState);
+
       const matchesType = !filters.projectType || project.project_type === filters.projectType;
       const matchesStatus = !filters.verificationStatus || project.verification_status === filters.verificationStatus;
 
@@ -55,12 +74,14 @@ export default function AllProjectsPage() {
 
       <div>
         <div className="mb-4 flex justify-between items-center text-sm text-foreground/60 font-medium tracking-wide">
-          <span>Menunjukkan {filteredProjects.length} projek</span>
+          <span>{isLoading ? "Memuatkan..." : `Menunjukkan ${filteredProjects.length} projek`}</span>
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-20">
-            <div className="animate-pulse space-y-4">Memuatkan projek...</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-64 bg-slate-100 animate-pulse rounded-2xl border border-border"></div>
+            ))}
           </div>
         ) : filteredProjects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -79,11 +100,24 @@ export default function AllProjectsPage() {
               onClick={() => setFilters({ search: "", state: "", projectType: "", verificationStatus: "" })}
               className="mt-4 text-primary font-medium hover:text-primary-hover px-4 py-2 bg-primary/5 rounded-lg transition-colors"
             >
-              Kosonkan semua penapis
+              Kosongkan semua penapis
             </button>
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+export default function AllProjectsPage() {
+  return (
+    <Suspense fallback={
+       <div className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 w-full flex-grow flex flex-col">
+          <div className="h-8 w-48 bg-slate-100 animate-pulse rounded-lg mb-8"></div>
+          <div className="h-64 bg-slate-100 animate-pulse rounded-2xl border border-border"></div>
+       </div>
+    }>
+      <ProjectsContent />
+    </Suspense>
   );
 }

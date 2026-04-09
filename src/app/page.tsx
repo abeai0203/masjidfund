@@ -229,7 +229,7 @@ export default function Home() {
             {states.map(state => (
               <Link 
                 key={state} 
-                href={`/states/${state.toLowerCase()}`}
+                href={`/projects?state=${encodeURIComponent(state)}`}
                 className="bg-white border border-border hover:border-primary hover:text-primary px-5 py-2 rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow-md text-slate-800"
               >
                 {state.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}

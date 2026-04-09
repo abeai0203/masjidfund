@@ -20,7 +20,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/states/selangor" className="text-sm text-foreground/80 hover:text-primary transition-colors">
+                <Link href="/projects?state=Selangor" className="text-sm text-foreground/80 hover:text-primary transition-colors">
                   Projek di Selangor
                 </Link>
               </li>
