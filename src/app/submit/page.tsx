@@ -204,7 +204,13 @@ export default function SubmitPage() {
     setIsScanning(true);
     setExtractedQrUrl(null);
     setExtractedType(null);
-    setFiles(prev => ({ ...prev, magic_scan: file }));
+    setFiles(prev => ({ 
+      ...prev, 
+      magic_scan: file,
+      qr: file,
+      main_image: file
+    }));
+    
     const previewUrl = URL.createObjectURL(file);
     setMagicScanPreview(previewUrl);
     
@@ -213,7 +219,7 @@ export default function SubmitPage() {
       isTimeout = true;
       setIsScanning(false);
       alert("Proses AI mengambil masa terlalu lama pada pelayar anda. Sila isi maklumat secara manual.");
-    }, 25000); 
+    }, 35000); // Increased timeout to 35s
     
     try {
       console.log("Starting OCR and QR detection for:", file.name);
@@ -453,11 +459,7 @@ export default function SubmitPage() {
         (f.elements.namedItem('project_type') as HTMLSelectElement).value = "Construction";
       }
 
-      setFiles(prev => ({ 
-        ...prev, 
-        qr: file, 
-        main_image: file 
-      }));
+      // Files were already set at the start of handleMagicScan
 
       if (!qrResult) {
         alert("⚠️ Imej poster ini tidak mempunyai Kod QR yang boleh dikesan. Sila muat naik kod QR secara manual atau pastikan poster mempunyai kod QR yang jelas.");
@@ -525,8 +527,9 @@ export default function SubmitPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!files.main_image) {
+    if (!files.main_image && !files.magic_scan) {
       alert("Sila muat naik imej utama projek.");
+      setIsSubmitting(false);
       return;
     }
     setIsSubmitting(true);
@@ -534,8 +537,9 @@ export default function SubmitPage() {
     try {
       // 1. Upload Images to Supabase Storage
       let finalMainImageUrl = "";
-      if (files.main_image) {
-        const { url, error } = await uploadImage(files.main_image);
+      const imageToUpload = files.main_image || files.magic_scan;
+      if (imageToUpload) {
+        const { url, error } = await uploadImage(imageToUpload);
         if (url) {
           finalMainImageUrl = url;
         } else {
