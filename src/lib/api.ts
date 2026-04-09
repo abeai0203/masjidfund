@@ -27,21 +27,25 @@ function setStoredData<T>(key: string, data: T[]) {
 }
 
 // --- Storage Helper ---
-export async function uploadImage(file: File | Blob | string, bucket: string = 'images'): Promise<{ url: string | null, error: string | null }> {
+export async function uploadImage(file: File | Blob | string, bucket: string = 'images', retryCount = 1): Promise<{ url: string | null, error: string | null }> {
   try {
     let finalFile: File | Blob;
     let fileName: string;
+
+    // Small jitter to prevent concurrent lock issues
+    await new Promise(r => setTimeout(r, Math.random() * 50));
 
     if (typeof file === 'string') {
       // Handle base64 / data URL
       const response = await fetch(file);
       finalFile = await response.blob();
-      fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+      fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 12)}.jpg`;
     } else {
       finalFile = file;
       const originalName = (file as any).name || 'image.jpg';
-      const extension = originalName.split('.').pop();
-      fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${extension}`;
+      const extension = originalName.split('.').pop() || 'jpg';
+      // Longer random string for absolute uniqueness
+      fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 12)}.${extension}`;
     }
 
     const { data, error } = await supabase.storage
@@ -53,6 +57,14 @@ export async function uploadImage(file: File | Blob | string, bucket: string = '
 
     if (error) {
       console.error("Storage upload error:", error);
+      
+      // Auto-retry if it's a lock conflict (common in concurrent uploads)
+      if (retryCount > 0 && error.message?.toLowerCase().includes('lock broken')) {
+        console.warn(`Retrying upload due to lock conflict... (${retryCount} left)`);
+        await new Promise(r => setTimeout(r, 100));
+        return uploadImage(file, bucket, retryCount - 1);
+      }
+      
       return { url: null, error: error.message };
     }
 

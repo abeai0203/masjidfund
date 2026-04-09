@@ -537,11 +537,17 @@ export default function SubmitPage() {
     try {
       // 1. Upload Images to Supabase Storage
       let finalMainImageUrl = "";
+      let finalQrUrl = extractedQrUrl; // Start with the potentially extracted URL
+      
       const imageToUpload = files.main_image || files.magic_scan;
+      const isSameFile = imageToUpload && files.qr && imageToUpload === files.qr;
+
       if (imageToUpload) {
         const { url, error } = await uploadImage(imageToUpload);
         if (url) {
           finalMainImageUrl = url;
+          // Deduplicate: If main image and QR source are the same file, reuse the URL
+          if (isSameFile) finalQrUrl = url; 
         } else {
           alert(`Gagal memuat naik imej utama: ${error}. Sila periksa tetapan database.`);
           setIsSubmitting(false);
@@ -549,10 +555,9 @@ export default function SubmitPage() {
         }
       }
 
-      let finalQrUrl = extractedQrUrl;
-      // If it's a blob/base64 from cropper or magic scan, upload it
-      if (extractedQrUrl && (extractedQrUrl.startsWith('blob:') || extractedQrUrl.startsWith('data:'))) {
-        const { url: uploadedQrUrl, error: qrError } = await uploadImage(extractedQrUrl);
+      // If the QR URL is still a local reference (blob/data), upload it now
+      if (finalQrUrl && (finalQrUrl.startsWith('blob:') || finalQrUrl.startsWith('data:'))) {
+        const { url: uploadedQrUrl, error: qrError } = await uploadImage(finalQrUrl);
         if (uploadedQrUrl) {
           finalQrUrl = uploadedQrUrl;
         } else {
@@ -560,8 +565,8 @@ export default function SubmitPage() {
           setIsSubmitting(false);
           return;
         }
-      } else if (!extractedQrUrl && files.qr) {
-        // If user uploaded a QR file manually but didn't crop
+      } else if (!finalQrUrl && files.qr) {
+        // Fallback for manual QR upload if no extraction URL exists
         const { url: uploadedQrUrl, error: qrError } = await uploadImage(files.qr);
         if (uploadedQrUrl) {
           finalQrUrl = uploadedQrUrl;
