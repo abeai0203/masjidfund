@@ -73,7 +73,7 @@ interface StatsData {
   activeConstruction: number;
 }
 
-export default function StatsSection({ stats }: { stats: StatsData }) {
+export default function StatsSection({ stats, isLoading = false }: { stats: StatsData; isLoading?: boolean }) {
   const items = [
     {
       label: "Masjid Disokong",
@@ -130,15 +130,25 @@ export default function StatsSection({ stats }: { stats: StatsData }) {
               <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 {item.icon}
               </div>
-              <div className="text-2xl sm:text-3xl font-black text-slate-800 mb-1">
-                <CountUp 
-                  end={item.value} 
-                  prefix={item.prefix} 
-                  suffix={item.suffix} 
-                />
+              
+              <div className="text-2xl sm:text-3xl font-black text-slate-800 mb-1 h-8 flex items-center">
+                {isLoading ? (
+                  <div className="w-20 h-8 bg-slate-100 animate-pulse rounded-lg mx-auto"></div>
+                ) : (
+                  <CountUp 
+                    end={item.value} 
+                    prefix={item.prefix} 
+                    suffix={item.suffix} 
+                  />
+                )}
               </div>
-              <div className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest">
-                {item.label}
+              
+              <div className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
+                {isLoading ? (
+                  <div className="w-24 h-3 bg-slate-50 animate-pulse rounded mx-auto"></div>
+                ) : (
+                  item.label
+                )}
               </div>
             </div>
           ))}

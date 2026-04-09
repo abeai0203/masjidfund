@@ -18,13 +18,22 @@ export default function Home() {
 
   useEffect(() => {
     async function loadData() {
-      const projects = await getPublicProjects();
-      const st = await getAllStates();
-      const s = await getHomeStats();
-      setPublicProjects(projects);
-      setStates([...new Set(st)]);
-      setStats(s);
-      setIsLoading(false);
+      setIsLoading(true);
+      try {
+        const [projects, st, s] = await Promise.all([
+          getPublicProjects(),
+          getAllStates(),
+          getHomeStats()
+        ]);
+        
+        setPublicProjects(projects);
+        setStates([...new Set(st)]);
+        setStats(s);
+      } catch (error) {
+        console.error("Error loading home data:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
     loadData();
   }, []);
@@ -103,7 +112,7 @@ export default function Home() {
         </div>
       </section>
 
-      <StatsSection stats={stats} />
+      <StatsSection stats={stats} isLoading={isLoading} />
 
       {/* Featured Projects Section */}
       <section className="pt-8 pb-20 px-4 sm:px-6 lg:px-8 bg-surface">
