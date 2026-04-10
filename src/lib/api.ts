@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { getSupabase, resetSupabase } from './supabase';
 import { Project, Lead, DiscoveryLead, Feedback, Contributor } from './types';
 import { MOCK_PROJECTS, MOCK_LEADS } from './mock-data';
 
@@ -48,7 +48,7 @@ export async function uploadImage(file: File | Blob | string, bucket: string = '
       fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 12)}.${extension}`;
     }
 
-    const { data, error } = await supabase.storage
+    const { data, error } = await getSupabase().storage
       .from(bucket)
       .upload(fileName, finalFile, {
         cacheControl: '3600',
@@ -68,7 +68,7 @@ export async function uploadImage(file: File | Blob | string, bucket: string = '
       return { url: null, error: error.message };
     }
 
-    const { data: { publicUrl } } = supabase.storage
+    const { data: { publicUrl } } = getSupabase().storage
       .from(bucket)
       .getPublicUrl(data.path);
 
@@ -82,17 +82,18 @@ export async function uploadImage(file: File | Blob | string, bucket: string = '
 // --- Utility Helpers ---
 
 /**
- * Resilient wrapper for API calls that specifically handles 
- * session-lock 'AbortError' conflicts with retries.
+ * Resilient wrapper for API calls that detects 'poisoned' clients 
+ * and trigger a 'resurrection' (resetSupabase) upon lock conflicts.
  */
-async function withRetry<T>(fn: () => Promise<T>, retries = 4, delay = 800): Promise<T> {
+async function withRetry<T>(fn: () => Promise<T>, retries = 5, delay = 500): Promise<T> {
   try {
     return await fn();
   } catch (error: any) {
     const isAbort = error?.name === 'AbortError' || error?.message?.includes('Lock broken');
     
     if (isAbort && retries > 0) {
-      console.warn(`[API] Lock conflict detected, retrying in ${delay}ms... (${retries} left)`);
+      console.warn(`[API] Lock conflict detected. Resurrecting client and retrying... (${retries} left)`);
+      resetSupabase(); // Kill the poisoned client singleton
       await new Promise(resolve => setTimeout(resolve, delay));
       return withRetry(fn, retries - 1, delay * 1.5);
     }
@@ -109,9 +110,10 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 4, delay = 800): Pro
 
 export async function getPublicProjects(): Promise<Project[]> {
   return withRetry(async () => {
-    if (!supabase) return [];
+    const client = getSupabase();
+    if (!client) return [];
     
-    const { data, error } = await supabase
+    const { data, error } = await client
       .from('projects')
       .select('*')
       .eq('publish_status', 'Published')
@@ -127,7 +129,7 @@ export async function getPublicProjects(): Promise<Project[]> {
 
 export async function getAllStates(): Promise<string[]> {
   try {
-    if (!supabase) return [];
+    if (!getSupabase()) return [];
 
     const { data, error } = await supabase
       .from('projects')
@@ -166,7 +168,7 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
 
 export async function getProjectsByState(state: string): Promise<Project[]> {
   try {
-    if (!supabase) return [];
+    if (!getSupabase()) return [];
     
     const { data, error } = await supabase
       .from('projects')
@@ -188,7 +190,7 @@ export async function getProjectsByState(state: string): Promise<Project[]> {
 
 export async function getHomeStats() {
   return withRetry(async () => {
-    if (!supabase) return { totalMosques: 0, todayCollection: 0, todayDonors: 0, activeConstruction: 0 };
+    if (!getSupabase()) return { totalMosques: 0, todayCollection: 0, todayDonors: 0, activeConstruction: 0 };
     
     const { data: dbData, error } = await supabase
       .from('projects')
@@ -431,7 +433,7 @@ export async function approveAndConvertToProject(id: string, notes?: string): Pr
   };
 
   // 3. Insert into Supabase
-  const { error: insertError } = await supabase.from('projects').insert([newProject]);
+  const { error: insertError } = await getSupabase().from('projects').insert([newProject]);
   if (insertError) {
     console.error("Failed to insert project into Supabase:", insertError);
     return false;
@@ -500,7 +502,7 @@ export async function scoutSocialLeads(): Promise<DiscoveryLead[]> {
   const [existingProjects, existingLeads, dismissedLeadsResult] = await Promise.all([
     getAdminProjects(),
     getAllLeads(),
-    supabase.from('dismissed_leads').select('discovery_id')
+    getSupabase().from('dismissed_leads').select('discovery_id')
   ]);
 
   const dismissedIds = new Set(dismissedLeadsResult.data?.map(d => d.discovery_id) || []);
@@ -823,7 +825,7 @@ export async function logDonation(data: {
 
 export async function getDonations(period: 'day' | 'week' | 'month' = 'day') {
   try {
-    let query = supabase.from('donations').select('*').order('created_at', { ascending: false });
+    let query = getSupabase().from('donations').select('*').order('created_at', { ascending: false });
 
     const now = new Date();
     if (period === 'day') {

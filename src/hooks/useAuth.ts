@@ -1,7 +1,5 @@
-"use client";
-
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getSupabase, resetSupabase } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
 import { Contributor } from '@/lib/types';
 
@@ -11,16 +9,23 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const client = getSupabase();
+    
     // 1. Proactive check for initial session to speed up recovery on refresh
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    client.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
         syncContributor(session.user);
       }
+    }).catch(err => {
+      // If initial getSession fails due to lock, trigger a reset
+      if (err?.name === 'AbortError') {
+        resetSupabase();
+      }
     });
 
     // 2. Single source of truth for all subsequent auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = client.auth.onAuthStateChange(async (event, session) => {
       const currentUser = session?.user ?? null;
       
       if (event === 'SIGNED_OUT') {
@@ -32,7 +37,6 @@ export function useAuth() {
         // Only mark loading as false AFTER contributor is synced
         await syncContributor(currentUser);
       } else if (event === 'INITIAL_SESSION') {
-        // Handle initial load with no user
         setLoading(false);
       }
     });
@@ -43,14 +47,17 @@ export function useAuth() {
   }, []);
 
   // 3. Manual Session Refresher (to replace disabled autoRefreshToken)
-  // Refreshes the token every 10 minutes to maintain session without background competition
   useEffect(() => {
     if (!user) return;
     
     const refreshTimer = setInterval(() => {
+      const client = getSupabase();
       console.log("[useAuth] Performing manual session maintenance...");
-      supabase.auth.refreshSession().catch(err => {
-        console.warn("[useAuth] Periodic refresh failed (expected if offline):", err.message);
+      client.auth.refreshSession().catch(err => {
+        if (err?.name === 'AbortError') {
+          resetSupabase();
+        }
+        console.warn("[useAuth] Periodic refresh failed:", err.message);
       });
     }, 10 * 60 * 1000);
 
@@ -58,9 +65,9 @@ export function useAuth() {
   }, [user]);
 
   const syncContributor = async (supabaseUser: User) => {
+    const client = getSupabase();
     try {
-      // 1. First, try to just fetch the existing contributor
-      const { data: existing, error: fetchError } = await supabase
+      const { data: existing, error: fetchError } = await client
         .from('contributors')
         .select('*')
         .eq('user_id', supabaseUser.id)
@@ -72,8 +79,7 @@ export function useAuth() {
         return;
       }
 
-      // 2. If not found, then perform the upsert (first time login)
-      const { data: upserted, error: upsertError } = await supabase
+      const { data: upserted, error: upsertError } = await client
         .from('contributors')
         .upsert({
           user_id: supabaseUser.id,
@@ -97,7 +103,8 @@ export function useAuth() {
   };
 
   const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const client = getSupabase();
+    const { error } = await client.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: window.location.origin + '/auth/callback',
@@ -107,31 +114,18 @@ export function useAuth() {
   };
 
   const signOut = async () => {
+    const client = getSupabase();
     try {
-      // 1. Terminate session globally in Supabase
-      await supabase.auth.signOut({ scope: 'global' });
+      await client.auth.signOut({ scope: 'global' });
     } catch (err) {
       console.error("Supabase sign out error:", err);
     } finally {
-      // 2. Local state cleanup
       setUser(null);
       setContributor(null);
       
-      // 3. Manual Storage Purge (Nuclear Option)
-      // This ensures any stuck keys are removed regardless of Supabase client behavior
       if (typeof window !== 'undefined') {
-        const keysToRemove = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
-            keysToRemove.push(key);
-          }
-        }
-        keysToRemove.forEach(key => localStorage.removeItem(key));
-        
-        sessionStorage.clear(); // Safe to clear entire session storage for logout
-        
-        // 4. Force a hard redirect with a cache-buster
+        localStorage.clear();
+        sessionStorage.clear();
         window.location.replace("/?logout=" + Date.now());
       }
     }
