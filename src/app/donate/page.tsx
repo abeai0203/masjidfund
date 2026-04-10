@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import ProgressBar from "@/components/ui/ProgressBar";
-import { getPublicProjects, updateProject, logDonation } from "@/lib/api";
+import { getPublicProjects, updateProject, logDonation, syncDonationStats } from "@/lib/api";
 import DuitNowQR from "@/components/ui/DuitNowQR";
 import { useAuth } from "@/hooks/useAuth";
 import Image from "next/image";
@@ -104,6 +104,11 @@ export default function DonatePage() {
     await updateProject(currentProject.slug, {
       collected_amount: newAmount,
     });
+
+    // Unified Stats Sync: Update Global (Simulation) and Personal (Persistence)
+    // We call this per-mosque to show progress, or we could call it at the end.
+    // Calling per-mosque ensures the home stats update immediately.
+    await syncDonationStats(splitAmount, user?.id);
 
     // Record for Summary
     const updatedRecords = [...records, {

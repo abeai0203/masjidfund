@@ -951,3 +951,26 @@ export async function updateContributorDonationStats(userId: string, amount: num
     return { error: e };
   }
 }
+/**
+ * Unified helper to sync donation statistics across all layers:
+ * 1. Global Simulation Cache (localStorage) - For instant home page updates & guest visibility.
+ * 2. Contributor Persistence (Supabase) - For dashboard history & persistent totals.
+ */
+export async function syncDonationStats(amount: number, userId?: string) {
+  if (amount <= 0) return;
+  
+  console.log(`[Sync] Triggering stats sync for RM${amount} (User: ${userId || 'Guest'})`);
+  
+  // Layer 1: Global Simulation
+  incrementSimulatedStats(amount);
+  
+  // Layer 2: Personal Persistence
+  if (userId) {
+    try {
+      await updateContributorDonationStats(userId, amount);
+      console.log(`[Sync] Persistent contributor stats updated for ${userId}`);
+    } catch (err) {
+      console.warn(`[Sync] Persistent update failed (non-critical):`, err);
+    }
+  }
+}
