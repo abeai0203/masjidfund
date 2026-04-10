@@ -11,7 +11,15 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Single source of truth for auth state
+    // 1. Proactive check for initial session to speed up recovery on refresh
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user);
+        syncContributor(session.user);
+      }
+    });
+
+    // 2. Single source of truth for all subsequent auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       const currentUser = session?.user ?? null;
       
@@ -23,10 +31,8 @@ export function useAuth() {
         setUser(currentUser);
         // Only mark loading as false AFTER contributor is synced
         await syncContributor(currentUser);
-      } else {
-        // Handle initial load with no session
-        setUser(null);
-        setContributor(null);
+      } else if (event === 'INITIAL_SESSION') {
+        // Handle initial load with no user
         setLoading(false);
       }
     });

@@ -13,13 +13,14 @@ export default function AuthLoadingGuard({ children }: { children: React.ReactNo
   const [isTimedOut, setIsTimedOut] = useState(false);
 
   useEffect(() => {
-    // Failsafe: If auth sync hangs for more than 3.5s, force render anyway
+    // Failsafe: If auth sync hangs for more than 5.5s, force render anyway
+    // This gives more time for SSO sessions to recover on slower networks
     const timer = setTimeout(() => {
       if (loading) {
         console.warn("[AuthGuard] Session sync timed out. Forcing render.");
         setIsTimedOut(true);
       }
-    }, 3500);
+    }, 5500);
 
     return () => clearTimeout(timer);
   }, [loading]);
