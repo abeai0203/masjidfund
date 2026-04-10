@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Project } from "@/lib/types";
-import { updateProject, incrementSimulatedStats } from "@/lib/api";
+import { updateProject, incrementSimulatedStats, updateContributorDonationStats } from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import DuitNowQR, { DuitNowQRHandle } from "@/components/ui/DuitNowQR";
 import { useRef } from "react";
@@ -36,6 +37,7 @@ export default function DonationModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const { user } = useAuth();
   const [step, setStep] = useState<"amount" | "method" | "details" | "alhamdulillah" | "summary">("amount");
   const [paymentMethod, setPaymentMethod] = useState<"qr" | "bank" | "toyyibpay">("qr");
   const [donationAmount, setDonationAmount] = useState<string>("");
@@ -122,6 +124,14 @@ export default function DonationModal({
       if (result) {
         setUpdatedProject(result);
         incrementSimulatedStats(amountNum);
+        
+        // --- Persistence Layer for Registered User ---
+        if (user) {
+          console.log(`[DonationModal] Linking donation to registered user: ${user.id}`);
+          updateContributorDonationStats(user.id, amountNum).catch(err => {
+            console.warn("[DonationModal] Persistent sync (Personal Stats) failed:", err);
+          });
+        }
       }
 
       setTimeout(() => {

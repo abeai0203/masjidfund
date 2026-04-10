@@ -918,3 +918,36 @@ export async function getContributors(): Promise<Contributor[]> {
   }
   return (data as Contributor[]) || [];
 }
+export async function updateContributorDonationStats(userId: string, amount: number) {
+  try {
+    const { data, error } = await supabase
+      .from('contributors')
+      .select('total_infaq_count, total_infaq_amount')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      console.error("Contributor fetch error:", error);
+      return { error };
+    }
+
+    const { error: updateError } = await supabase
+      .from('contributors')
+      .update({
+        total_infaq_count: (data.total_infaq_count || 0) + 1,
+        total_infaq_amount: (data.total_infaq_amount || 0) + amount,
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', userId);
+
+    if (updateError) {
+      console.error("Contributor update error:", updateError);
+      return { error: updateError };
+    }
+    
+    return { success: true };
+  } catch (e) {
+    console.error("Unexpected error updating contributor stats:", e);
+    return { error: e };
+  }
+}
