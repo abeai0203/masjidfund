@@ -190,7 +190,15 @@ export async function getHomeStats() {
   }
 
   return withRetry(async () => {
-    if (!supabase) return cached || { totalMosques: 6, todayCollection: 0, todayDonors: 0, activeConstruction: 1 };
+    // 1. Get Simulated Daily Totals from Local Storage
+    let simDonors = 0;
+    let simCollection = 0;
+    if (typeof window !== 'undefined') {
+      simDonors = parseInt(localStorage.getItem('sim_today_donors') || "0");
+      simCollection = parseFloat(localStorage.getItem('sim_today_collection') || "0");
+    }
+
+    if (!supabase) return cached || { totalMosques: 6, todayCollection: simCollection, todayDonors: simDonors, activeConstruction: 1 };
     
     const { data: dbData, error } = await supabase
       .from('projects')
@@ -201,8 +209,8 @@ export async function getHomeStats() {
     const activeProjects = (dbData as any[]).filter(p => p.publish_status === 'Published');
     const stats = {
       totalMosques: activeProjects.length || 6,
-      todayCollection: 0, 
-      todayDonors: 0,
+      todayCollection: simCollection, 
+      todayDonors: simDonors,
       activeConstruction: activeProjects.filter(p => p.project_type === 'Construction').length || 1
     };
 
