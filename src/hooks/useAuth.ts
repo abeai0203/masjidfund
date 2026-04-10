@@ -42,6 +42,21 @@ export function useAuth() {
     };
   }, []);
 
+  // 3. Manual Session Refresher (to replace disabled autoRefreshToken)
+  // Refreshes the token every 10 minutes to maintain session without background competition
+  useEffect(() => {
+    if (!user) return;
+    
+    const refreshTimer = setInterval(() => {
+      console.log("[useAuth] Performing manual session maintenance...");
+      supabase.auth.refreshSession().catch(err => {
+        console.warn("[useAuth] Periodic refresh failed (expected if offline):", err.message);
+      });
+    }, 10 * 60 * 1000);
+
+    return () => clearInterval(refreshTimer);
+  }, [user]);
+
   const syncContributor = async (supabaseUser: User) => {
     try {
       // 1. First, try to just fetch the existing contributor

@@ -82,15 +82,24 @@ export async function uploadImage(file: File | Blob | string, bucket: string = '
 // --- Utility Helpers ---
 
 /**
- * Lightweight resilient wrapper for public API calls.
+ * Resilient wrapper for API calls that specifically handles 
+ * session-lock 'AbortError' conflicts with retries.
  */
-async function withRetry<T>(fn: () => Promise<T>, retries = 2, delay = 100): Promise<T> {
+async function withRetry<T>(fn: () => Promise<T>, retries = 4, delay = 800): Promise<T> {
   try {
     return await fn();
   } catch (error: any) {
-    if (retries > 0) {
+    const isAbort = error?.name === 'AbortError' || error?.message?.includes('Lock broken');
+    
+    if (isAbort && retries > 0) {
+      console.warn(`[API] Lock conflict detected, retrying in ${delay}ms... (${retries} left)`);
       await new Promise(resolve => setTimeout(resolve, delay));
-      return withRetry(fn, retries - 1, delay * 2);
+      return withRetry(fn, retries - 1, delay * 1.5);
+    }
+
+    if (retries > 0) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      return withRetry(fn, retries - 1, delay);
     }
     throw error;
   }

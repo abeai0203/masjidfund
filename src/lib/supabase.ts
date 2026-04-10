@@ -25,7 +25,7 @@ export const supabase = (supabaseUrl && supabaseKey)
   ? createClient(supabaseUrl, supabaseKey, {
       auth: {
         persistSession: true,
-        autoRefreshToken: true,
+        autoRefreshToken: false, // Stop automatic background competition
         detectSessionInUrl: true,
         storageKey: 'masjidfund-v3-auth',
         storage: noLockStorage,
