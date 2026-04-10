@@ -110,7 +110,14 @@ export function useAuth() {
       setContributor(null);
       
       if (typeof window !== 'undefined') {
-        localStorage.clear();
+        // Targeted cleanup: Preserve global simulation stats (sim_ prefix), 
+        // but clear private session data.
+        Object.keys(localStorage).forEach(key => {
+          if (!key.startsWith('sim_')) {
+            localStorage.removeItem(key);
+          }
+        });
+        
         sessionStorage.clear();
         window.location.replace("/?logout=" + Date.now());
       }
