@@ -19,6 +19,23 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // HYDRATION BRIDGE: Immediately sync local simulation stats if they exist.
+    // This prevents the UI from flickering to 0 during DB load.
+    if (typeof window !== 'undefined') {
+      const simDonors = parseInt(localStorage.getItem('sim_today_donors') || "0");
+      const simCollection = parseFloat(localStorage.getItem('sim_today_collection') || "0");
+      
+      if (simDonors > 0 || simCollection > 0) {
+        setStats(prev => ({
+          ...prev,
+          todayDonors: Math.max(prev.todayDonors, simDonors),
+          todayCollection: Math.max(prev.todayCollection, simCollection)
+        }));
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     // Keep showing loading state if auth hasn't synced yet
     if (loading) {
       setIsLoading(true);

@@ -180,7 +180,15 @@ export async function getProjectsByState(state: string): Promise<Project[]> {
 export async function getHomeStats() {
   const CACHE_KEY = 'mf_home_stats_v3';
   
-  // Try to load from local cache first for instant UI response and fail-safety
+  // 1. Get LATEST Simulated Totals from Local Storage
+  let simDonors = 0;
+  let simCollection = 0;
+  if (typeof window !== 'undefined') {
+    simDonors = parseInt(localStorage.getItem('sim_today_donors') || "0");
+    simCollection = parseFloat(localStorage.getItem('sim_today_collection') || "0");
+  }
+
+  // Fallback for initial UI transition/cache
   let cached: any = null;
   if (typeof window !== 'undefined') {
     try {
@@ -190,15 +198,7 @@ export async function getHomeStats() {
   }
 
   return withRetry(async () => {
-    // 1. Get Simulated Daily Totals from Local Storage
-    let simDonors = 0;
-    let simCollection = 0;
-    if (typeof window !== 'undefined') {
-      simDonors = parseInt(localStorage.getItem('sim_today_donors') || "0");
-      simCollection = parseFloat(localStorage.getItem('sim_today_collection') || "0");
-    }
-
-    if (!supabase) return cached || { totalMosques: 6, todayCollection: simCollection, todayDonors: simDonors, activeConstruction: 1 };
+    if (!supabase) return { totalMosques: 6, todayCollection: simCollection, todayDonors: simDonors, activeConstruction: 1 };
     
     const { data: dbData, error } = await supabase
       .from('projects')
@@ -221,9 +221,14 @@ export async function getHomeStats() {
 
     return stats;
   }).catch(e => {
-    console.warn("[API] getHomeStats database struggle (Lock/Network). Returning cached state.", e.message);
-    // Absolute safety fallback
-    return cached || { totalMosques: 6, todayCollection: 0, todayDonors: 0, activeConstruction: 1 };
+    console.warn("[API] getHomeStats database struggle (Lock/Network). Returning best effort state.", e.message);
+    // Even on error, we MUST return the local sim values to keep the UI consistent
+    return { 
+      totalMosques: cached?.totalMosques || 6, 
+      todayCollection: Math.max(simCollection, cached?.todayCollection || 0), 
+      todayDonors: Math.max(simDonors, cached?.todayDonors || 0), 
+      activeConstruction: cached?.activeConstruction || 1 
+    };
   });
 }
 
