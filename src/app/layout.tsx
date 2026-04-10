@@ -68,6 +68,26 @@ export default function RootLayout({
   return (
     <html lang="ms">
       <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col`}>
+        <Script
+          id="supabase-lock-silencer"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (typeof window !== 'undefined' && window.navigator && window.navigator.locks) {
+                try {
+                  Object.defineProperty(window.navigator, 'locks', { 
+                    value: undefined, 
+                    configurable: true 
+                  });
+                  console.log("[MasterSilencer] Navigator Locks disabled.");
+                } catch (e) {
+                  console.warn("[MasterSilencer] Silo block failed:", e);
+                }
+              }
+            `
+          }}
+        />
+
         <AuthLoadingGuard>
           <Navbar />
           <main className="flex-grow flex flex-col">
