@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getSupabase, resetSupabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
 import { Contributor } from '@/lib/types';
 
@@ -9,23 +9,16 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const client = getSupabase();
-    
     // 1. Proactive check for initial session to speed up recovery on refresh
-    client.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
         syncContributor(session.user);
       }
-    }).catch(err => {
-      // If initial getSession fails due to lock, trigger a reset
-      if (err?.name === 'AbortError') {
-        resetSupabase();
-      }
     });
 
     // 2. Single source of truth for all subsequent auth state changes
-    const { data: { subscription } } = client.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       const currentUser = session?.user ?? null;
       
       if (event === 'SIGNED_OUT') {
@@ -51,12 +44,8 @@ export function useAuth() {
     if (!user) return;
     
     const refreshTimer = setInterval(() => {
-      const client = getSupabase();
       console.log("[useAuth] Performing manual session maintenance...");
-      client.auth.refreshSession().catch(err => {
-        if (err?.name === 'AbortError') {
-          resetSupabase();
-        }
+      supabase.auth.refreshSession().catch(err => {
         console.warn("[useAuth] Periodic refresh failed:", err.message);
       });
     }, 10 * 60 * 1000);
@@ -65,9 +54,8 @@ export function useAuth() {
   }, [user]);
 
   const syncContributor = async (supabaseUser: User) => {
-    const client = getSupabase();
     try {
-      const { data: existing, error: fetchError } = await client
+      const { data: existing, error: fetchError } = await supabase
         .from('contributors')
         .select('*')
         .eq('user_id', supabaseUser.id)
@@ -79,7 +67,7 @@ export function useAuth() {
         return;
       }
 
-      const { data: upserted, error: upsertError } = await client
+      const { data: upserted, error: upsertError } = await supabase
         .from('contributors')
         .upsert({
           user_id: supabaseUser.id,
@@ -103,8 +91,7 @@ export function useAuth() {
   };
 
   const signInWithGoogle = async () => {
-    const client = getSupabase();
-    const { error } = await client.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: window.location.origin + '/auth/callback',
@@ -114,9 +101,8 @@ export function useAuth() {
   };
 
   const signOut = async () => {
-    const client = getSupabase();
     try {
-      await client.auth.signOut({ scope: 'global' });
+      await supabase.auth.signOut({ scope: 'global' });
     } catch (err) {
       console.error("Supabase sign out error:", err);
     } finally {
