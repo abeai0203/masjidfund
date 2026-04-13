@@ -200,21 +200,39 @@ export async function getHomeStats() {
   return withRetry(async () => {
     if (!supabase) return { totalMosques: 6, todayCollection: simCollection, todayDonors: simDonors, activeConstruction: 1 };
     
+    // 1. Fetch Projects for global counts
     const { data: dbData, error } = await supabase
       .from('projects')
       .select('project_type, publish_status');
     
     if (error) throw error;
+
+    // 2. Fetch Today's REAL Statistics from the 'donations' table
+    const startOfDay = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+    const { data: todayDonations, error: donationsError } = await supabase
+      .from('donations')
+      .select('total_amount')
+      .gte('created_at', startOfDay);
+    
+    let dbCollection = 0;
+    let dbDonors = 0;
+    if (!donationsError && todayDonations) {
+      dbCollection = todayDonations.reduce((sum, d) => sum + (d.total_amount || 0), 0);
+      dbDonors = todayDonations.length;
+    }
     
     const activeProjects = (dbData as any[]).filter(p => p.publish_status === 'Published');
+    
+    // 3. Hybrid Strategy: Take the HIGHER of Server Data or Local Simulation
+    // This prevents "Ghost Zero" during hydration while showing server truth
     const stats = {
       totalMosques: activeProjects.length || 6,
-      todayCollection: simCollection, 
-      todayDonors: simDonors,
+      todayCollection: Math.max(simCollection, dbCollection), 
+      todayDonors: Math.max(simDonors, dbDonors),
       activeConstruction: activeProjects.filter(p => p.project_type === 'Construction').length || 1
     };
 
-    // Save to cache on success
+    // Save to cache for offline/instant recovery
     if (typeof window !== 'undefined') {
       localStorage.setItem(CACHE_KEY, JSON.stringify(stats));
     }
