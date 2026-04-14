@@ -37,7 +37,7 @@ export default function DonationModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const { user } = useAuth();
+  const { user, contributor } = useAuth();
   const [step, setStep] = useState<"amount" | "method" | "details" | "alhamdulillah" | "summary">("amount");
   const [paymentMethod, setPaymentMethod] = useState<"qr" | "bank" | "toyyibpay">("qr");
   const [donationAmount, setDonationAmount] = useState<string>("");
@@ -46,6 +46,10 @@ export default function DonationModal({
   const [randomHadith, setRandomHadith] = useState(HADITHS[0]);
   const [updatedProject, setUpdatedProject] = useState<Project>(project);
   const qrRef = useRef<DuitNowQRHandle>(null);
+
+  // Fallback info for logging
+  const donorName = user?.user_metadata?.full_name || "Penderma MasjidFund";
+  const donorPhone = user?.user_metadata?.phone || "N/A";
 
   useEffect(() => {
     if (isOpen) {
