@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Project } from "@/lib/types";
-import { updateProject, syncDonationStats } from "@/lib/api";
+import { updateProject, logDonation, syncDonationStats } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import DuitNowQR, { DuitNowQRHandle } from "@/components/ui/DuitNowQR";
@@ -126,6 +126,16 @@ export default function DonationModal({
         
         // Unified Stats Sync: Update Global (Simulation) and Personal (Persistence)
         await syncDonationStats(amountNum, user?.id);
+
+        // LOG DONATION RECORD TO DATABASE ( Ledger )
+        await logDonation({
+          contributor_id: contributor?.id,
+          donor_name: donorName,
+          donor_phone: donorPhone,
+          total_amount: amountNum,
+          mosque_count: 1,
+          mosque_names: [project.mosque_name]
+        });
       }
 
       setTimeout(() => {

@@ -108,7 +108,10 @@ export default function DonatePage() {
     // Unified Stats Sync: Update Global (Simulation) and Personal (Persistence)
     // We call this per-mosque to show progress, or we could call it at the end.
     // Calling per-mosque ensures the home stats update immediately.
-    await syncDonationStats(splitAmount, user?.id);
+    const syncResult = await syncDonationStats(splitAmount, user?.id);
+    if (!syncResult.success) {
+      console.warn('[MasjidFund] Stats sync failed, but proceeding with local simulation:', syncResult.error);
+    }
 
     // Record for Summary
     const updatedRecords = [...records, {
@@ -133,9 +136,16 @@ export default function DonatePage() {
         mosque_count: actualNum,
         mosque_names: recommendations.map(r => r.mosque_name)
       });
-      console.log('[MasjidFund] Donation log result:', logResult);
+      
+      if (!logResult.success) {
+        console.error('[MasjidFund] CRITICAL: Final donation log failed even after retries:', logResult.error);
+      } else {
+        console.log('[MasjidFund] Final donation log successful.');
+      }
     }
 
+    // Ensure we keep the "Alhamdulillah" visible for 3s to let the user feel the success
+    // and to give the background fetches a chance to settle.
     setTimeout(() => {
       setShowAlhamdulillah(false);
       setIsProcessing(false);

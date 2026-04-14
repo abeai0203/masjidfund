@@ -851,8 +851,14 @@ export async function logDonation(data: {
       .insert([data]);
 
     if (error) {
-      console.error('Supabase error logging donation:', error);
-      return { error };
+      console.error('Supabase error logging donation (will retry):', error);
+      
+      // Attempt ONE immediate retry
+      const { error: retryError } = await supabase
+        .from('donations')
+        .insert([data]);
+
+      if (retryError) return { error: retryError };
     }
     return { success: true };
   } catch (e) {
@@ -959,8 +965,19 @@ export async function updateContributorDonationStats(userId: string, amount: num
       .eq('user_id', userId);
 
     if (updateError) {
-      console.error("Contributor update error:", updateError);
-      return { error: updateError };
+      console.error("Contributor update error (will retry):", updateError);
+      
+      // Attempt ONE immediate retry for mobile stability
+      const { error: retryError } = await supabase
+        .from('contributors')
+        .update({
+          total_infaq_count: (data.total_infaq_count || 0) + 1,
+          total_infaq_amount: (data.total_infaq_amount || 0) + amount,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId);
+
+      if (retryError) return { error: retryError };
     }
     
     return { success: true };
@@ -980,15 +997,81 @@ export async function syncDonationStats(amount: number, userId?: string) {
   console.log(`[Sync] Triggering stats sync for RM${amount} (User: ${userId || 'Guest'})`);
   
   // Layer 1: Global Simulation
+  if (amount <= 0) return { success: true };
+  
+  console.log(`[MasjidFund] Syncing RM${amount} (User: ${userId || 'Guest'})`);
+
+  // Layer 1: Simulation (Visible immediately for UI speed)
   incrementSimulatedStats(amount);
   
-  // Layer 2: Personal Persistence
+  // Layer 2: Database Persistence (The source of truth)
   if (userId) {
     try {
-      await updateContributorDonationStats(userId, amount);
-      console.log(`[Sync] Persistent contributor stats updated for ${userId}`);
+      const result = await updateContributorDonationStats(userId, amount);
+      if (result.error) {
+        console.warn(`[Sync] Persistent update failed after retries:`, result.error);
+        return { success: false, error: result.error };
+      }
+      return { success: true };
     } catch (err) {
-      console.warn(`[Sync] Persistent update failed (non-critical):`, err);
+      console.error(`[Sync] Unexpected crash during sync:`, err);
+      return { success: false, error: err };
     }
+  }
+  
+  return { success: true };
+}
+
+/**
+ * Fetches a unified activity feed for a specific contributor.
+ * Combines donation history and mosque submission leads.
+ */
+export async function getUserRecentActivity(contributorId: string) {
+  try {
+    // 1. Fetch Latest Donations
+    const { data: donations, error: donationsError } = await supabase
+      .from('donations')
+      .select('id, created_at, total_amount, mosque_names')
+      .eq('contributor_id', contributorId)
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    // 2. Fetch Latest Leads (Submissions)
+    const { data: leads, error: leadsError } = await supabase
+      .from('leads')
+      .select('id, created_at, extracted_mosque_name, status')
+      .eq('contributor_id', contributorId)
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    if (donationsError) console.error("Error fetching user donations:", donationsError);
+    if (leadsError) console.error("Error fetching user leads:", leadsError);
+
+    // 3. Map to Unified Format
+    const donationActivities = (donations || []).map(d => ({
+      id: d.id,
+      type: 'donation' as const,
+      title: `Infaq ${d.mosque_names?.[0] || 'Masjid'}`,
+      amount: d.total_amount,
+      date: d.created_at,
+      status: 'success'
+    }));
+
+    const leadActivities = (leads || []).map(l => ({
+      id: l.id,
+      type: 'lead' as const,
+      title: `Cadangan: ${l.extracted_mosque_name || 'Masjid Baru'}`,
+      date: l.created_at,
+      status: l.status
+    }));
+
+    // 4. Merge and Sort
+    return [...donationActivities, ...leadActivities]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 10);
+
+  } catch (e) {
+    console.error("Unexpected error fetching user activity:", e);
+    return [];
   }
 }

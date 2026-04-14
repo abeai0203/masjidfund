@@ -2,13 +2,28 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { getUserRecentActivity } from "@/lib/api";
 
 export default function UserDashboardPage() {
   const { user, contributor, loading } = useAuth();
   const router = useRouter();
+  const [activities, setActivities] = useState<any[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    async function fetchActivity() {
+      if (contributor?.id) {
+        setIsRefreshing(true);
+        const data = await getUserRecentActivity(contributor.id);
+        setActivities(data);
+        setIsRefreshing(false);
+      }
+    }
+    fetchActivity();
+  }, [contributor]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -134,19 +149,98 @@ export default function UserDashboardPage() {
         </div>
       </div>
 
-      {/* Activity Placeholder */}
-      <div className="max-w-5xl mx-auto px-6 mt-12">
-        <div className="bg-white rounded-[2.5rem] border border-border p-12 text-center shadow-sm">
-          <div className="w-20 h-20 bg-surface-muted rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <svg className="w-10 h-10 text-foreground/10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-black text-foreground mb-3">Aktiviti Terkini</h2>
-          <p className="text-foreground/40 max-w-md mx-auto text-sm leading-relaxed">
-            Bahagian ini akan memaparkan sejarah derma dan kempen yang telah anda hantar tidak lama lagi.
-          </p>
+      {/* Activity Feed */}
+      <div className="max-w-5xl mx-auto px-6 mt-12 pb-20">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-black text-foreground tracking-tight">Aktiviti Terkini</h2>
+          {activities.length > 0 && (
+            <button 
+              onClick={() => {
+                if (contributor?.id) getUserRecentActivity(contributor.id).then(setActivities);
+              }}
+              className="text-xs font-black text-primary uppercase tracking-widest hover:opacity-70 transition-opacity"
+            >
+              Refresh
+            </button>
+          )}
         </div>
+
+        {isRefreshing && activities.length === 0 ? (
+          <div className="bg-white rounded-[2.5rem] border border-border p-20 text-center animate-pulse">
+            <div className="w-12 h-12 bg-surface-muted rounded-full mx-auto mb-4" />
+            <div className="h-4 bg-surface-muted rounded w-32 mx-auto" />
+          </div>
+        ) : activities.length === 0 ? (
+          <div className="bg-white rounded-[2.5rem] border border-border p-12 text-center shadow-sm">
+            <div className="w-20 h-20 bg-surface-muted rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-foreground/10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-black text-foreground mb-3">Belum ada aktiviti</h3>
+            <p className="text-foreground/40 max-w-md mx-auto text-sm leading-relaxed mb-8">
+              Mula menderma atau hantar maklumat masjid untuk melihat sejarah sumbangan anda di sini.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/projects" className="px-8 py-3 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest">Mula Infaq</Link>
+              <Link href="/contribute" className="px-8 py-3 bg-surface-muted text-foreground rounded-2xl font-black text-xs uppercase tracking-widest">Hantar Kempen</Link>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {activities.map((activity) => (
+              <div 
+                key={activity.id}
+                className="bg-white p-6 rounded-[2rem] border border-border flex items-center gap-6 hover:shadow-lg transition-all group"
+              >
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${
+                  activity.type === 'donation' ? 'bg-emerald-50 text-emerald-600' : 'bg-primary/10 text-primary'
+                }`}>
+                  {activity.type === 'donation' ? (
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                    </svg>
+                  )}
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${
+                      activity.type === 'donation' ? 'bg-emerald-100/50 text-emerald-700' : 'bg-primary/10 text-primary'
+                    }`}>
+                      {activity.type === 'donation' ? 'Infaq' : 'Kempen'}
+                    </span>
+                    <span className="text-[10px] font-bold text-foreground/30">
+                      {new Date(activity.date).toLocaleDateString('ms-MY', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                  </div>
+                  <h4 className="font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                    {activity.title}
+                  </h4>
+                  {activity.amount && (
+                    <p className="text-sm font-black text-emerald-600 mt-1">RM {activity.amount.toLocaleString()}</p>
+                  )}
+                </div>
+
+                <div className="shrink-0 text-right">
+                  <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${
+                    activity.status === 'success' || activity.status === 'Published'
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                      : activity.status === 'Pending'
+                      ? 'bg-amber-50 text-amber-700 border-amber-100'
+                      : 'bg-surface-muted text-foreground/40 border-border'
+                  }`}>
+                    {activity.status === 'success' || activity.status === 'Published' ? 'Berjaya' : activity.status || 'Dihantar'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
