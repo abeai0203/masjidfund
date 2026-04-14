@@ -992,11 +992,6 @@ export async function updateContributorDonationStats(userId: string, amount: num
  * 2. Contributor Persistence (Supabase) - For dashboard history & persistent totals.
  */
 export async function syncDonationStats(amount: number, userId?: string) {
-  if (amount <= 0) return;
-  
-  console.log(`[Sync] Triggering stats sync for RM${amount} (User: ${userId || 'Guest'})`);
-  
-  // Layer 1: Global Simulation
   if (amount <= 0) return { success: true };
   
   console.log(`[MasjidFund] Syncing RM${amount} (User: ${userId || 'Guest'})`);
